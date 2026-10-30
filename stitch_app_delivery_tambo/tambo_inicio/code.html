@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tambo+ - Inicio</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "inverse-primary": "#ffabed",
+            "surface-container": "#f0eded",
+            "inverse-surface": "#313030",
+            "on-error": "#ffffff",
+            "on-tertiary-fixed": "#3f0016",
+            "on-error-container": "#93000a",
+            "on-tertiary": "#ffffff",
+            "outline": "#83727d",
+            "on-secondary-fixed": "#271900",
+            "surface-dim": "#dcd9d9",
+            "on-tertiary-fixed-variant": "#90003b",
+            "on-secondary-fixed-variant": "#5e4200",
+            "on-secondary-container": "#6f4e00",
+            "on-primary-fixed": "#390035",
+            "secondary-fixed-dim": "#fbbc39",
+            "surface-variant": "#e5e2e1",
+            "on-primary": "#ffffff",
+            "surface": "#fcf9f8",
+            "surface-tint": "#943b89",
+            "surface-container-lowest": "#ffffff",
+            "on-background": "#1c1b1b",
+            "secondary": "#7c5800",
+            "tertiary-fixed": "#ffd9de",
+            "on-surface-variant": "#51434d",
+            "surface-container-high": "#eae7e7",
+            "on-primary-container": "#e884d7",
+            "secondary-fixed": "#ffdea8",
+            "tertiary": "#54001f",
+            "outline-variant": "#d5c1cd",
+            "surface-container-highest": "#e5e2e1",
+            "background": "#fcf9f8",
+            "on-secondary": "#ffffff",
+            "secondary-container": "#ffbe3b",
+            "error-container": "#ffdad6",
+            "tertiary-container": "#7c0032",
+            "surface-bright": "#fcf9f8",
+            "on-primary-fixed-variant": "#78216f",
+            "error": "#ba1a1a",
+            "primary-fixed": "#ffd7f3",
+            "primary-fixed-dim": "#ffabed",
+            "surface-container-low": "#f6f3f2",
+            "tertiary-fixed-dim": "#ffb2bf",
+            "inverse-on-surface": "#f3f0ef",
+            "on-tertiary-container": "#ff7d9b",
+            "on-surface": "#1c1b1b",
+            "primary": "#4c0047",
+            "primary-container": "#6b1464"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter": "0.75rem",
+            "margin": "1rem",
+            "space-lg": "1.25rem",
+            "space-md": "1rem",
+            "space-xl": "1.5rem",
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem"
+          },
+          "fontFamily": {
+            "label-sm": ["Inter"],
+            "price-headline": ["Inter"],
+            "headline-md": ["Inter"],
+            "price-strikethrough": ["Inter"],
+            "body-sm": ["Inter"],
+            "label-lg": ["Inter"],
+            "headline-xl": ["Inter"],
+            "label-md": ["Inter"],
+            "headline-lg": ["Inter"],
+            "body-md": ["Inter"],
+            "body-lg": ["Inter"]
+          },
+          "fontSize": {
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "700" }],
+            "price-headline": ["20px", { "lineHeight": "24px", "fontWeight": "800" }],
+            "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "700" }],
+            "price-strikethrough": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+            "label-lg": ["15px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "headline-xl": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+            "label-md": ["13px", { "lineHeight": "18px", "fontWeight": "600" }],
+            "headline-lg": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "body-lg": ["16px", { "lineHeight": "22px", "fontWeight": "500" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    body {
+      background-color: #fcf9f8;
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface flex justify-center min-h-screen selection:bg-primary selection:text-on-primary">
+<!-- Mobile Viewport Shell -->
+<div class="w-full max-w-md bg-background min-h-screen flex flex-col relative pb-[96px] shadow-2xl">
+<!-- Top Status Bar & Location Header -->
+<header class="sticky top-0 z-40 bg-primary text-on-primary shadow-sm">
+<div class="px-margin pt-3 pb-1 flex justify-between items-center text-xs opacity-90">
+<span class="font-bold tracking-tight">4:15</span>
+<div class="flex items-center space-x-1.5">
+<span class="material-symbols-outlined text-[14px]">signal_cellular_alt</span>
+<span class="font-semibold text-[11px]">5G</span>
+<span class="material-symbols-outlined text-[15px]">battery_charging_full</span>
+</div>
+</div>
+<!-- JSON TopAppBar Implementation -->
+<div class="flex justify-between items-center w-full px-margin py-space-sm">
+<div class="flex items-center space-x-2 truncate pr-2">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center flex-shrink-0 text-secondary-container">
+<span class="material-symbols-outlined text-[20px]" data-icon="location_on">location_on</span>
+</div>
+<div class="truncate">
+<span class="font-label-sm text-label-sm text-primary-fixed block uppercase tracking-wider">Entregar en:</span>
+<span class="font-label-lg text-label-lg font-bold text-on-primary truncate block">Av. Larco 400, Lima</span>
+</div>
+<span class="material-symbols-outlined text-[18px] text-primary-fixed-dim" data-icon="expand_more">expand_more</span>
+</div>
+<button aria-label="Carrito de compras" class="relative p-2 rounded-xl bg-primary-container text-on-primary active:scale-95 transition-transform flex-shrink-0 hover:bg-primary-container/80">
+<span class="material-symbols-outlined text-[22px]" data-icon="shopping_bag">shopping_bag</span>
+<span class="absolute -top-1 -right-1 bg-secondary-container text-on-secondary-fixed text-[11px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center border-2 border-primary">
+            1
+          </span>
+</button>
+</div>
+<!-- Segmented Delivery / Pick-Up Switcher -->
+<div class="px-margin pb-3 pt-1">
+<div class="bg-primary-container/60 p-1 rounded-xl flex items-center justify-between text-center">
+<button class="flex-1 py-1.5 rounded-lg bg-surface-container-lowest text-primary font-label-md text-label-md font-bold shadow-sm flex items-center justify-center space-x-1.5 transition-all">
+<span class="material-symbols-outlined text-[16px]">moped</span>
+<span>Delivery</span>
+</button>
+<button class="flex-1 py-1.5 rounded-lg text-on-primary-container font-label-md text-label-md font-medium flex items-center justify-center space-x-1.5 hover:text-on-primary transition-all">
+<span class="material-symbols-outlined text-[16px]">store</span>
+<span>Para llevar</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Search Section (Floating Tactical Bar) -->
+<div class="px-margin mt-3 mb-2 z-20">
+<div class="relative flex items-center bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container hover:border-outline-variant transition-colors">
+<span class="material-symbols-outlined text-outline ml-3.5 text-[20px]" data-icon="search">search</span>
+<input class="w-full pl-2 pr-10 py-3 text-body-md font-body-md bg-transparent border-none focus:ring-0 focus:outline-none placeholder-outline text-on-surface" placeholder="¿Qué se te antoja hoy? (Chela, snacks...)" type="text"/>
+<button class="absolute right-3 p-1 rounded-lg text-primary hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="tune">tune</span>
+</button>
+</div>
+</div>
+<!-- Quick Notification/Fulfillment Banner -->
+<div class="px-margin mb-3">
+<div class="bg-secondary-fixed/50 border border-secondary-fixed-dim/40 rounded-xl px-3 py-2 flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-secondary text-[20px]">bolt</span>
+<p class="text-body-sm font-body-sm font-medium text-on-secondary-container">
+            Entrega ultra rápida en tu puerta <strong class="font-bold">en 25-35 min</strong>
+</p>
+</div>
+<span class="text-label-sm font-label-sm font-bold text-secondary uppercase">Gratis</span>
+</div>
+</div>
+<!-- Hero Promotional Carousel (Tambo Visual Identity & Offers) -->
+<section class="mb-5 overflow-hidden">
+<div class="flex space-x-3 px-margin overflow-x-auto no-scrollbar snap-x snap-mandatory">
+<!-- Promo 1: Four Loko Fest Banner (Inspired by Uploaded Graphic) -->
+<div class="snap-center min-w-[320px] sm:min-w-[350px] bg-gradient-to-br from-[#6b1464] via-[#4c0047] to-[#270024] rounded-2xl p-4 text-on-primary relative shadow-md overflow-hidden flex flex-col justify-between">
+<div class="absolute -right-10 -top-10 w-40 h-40 bg-primary-container rounded-full blur-2xl opacity-50 pointer-events-none"></div>
+<div class="flex justify-between items-start z-10">
+<div>
+<span class="bg-secondary-container text-on-secondary-fixed text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full tracking-wider shadow-sm">
+                ¡TAMBOO NIGHTS!
+              </span>
+<h3 class="font-headline-lg text-headline-lg font-extrabold text-on-primary tracking-tight mt-1">
+                2x Four Loko Sandía
+              </h3>
+<p class="font-body-sm text-body-sm text-primary-fixed-dim">RTD Lata 473 ml c/u</p>
+</div>
+<div class="text-right">
+<span class="font-price-strikethrough text-price-strikethrough text-outline-variant line-through block">S/ 21.98</span>
+<span class="font-price-headline text-price-headline text-secondary-container block font-black">S/ 14.90</span>
+</div>
+</div>
+<div class="flex items-center justify-between mt-3 z-10 pt-2 border-t border-white/10">
+<div class="flex items-center space-x-1.5 text-primary-fixed text-[11px] font-medium">
+<span class="material-symbols-outlined text-[15px]">schedule</span>
+<span>Válido hoy hasta las 23:59</span>
+</div>
+<button class="bg-secondary-container hover:bg-secondary-fixed text-on-secondary-fixed px-3.5 py-1.5 rounded-xl font-label-md text-label-md font-bold flex items-center space-x-1 shadow-sm active:scale-95 transition-transform">
+<span>Agregar</span>
+<span class="material-symbols-outlined text-[16px]">add</span>
+</button>
+</div>
+</div>
+<!-- Promo 2: Combo Chelazo -->
+<div class="snap-center min-w-[320px] sm:min-w-[350px] bg-gradient-to-br from-[#7c0032] to-[#4c0047] rounded-2xl p-4 text-on-primary relative shadow-md overflow-hidden flex flex-col justify-between">
+<div class="flex justify-between items-start z-10">
+<div>
+<span class="bg-primary-fixed text-on-primary-fixed text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full tracking-wider">
+                FIN DE SEMANA
+              </span>
+<h3 class="font-headline-lg text-headline-lg font-extrabold text-on-primary tracking-tight mt-1">
+                Pack Cusqueña Trigo
+              </h3>
+<p class="font-body-sm text-body-sm text-tertiary-fixed">6 botellas 330ml + Papas Lays</p>
+</div>
+<div class="text-right">
+<span class="font-price-strikethrough text-price-strikethrough text-outline-variant line-through block">S/ 36.90</span>
+<span class="font-price-headline text-price-headline text-secondary-container block font-black">S/ 28.50</span>
+</div>
+</div>
+<div class="flex items-center justify-between mt-3 z-10 pt-2 border-t border-white/10">
+<span class="text-[11px] text-tertiary-fixed font-medium">Hasta agotar stock</span>
+<button class="bg-surface-container-lowest text-primary hover:bg-surface-container px-3.5 py-1.5 rounded-xl font-label-md text-label-md font-bold flex items-center space-x-1 active:scale-95 transition-transform shadow-sm">
+<span>Aprovechar</span>
+<span class="material-symbols-outlined text-[16px]">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Dots indicator -->
+<div class="flex justify-center space-x-1.5 mt-2.5">
+<div class="w-5 h-1.5 bg-primary rounded-full"></div>
+<div class="w-1.5 h-1.5 bg-surface-dim rounded-full"></div>
+<div class="w-1.5 h-1.5 bg-surface-dim rounded-full"></div>
+</div>
+</section>
+<!-- Rapid Re-Order Card (Miraflores Anchor) -->
+<div class="px-margin mb-5">
+<div class="bg-surface-container-lowest border border-surface-container rounded-2xl p-3.5 shadow-sm flex items-center justify-between">
+<div class="flex items-center space-x-3">
+<div class="w-11 h-11 rounded-xl bg-primary-fixed flex items-center justify-center text-primary flex-shrink-0">
+<span class="material-symbols-outlined text-[24px]">history</span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm uppercase text-secondary font-bold tracking-wide">Tu último pedido</span>
+<h4 class="font-label-lg text-label-lg font-bold text-on-surface">Tienda Larco 400</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">2 Four Loko + Hielo 2kg • S/ 20.90</p>
+</div>
+</div>
+<button class="bg-primary-container text-on-primary p-2.5 rounded-xl hover:bg-primary active:scale-95 transition-transform flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">replay</span>
+</button>
+</div>
+</div>
+<!-- Category Pills / Circles Grid -->
+<section class="px-margin mb-6">
+<div class="flex justify-between items-center mb-3">
+<h2 class="font-headline-md text-headline-md font-bold text-on-surface">Explora categorías</h2>
+<a class="font-label-md text-label-md font-bold text-primary hover:underline flex items-center" href="#">
+          Ver todas <span class="material-symbols-outlined text-[16px] ml-0.5">chevron_right</span>
+</a>
+</div>
+<div class="grid grid-cols-4 gap-2.5">
+<!-- Category 1 -->
+<a class="flex flex-col items-center group text-center" href="#">
+<div class="w-14 h-14 rounded-2xl bg-surface-container-low group-hover:bg-primary-fixed border border-surface-container flex items-center justify-center text-primary transition-colors mb-1.5">
+<span class="material-symbols-outlined text-[28px]">sports_bar</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface group-hover:text-primary leading-tight font-semibold">Bebidas</span>
+</a>
+<!-- Category 2 -->
+<a class="flex flex-col items-center group text-center" href="#">
+<div class="w-14 h-14 rounded-2xl bg-surface-container-low group-hover:bg-primary-fixed border border-surface-container flex items-center justify-center text-primary transition-colors mb-1.5">
+<span class="material-symbols-outlined text-[28px]">cookie</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface group-hover:text-primary leading-tight font-semibold">Snacks</span>
+</a>
+<!-- Category 3 -->
+<a class="flex flex-col items-center group text-center" href="#">
+<div class="w-14 h-14 rounded-2xl bg-surface-container-low group-hover:bg-primary-fixed border border-surface-container flex items-center justify-center text-primary transition-colors mb-1.5">
+<span class="material-symbols-outlined text-[28px]">bakery_dining</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface group-hover:text-primary leading-tight font-semibold">Comida lista</span>
+</a>
+<!-- Category 4 -->
+<a class="flex flex-col items-center group text-center" href="#">
+<div class="w-14 h-14 rounded-2xl bg-surface-container-low group-hover:bg-primary-fixed border border-surface-container flex items-center justify-center text-primary transition-colors mb-1.5">
+<span class="material-symbols-outlined text-[28px]">coffee</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface group-hover:text-primary leading-tight font-semibold">Cafetería</span>
+</a>
+<!-- Category 5 -->
+<a class="flex flex-col items-center group text-center" href="#">
+<div class="w-14 h-14 rounded-2xl bg-surface-container-low group-hover:bg-primary-fixed border border-surface-container flex items-center justify-center text-primary transition-colors mb-1.5">
+<span class="material-symbols-outlined text-[28px]">egg</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface group-hover:text-primary leading-tight font-semibold">Lácteos</span>
+</a>
+<!-- Category 6 -->
+<a class="flex flex-col items-center group text-center" href="#">
+<div class="w-14 h-14 rounded-2xl bg-surface-container-low group-hover:bg-primary-fixed border border-surface-container flex items-center justify-center text-primary transition-colors mb-1.5">
+<span class="material-symbols-outlined text-[28px]">shopping_basket</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface group-hover:text-primary leading-tight font-semibold">Abarrotes</span>
+</a>
+<!-- Category 7 -->
+<a class="flex flex-col items-center group text-center" href="#">
+<div class="w-14 h-14 rounded-2xl bg-surface-container-low group-hover:bg-primary-fixed border border-surface-container flex items-center justify-center text-primary transition-colors mb-1.5">
+<span class="material-symbols-outlined text-[28px]">cleaning_services</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface group-hover:text-primary leading-tight font-semibold">Limpieza</span>
+</a>
+<!-- Category 8 -->
+<a class="flex flex-col items-center group text-center" href="#">
+<div class="w-14 h-14 rounded-2xl bg-surface-container-low group-hover:bg-primary-fixed border border-surface-container flex items-center justify-center text-primary transition-colors mb-1.5">
+<span class="material-symbols-outlined text-[28px]">sanitizer</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface group-hover:text-primary leading-tight font-semibold">Cuidado</span>
+</a>
+</div>
+</section>
+<!-- Ofertas del Día Section (Horizontal Cards Scroll) -->
+<section class="mb-6">
+<div class="px-margin flex justify-between items-center mb-3">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-tertiary-container text-[22px]">local_fire_department</span>
+<h2 class="font-headline-md text-headline-md font-bold text-on-surface">Ofertas del día</h2>
+</div>
+<span class="bg-tertiary-fixed text-on-tertiary-fixed text-[11px] font-bold px-2 py-0.5 rounded-full">
+          Hasta -35%
+        </span>
+</div>
+<div class="flex space-x-3 px-margin overflow-x-auto no-scrollbar snap-x">
+<!-- Product 1: Four Loko Gold (From Cart Reference) -->
+<div class="snap-start min-w-[170px] max-w-[170px] bg-surface-container-lowest border border-surface-container rounded-2xl p-3 flex flex-col justify-between shadow-sm relative group hover:border-primary-fixed transition-colors">
+<span class="absolute top-2 left-2 bg-error text-on-error font-label-sm text-[10px] font-extrabold px-1.5 py-0.5 rounded">
+            -32%
+          </span>
+<div class="w-full h-28 bg-surface-container-low rounded-xl flex items-center justify-center mb-2 overflow-hidden p-2">
+<img class="h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform" data-alt="Two gold Four Loko cans positioned closely together against a clean, light studio backdrop with soft commercial studio lighting and high-contrast yellow accents reflecting an energetic convenience store retail promotion." src="https://lh3.googleusercontent.com/aida-public/AB6AXuArZovc0KkBvPut4pfmzWxk1ygbssox9GlA8ZPBNT-j2cLyygRIBCzRvd6nEuNhHDX975j1Nct-ugPsvOrJ0ZsgzTNQlyqlXXtAbVxCUlNpDPzlvK5n_7zw-h0Rmod4AfG3LKUdaY_NkXCn3UsfgpIC-hIRmH7NzFEzkbrzEH-zx0x0TvZoDLNDswblBGYNzJ80NpX7ulxIkIcCfWnMfBMsVLwK3hruf_q3wBoXeKg"/>
+</div>
+<div>
+<h3 class="font-label-md text-label-md font-bold text-on-surface line-clamp-2 leading-tight">
+              Pack 2 RTD Four Loko Gold 473ml
+            </h3>
+<p class="font-body-sm text-[11px] text-on-surface-variant mt-0.5">Bebida con alcohol</p>
+</div>
+<div class="mt-2.5 pt-2 border-t border-surface-container flex items-center justify-between">
+<div>
+<span class="font-price-strikethrough text-[11px] text-outline line-through block">S/ 21.98</span>
+<span class="font-price-headline text-headline-md text-primary font-black block">S/ 14.90</span>
+</div>
+<button class="w-8 h-8 rounded-xl bg-secondary-container hover:bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center shadow-sm active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+</div>
+<!-- Product 2: Galletas Morochas -->
+<div class="snap-start min-w-[170px] max-w-[170px] bg-surface-container-lowest border border-surface-container rounded-2xl p-3 flex flex-col justify-between shadow-sm relative group hover:border-primary-fixed transition-colors">
+<span class="absolute top-2 left-2 bg-error text-on-error font-label-sm text-[10px] font-extrabold px-1.5 py-0.5 rounded">
+            -25%
+          </span>
+<div class="w-full h-28 bg-surface-container-low rounded-xl flex items-center justify-center mb-2 overflow-hidden p-2">
+<img class="h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform" data-alt="Pack of Peruvian chocolate Morochas biscuits in striking commercial packaging staged on an off-white table with subtle purple ambient lighting accents, sharp retail catalog photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiMmMxIWz63wOmB89BOF2sr8i1s6KbQ_Ikmh-5PeXuEUuwy9mviLsgidrJfFOMp5uVi7ezm4qvwmSLkQEL05d5hpi-TWAjYWDwd49I6Hf-ixC0POd4gGPpIF7Eb-Bqpgi-PtcIbX_5IMWkalgRiOKXJI56z_XHNPQ9ClhbJBOr86QBgaGZ0Kx6SUgXTYkLBmNErgBa0mbFkoPkEwCUKM3LzFH94-fbgGQCcukfpSY"/>
+</div>
+<div>
+<h3 class="font-label-md text-label-md font-bold text-on-surface line-clamp-2 leading-tight">
+              Galletas Morochas Pack x 6 unid.
+            </h3>
+<p class="font-body-sm text-[11px] text-on-surface-variant mt-0.5">Snacks dulces</p>
+</div>
+<div class="mt-2.5 pt-2 border-t border-surface-container flex items-center justify-between">
+<div>
+<span class="font-price-strikethrough text-[11px] text-outline line-through block">S/ 6.50</span>
+<span class="font-price-headline text-headline-md text-primary font-black block">S/ 4.90</span>
+</div>
+<button class="w-8 h-8 rounded-xl bg-secondary-container hover:bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center shadow-sm active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+</div>
+<!-- Product 3: Coca Cola Sin Azucar -->
+<div class="snap-start min-w-[170px] max-w-[170px] bg-surface-container-lowest border border-surface-container rounded-2xl p-3 flex flex-col justify-between shadow-sm relative group hover:border-primary-fixed transition-colors">
+<div class="w-full h-28 bg-surface-container-low rounded-xl flex items-center justify-center mb-2 overflow-hidden p-2">
+<img class="h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform" data-alt="Coca-Cola Zero Sugar 1.5 Liter cold plastic bottle with condensation droplets, clean modern commercial product photography under crisp balanced light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrDFQQP1Jac3jyC3a2ZS3HzIFh-CB8kKZPj_AoKD7Qg_-VKAxBVYTXhpNlnPgnBwgMFwgZ-KUvn0_lW84UHliC4ehw7xVUpMiBmK89YMQAWXlOS-j8ct9cbCW_LUTYWC5RV2uMqevQzVeLNqOr0nvcmB5wP8Zcal8DBU1cDBUlnHfBszyWO21IKP_g801z2pHh59cOiYig2d3RnQmaHY2ID18pnzWGrOVhMc8WwJ0"/>
+</div>
+<div>
+<h3 class="font-label-md text-label-md font-bold text-on-surface line-clamp-2 leading-tight">
+              Coca-Cola Sin Azúcar 1.5 L
+            </h3>
+<p class="font-body-sm text-[11px] text-on-surface-variant mt-0.5">Gaseosas</p>
+</div>
+<div class="mt-2.5 pt-2 border-t border-surface-container flex items-center justify-between">
+<div>
+<span class="font-price-strikethrough text-[11px] text-outline line-through block opacity-0">S/ 0.00</span>
+<span class="font-price-headline text-headline-md text-primary font-black block">S/ 7.50</span>
+</div>
+<button class="w-8 h-8 rounded-xl bg-secondary-container hover:bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center shadow-sm active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+</div>
+<!-- Product 4: Cusqueña 6-Pack -->
+<div class="snap-start min-w-[170px] max-w-[170px] bg-surface-container-lowest border border-surface-container rounded-2xl p-3 flex flex-col justify-between shadow-sm relative group hover:border-primary-fixed transition-colors">
+<span class="absolute top-2 left-2 bg-error text-on-error font-label-sm text-[10px] font-extrabold px-1.5 py-0.5 rounded">
+            -18%
+          </span>
+<div class="w-full h-28 bg-surface-container-low rounded-xl flex items-center justify-center mb-2 overflow-hidden p-2">
+<img class="h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform" data-alt="Six-pack cluster of Cusqueña premium Peruvian beer bottles, elegant golden amber liquid reflections, isolated on clean neutral white surface for mobile e-commerce." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPIRpd8-q-DVqrSLBHSDwqcFT598z0a2cuT9zyeCUWNlvCIJR7LrYKJqzt3NIoqmo8c1ZDbtoY1jjCZGfM-rZ5HPJs7V1UDK4Uy_Pmoa3M_5rX31sPHqRbtsWTeBS3ZTgN4eYL9djAfJ1ny03Op7rKiTWwPVD_WfxYSC8lZ9unMPcUOFj8tkgy2iJ0rnU9glEmwlAzSZoe5z4Mn-L2GMm79JY379FZyfi_AN0iYF0"/>
+</div>
+<div>
+<h3 class="font-label-md text-label-md font-bold text-on-surface line-clamp-2 leading-tight">
+              Cerveza Cusqueña Trigo Pack x 6
+            </h3>
+<p class="font-body-sm text-[11px] text-on-surface-variant mt-0.5">Cervezas nacionales</p>
+</div>
+<div class="mt-2.5 pt-2 border-t border-surface-container flex items-center justify-between">
+<div>
+<span class="font-price-strikethrough text-[11px] text-outline line-through block">S/ 32.90</span>
+<span class="font-price-headline text-headline-md text-primary font-black block">S/ 26.90</span>
+</div>
+<button class="w-8 h-8 rounded-xl bg-secondary-container hover:bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center shadow-sm active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Combos y Lo Más Pedido (Bento Style 2-Column Grid) -->
+<section class="px-margin mb-6">
+<div class="flex justify-between items-center mb-3">
+<div>
+<h2 class="font-headline-md text-headline-md font-bold text-on-surface">Combos Tambo</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Los favoritos de tu barrio listos para armar la previa</p>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<!-- Bento Card 1 -->
+<div class="bg-surface-container-lowest border border-surface-container rounded-2xl p-3 flex flex-col justify-between shadow-sm hover:shadow transition-shadow">
+<div class="w-full h-32 bg-surface-container-low rounded-xl flex items-center justify-center mb-2 overflow-hidden relative">
+<span class="absolute top-1.5 left-1.5 bg-primary text-on-primary text-[10px] font-bold px-1.5 py-0.5 rounded">
+              Combo Piqueo
+            </span>
+<img class="h-full object-contain p-2 mix-blend-multiply" data-alt="Peruvian savory party snack combo featuring artisanal empanada and bottled beverage set together on bright commercial display counter." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbznDHIPw7v5itZPLo9x6hKRSnAkLC12FMkvuC5ESlM2FrQrBD7djDKMRj7sUhQLWIP3yN74RK6hnUe7dwjqZbVanqeVMsKfXNaPKqCtq_jq4knOaXUHScC46TlTKiWT5sBZAH_DySTOdyb8SKhqX61_5n6u1CYqWAAlYjM1FVMUQWIjq6NddG2VwTsj5rictvEyK-3ZERfDoYTNK-jbdppH0YcTusaBxcTya3f24"/>
+</div>
+<div>
+<h3 class="font-label-md text-label-md font-bold text-on-surface line-clamp-1">Empanada de Carne + Coca Cola</h3>
+<p class="font-body-sm text-[11px] text-on-surface-variant">Al paso bien caliente</p>
+</div>
+<div class="mt-2 pt-2 border-t border-surface-container flex items-center justify-between">
+<span class="font-price-headline text-[17px] text-primary font-black">S/ 8.90</span>
+<button class="w-7 h-7 rounded-lg bg-primary-container text-on-primary flex items-center justify-center shadow-sm active:scale-95">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+<!-- Bento Card 2 -->
+<div class="bg-surface-container-lowest border border-surface-container rounded-2xl p-3 flex flex-col justify-between shadow-sm hover:shadow transition-shadow">
+<div class="w-full h-32 bg-surface-container-low rounded-xl flex items-center justify-center mb-2 overflow-hidden relative">
+<span class="absolute top-1.5 left-1.5 bg-secondary-container text-on-secondary-fixed text-[10px] font-black px-1.5 py-0.5 rounded">
+              Top #1 Previa
+            </span>
+<img class="h-full object-contain p-2 mix-blend-multiply" data-alt="Rum bottle paired with cola liter bottle and bag of ice pack in a celebratory setup on a sleek white reflective surface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDduBbm8J76tm9d8OOcG9C_PiZK9H2xze2BtZgMCRlX-RDxmQG46-ljeWBvxaqsfUr-q4Q1FFmjTO7pycJCyJy-HXSTt0Fbly98_5XiMj1-WjhMXuaOlyXR7uC2xzjLankcaOHq8aR8FpdNEpydJ-hbc1_RjCdtown1rT4L-ZYQ8xgjvFNwzfTLqs81kcOKVXRGqch9tqAJlRqzejVYEMBw9RQcopl-S38ni-hFSOg"/>
+</div>
+<div>
+<h3 class="font-label-md text-label-md font-bold text-on-surface line-clamp-1">Ron Cartavio + Coca-Cola 1.5L + Hielo</h3>
+<p class="font-body-sm text-[11px] text-on-surface-variant">Incluye bolsa de hielo 2kg</p>
+</div>
+<div class="mt-2 pt-2 border-t border-surface-container flex items-center justify-between">
+<span class="font-price-headline text-[17px] text-primary font-black">S/ 34.90</span>
+<button class="w-7 h-7 rounded-lg bg-primary-container text-on-primary flex items-center justify-center shadow-sm active:scale-95">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Legal Health Warning Footer (Required in Peru for Liquor promotions) -->
+<div class="px-margin mb-6">
+<div class="border border-outline-variant/60 rounded-xl p-2.5 text-center bg-surface-container-lowest/60">
+<p class="font-label-sm text-[10px] text-on-surface-variant font-bold uppercase tracking-wider">
+          Tomar bebidas alcohólicas en exceso es dañino • Solo para mayores de 18 años
+        </p>
+</div>
+</div>
+<!-- Active Cart Sticky Peek Bar (Tactical Quick Transition) -->
+<div class="px-margin mb-4">
+<div class="bg-primary text-on-primary rounded-2xl p-3 flex items-center justify-between shadow-lg">
+<div class="flex items-center space-x-2.5">
+<div class="w-8 h-8 rounded-lg bg-secondary-container text-on-secondary-fixed flex items-center justify-center font-bold text-sm">
+            1
+          </div>
+<div>
+<p class="font-label-md text-label-md font-bold leading-tight">Ver pedido actual</p>
+<p class="font-body-sm text-[11px] text-primary-fixed-dim">Pack 2 Four Loko Gold • S/ 14.90</p>
+</div>
+</div>
+<button class="bg-secondary-container hover:bg-secondary-fixed text-on-secondary-fixed font-label-md text-label-md font-bold px-3 py-1.5 rounded-xl flex items-center space-x-1 active:scale-95 transition-transform">
+<span>Ir a pagar</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- JSON BottomNavBar Implementation (Active Destination: 'Inicio') -->
+<!-- Executing exact tokens: fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter py-space-xs -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter py-space-xs bg-surface-container-lowest dark:bg-inverse-surface shadow-lg dark:shadow-none border-t border-surface-variant dark:border-outline-variant max-w-md mx-auto right-0">
+<!-- 1: Inicio (ACTIVE STATE MAPPED) -->
+<a class="flex flex-col items-center justify-center bg-primary-fixed dark:bg-primary-container text-primary dark:text-on-primary-container rounded-xl px-space-sm py-space-xs font-bold active:scale-95 transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[22px]" data-icon="storefront" data-weight="fill" style="font-variation-settings: 'FILL' 1;">storefront</span>
+<span class="font-label-sm text-label-sm mt-0.5">Inicio</span>
+</a>
+<!-- 2: Categorías (INACTIVE) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-space-sm py-space-xs hover:bg-surface-container active:scale-95 transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[22px]" data-icon="grid_view">grid_view</span>
+<span class="font-label-sm text-label-sm mt-0.5">Categorías</span>
+</a>
+<!-- 3: Descuentos (INACTIVE with visual badge cue) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-space-sm py-space-xs hover:bg-surface-container active:scale-95 transition-all duration-150 relative" href="#">
+<span class="absolute top-1 right-2 w-2 h-2 rounded-full bg-secondary-container"></span>
+<span class="material-symbols-outlined text-[22px]" data-icon="local_offer">local_offer</span>
+<span class="font-label-sm text-label-sm mt-0.5">Descuentos</span>
+</a>
+<!-- 4: Órdenes (INACTIVE) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-space-sm py-space-xs hover:bg-surface-container active:scale-95 transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[22px]" data-icon="receipt_long">receipt_long</span>
+<span class="font-label-sm text-label-sm mt-0.5">Órdenes</span>
+</a>
+<!-- 5: Perfil (INACTIVE) -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-space-sm py-space-xs hover:bg-surface-container active:scale-95 transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[22px]" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm mt-0.5">Perfil</span>
+</a>
+</nav>
+</div>
+<script>
+    // Micro-interactions for rapid testing
+    document.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        // Feedback pulse
+        btn.classList.add('opacity-90');
+        setTimeout(() => btn.classList.remove('opacity-90'), 150);
+      });
+    });
+  </script>
+</body></html>

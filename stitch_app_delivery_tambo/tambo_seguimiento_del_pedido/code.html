@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Seguimiento de Pedido #TB-84920 - Tambo</title>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "inverse-primary": "#ffabed",
+            "surface-container": "#f0eded",
+            "inverse-surface": "#313030",
+            "on-error": "#ffffff",
+            "on-tertiary-fixed": "#3f0016",
+            "on-error-container": "#93000a",
+            "on-tertiary": "#ffffff",
+            "outline": "#83727d",
+            "on-secondary-fixed": "#271900",
+            "surface-dim": "#dcd9d9",
+            "on-tertiary-fixed-variant": "#90003b",
+            "on-secondary-fixed-variant": "#5e4200",
+            "on-secondary-container": "#6f4e00",
+            "on-primary-fixed": "#390035",
+            "secondary-fixed-dim": "#fbbc39",
+            "surface-variant": "#e5e2e1",
+            "on-primary": "#ffffff",
+            "surface": "#fcf9f8",
+            "surface-tint": "#943b89",
+            "surface-container-lowest": "#ffffff",
+            "on-background": "#1c1b1b",
+            "secondary": "#7c5800",
+            "tertiary-fixed": "#ffd9de",
+            "on-surface-variant": "#51434d",
+            "surface-container-high": "#eae7e7",
+            "on-primary-container": "#e884d7",
+            "secondary-fixed": "#ffdea8",
+            "tertiary": "#54001f",
+            "outline-variant": "#d5c1cd",
+            "surface-container-highest": "#e5e2e1",
+            "background": "#fcf9f8",
+            "on-secondary": "#ffffff",
+            "secondary-container": "#ffbe3b",
+            "error-container": "#ffdad6",
+            "tertiary-container": "#7c0032",
+            "surface-bright": "#fcf9f8",
+            "on-primary-fixed-variant": "#78216f",
+            "error": "#ba1a1a",
+            "primary-fixed": "#ffd7f3",
+            "primary-fixed-dim": "#ffabed",
+            "surface-container-low": "#f6f3f2",
+            "tertiary-fixed-dim": "#ffb2bf",
+            "inverse-on-surface": "#f3f0ef",
+            "on-tertiary-container": "#ff7d9b",
+            "on-surface": "#1c1b1b",
+            "primary": "#4c0047",
+            "primary-container": "#6b1464"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter": "0.75rem",
+            "margin": "1rem",
+            "space-lg": "1.25rem",
+            "space-md": "1rem",
+            "space-xl": "1.5rem",
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem"
+          },
+          "fontFamily": {
+            "label-sm": ["Inter"],
+            "price-headline": ["Inter"],
+            "headline-md": ["Inter"],
+            "price-strikethrough": ["Inter"],
+            "body-sm": ["Inter"],
+            "label-lg": ["Inter"],
+            "headline-xl": ["Inter"],
+            "label-md": ["Inter"],
+            "headline-lg": ["Inter"],
+            "body-md": ["Inter"],
+            "body-lg": ["Inter"]
+          },
+          "fontSize": {
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "700" }],
+            "price-headline": ["20px", { "lineHeight": "24px", "fontWeight": "800" }],
+            "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "700" }],
+            "price-strikethrough": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+            "label-lg": ["15px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "headline-xl": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+            "label-md": ["13px", { "lineHeight": "18px", "fontWeight": "600" }],
+            "headline-lg": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "body-lg": ["16px", { "lineHeight": "22px", "fontWeight": "500" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* Pulsing animations and route simulation */
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.9; }
+      50% { transform: scale(1.35); opacity: 0.2; }
+      100% { transform: scale(0.95); opacity: 0.9; }
+    }
+    .rider-pulse {
+      animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes dash {
+      to {
+        stroke-dashoffset: -32;
+      }
+    }
+    .route-animated {
+      stroke-dasharray: 8 6;
+      animation: dash 1.8s linear infinite;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface antialiased font-body-md select-none overflow-x-hidden min-h-screen flex flex-col justify-start items-center">
+<!-- Mobile Screen Container Frame -->
+<div class="w-full max-w-md min-h-screen bg-background relative flex flex-col shadow-2xl overflow-hidden pb-12">
+<!-- Top Bar: Task-focused Header (Semantic Shell suppresses bottom nav for transactional order tracking) -->
+<header class="sticky top-0 z-40 bg-primary-container text-on-primary px-margin py-space-sm flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-space-xs">
+<button aria-label="Volver" class="w-9 h-9 rounded-full flex items-center justify-center text-on-primary hover:bg-primary active:scale-95 transition-transform duration-150" type="button">
+<span class="material-symbols-outlined text-[22px]">arrow_back</span>
+</button>
+<div class="flex flex-col">
+<span class="text-label-sm font-label-sm text-primary-fixed uppercase tracking-wider">Estado de orden</span>
+<h1 class="text-headline-md font-headline-md tracking-tight text-on-primary">Seguimiento de Pedido #TB-84920</h1>
+</div>
+</div>
+<button class="inline-flex items-center gap-1 bg-primary text-primary-fixed text-label-md font-label-md px-3 py-1.5 rounded-full hover:bg-on-primary-fixed-variant active:scale-95 transition-transform duration-150 shadow-sm" type="button">
+<span class="material-symbols-outlined text-[18px]">support_agent</span>
+<span>Soporte</span>
+</button>
+</header>
+<!-- Map Canvas Area (Top half) -->
+<div class="relative w-full h-[330px] bg-surface-container overflow-hidden z-0">
+<!-- Detailed Map Background Graphics -->
+<svg class="absolute inset-0 w-full h-full object-cover" fill="none" preserveaspectratio="xMidYMid slice" viewbox="0 0 400 330" xmlns="http://www.w3.org/2000/svg">
+<!-- City Grids / Neighborhood Blocks -->
+<rect fill="#E8ECEF" height="330" width="400"></rect>
+<!-- Green Urban Parks -->
+<path d="M-10 40 Q 40 20, 80 60 T 110 130 L-10 130 Z" fill="#D3EAD7"></path>
+<path d="M280 20 Q 340 10, 390 50 L 410 110 L 260 90 Z" fill="#D3EAD7"></path>
+<circle cx="340" cy="220" fill="#D3EAD7" r="45"></circle>
+<!-- Street Network (Secondary road grid) -->
+<path d="M-20 80 L420 80" stroke="#FFFFFF" stroke-linecap="round" stroke-width="8"></path>
+<path d="M-20 180 L420 180" stroke="#FFFFFF" stroke-linecap="round" stroke-width="12"></path>
+<path d="M-20 260 L420 260" stroke="#FFFFFF" stroke-linecap="round" stroke-width="6"></path>
+<path d="M60 -20 L60 350" stroke="#FFFFFF" stroke-linecap="round" stroke-width="9"></path>
+<path d="M190 -20 L190 350" stroke="#FFFFFF" stroke-linecap="round" stroke-width="14"></path>
+<path d="M310 -20 L310 350" stroke="#FFFFFF" stroke-linecap="round" stroke-width="8"></path>
+<!-- Diagonal arterial avenues (Lima style) -->
+<path d="M-10 240 L380 40" stroke="#FFFFFF" stroke-linecap="round" stroke-width="16"></path>
+<path d="M-10 240 L380 40" stroke="#F1F3F5" stroke-linecap="round" stroke-width="10"></path>
+<!-- Active Delivery Route (Tambo Berry Purple Glow & Solid Line) -->
+<!-- Start: Tambo Magdalena (x: 45, y: 75) -> Intermediary route -> Destination (x: 320, y: 195) -->
+<path d="M 52 82 L 190 82 L 190 145 L 260 145 L 315 185" opacity="0.45" stroke="#E884D7" stroke-linecap="round" stroke-linejoin="round" stroke-width="10"></path>
+<path d="M 52 82 L 190 82 L 190 145 L 260 145 L 315 185" stroke="#6B1464" stroke-linecap="round" stroke-linejoin="round" stroke-width="4.5"></path>
+<!-- Animated Route Dash Overlay -->
+<path class="route-animated" d="M 52 82 L 190 82 L 190 145 L 260 145 L 315 185" stroke="#FFD7F3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+<!-- Store Origin Pin (Tambo Magdalena) -->
+<div class="absolute left-[36px] top-[48px] flex flex-col items-center group">
+<div class="bg-primary-container text-on-primary text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md whitespace-nowrap mb-1 border border-primary-fixed">
+          Tambo Magdalena
+        </div>
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary shadow-lg ring-2 ring-surface-container-lowest">
+<span class="material-symbols-outlined text-[18px]">storefront</span>
+</div>
+</div>
+<!-- Moving Rider Marker on the Route (Current Position) -->
+<div class="absolute left-[200px] top-[125px] -translate-x-1/2 -translate-y-1/2 flex flex-col items-center z-10">
+<!-- Pulsing radar glow -->
+<div class="absolute w-12 h-12 rounded-full bg-primary-container opacity-40 rider-pulse pointer-events-none"></div>
+<div class="relative w-10 h-10 rounded-full bg-secondary-container text-on-secondary-fixed flex items-center justify-center shadow-lg border-2 border-surface-container-lowest ring-2 ring-primary">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">two_wheeler</span>
+</div>
+<div class="bg-inverse-surface text-surface text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md mt-1 tracking-tight">
+          Carlos en moto
+        </div>
+</div>
+<!-- Destination Marker (Domicilio del cliente) -->
+<div class="absolute left-[300px] top-[155px] flex flex-col items-center">
+<div class="bg-surface-container-lowest text-primary text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md whitespace-nowrap mb-1 border border-outline-variant">
+          Tu Dirección
+        </div>
+<div class="relative flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary-container text-[34px] drop-shadow-md" style="font-variation-settings: 'FILL' 1;">
+            location_on
+          </span>
+<span class="material-symbols-outlined text-primary text-[14px] absolute top-1.5" style="font-variation-settings: 'FILL' 1;">
+            home
+          </span>
+</div>
+</div>
+<!-- Live Speed / GPS floating badge -->
+<div class="absolute top-3 right-3 bg-surface-container-lowest/90 backdrop-blur-md px-3 py-1.5 rounded-full shadow-md border border-outline-variant flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+<span class="w-2 h-2 -ml-3.5 rounded-full bg-emerald-600"></span>
+<span class="text-label-sm font-label-sm text-on-surface">GPS Activo en vivo</span>
+</div>
+<!-- Map Center Reset Button -->
+<button aria-label="Centrar en repartidor" class="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-surface-container-lowest text-primary flex items-center justify-center shadow-lg border border-surface-variant active:scale-90 transition-transform" type="button">
+<span class="material-symbols-outlined text-[22px]">my_location</span>
+</button>
+</div>
+<!-- Sheet Content Container (Overlapping & elevated) -->
+<main class="-mt-6 relative z-10 flex-1 bg-surface-container-lowest rounded-t-[24px] shadow-2xl border-t border-surface-variant flex flex-col px-margin pt-3 pb-8">
+<!-- Top Pull Handle -->
+<div class="w-9 h-1 bg-outline-variant rounded-full mx-auto mb-3"></div>
+<!-- Prominent Delivery Status Banner Card -->
+<div class="bg-surface-container-low rounded-xl p-space-md mb-space-md border border-surface-variant flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-xl bg-primary-fixed flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1;">moped</span>
+</div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-label-sm font-label-sm uppercase tracking-wider text-primary font-bold">Estado actual</span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+</div>
+<h2 class="text-headline-md font-headline-md text-on-surface">En camino a tu dirección</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Llegada estimada en unos momentos</p>
+</div>
+</div>
+<div class="bg-secondary-container text-on-secondary-fixed rounded-xl px-3 py-2 text-center shadow-sm min-w-[70px]">
+<span class="block text-label-sm font-label-sm font-bold uppercase text-on-secondary-container">Tiempo</span>
+<span class="text-headline-lg font-headline-lg font-extrabold leading-none">12</span>
+<span class="block text-[10px] font-bold uppercase text-on-secondary-container">min</span>
+</div>
+</div>
+<!-- 4-Step Order Progression Timeline -->
+<section class="mb-space-lg bg-surface-container-lowest rounded-xl p-space-sm border border-surface-variant">
+<div class="flex justify-between items-center mb-3 px-1">
+<h3 class="text-label-md font-label-md text-on-surface">Progreso del Pedido</h3>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Paso 3 de 4</span>
+</div>
+<div class="grid grid-cols-4 relative gap-1 px-1">
+<!-- Step 1: Pedido recibido (Completed) -->
+<div class="flex flex-col items-center text-center">
+<div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mb-1.5 ring-2 ring-emerald-500 shadow-xs z-10">
+<span class="material-symbols-outlined text-[18px] font-bold">check</span>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface leading-tight">Pedido recibido</span>
+<span class="text-[10px] text-on-surface-variant mt-0.5">16:05</span>
+</div>
+<!-- Connecting line 1 -> 2 -->
+<div class="absolute left-[15%] top-4 w-[23%] h-[3px] bg-emerald-500 z-0"></div>
+<!-- Step 2: Preparando en tienda (Completed) -->
+<div class="flex flex-col items-center text-center">
+<div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mb-1.5 ring-2 ring-emerald-500 shadow-xs z-10">
+<span class="material-symbols-outlined text-[18px] font-bold">check</span>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface leading-tight">Preparado en tienda</span>
+<span class="text-[10px] text-on-surface-variant mt-0.5">16:12</span>
+</div>
+<!-- Connecting line 2 -> 3 -->
+<div class="absolute left-[39%] top-4 w-[23%] h-[3px] bg-primary-container z-0"></div>
+<!-- Step 3: En camino (Active / Current) -->
+<div class="flex flex-col items-center text-center">
+<div class="relative w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center mb-1.5 ring-4 ring-primary-fixed shadow-md z-10">
+<span class="material-symbols-outlined text-[18px] animate-pulse">local_shipping</span>
+</div>
+<span class="text-label-sm font-label-sm text-primary-container font-extrabold leading-tight">En camino</span>
+<span class="text-[10px] text-primary font-bold mt-0.5">16:15</span>
+</div>
+<!-- Connecting line 3 -> 4 (Pending) -->
+<div class="absolute left-[64%] top-4 w-[23%] h-[3px] bg-surface-variant z-0"></div>
+<!-- Step 4: Entregado (Pending) -->
+<div class="flex flex-col items-center text-center">
+<div class="w-8 h-8 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center mb-1.5 ring-1 ring-outline-variant z-10">
+<span class="material-symbols-outlined text-[16px]">home</span>
+</div>
+<span class="text-label-sm font-label-sm text-outline leading-tight">Entregado</span>
+<span class="text-[10px] text-outline mt-0.5">Estimado</span>
+</div>
+</div>
+</section>
+<!-- Rider Profile Card -->
+<section class="bg-surface-container-lowest rounded-xl p-space-md border border-surface-variant shadow-sm mb-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="relative">
+<img class="w-13 h-13 w-12 h-12 rounded-full object-cover border-2 border-primary-container shadow-sm" data-alt="A clean portrait photograph of a friendly young Peruvian delivery courier wearing a branded purple cap and polo shirt smiling genuinely in natural outdoor day lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0JThzLvy5XDBAwrhA3pB5K8E8MLEbuLDvZELXDgsN7ZJDFZqYgfZiyJhDuX35NzIYKhfqJm7A0a8ibxY6ZW97uqrjmViykbD8fSCaxl4aNh2XDjF5swpePLiXqw1SQkpblz1Fx8Lvkbw8ADy_VmsZY-xxC3QqpublRTxtJe3fLPx_sTKlb9jIHbNuPCxGEOoZlWUl_7_XUehOF6tdRzYQ3G1GKMkx2iEwAp8SPcc"/>
+<div class="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full w-4 h-4 border-2 border-surface-container-lowest flex items-center justify-center">
+<span class="block w-1.5 h-1.5 rounded-full bg-white"></span>
+</div>
+</div>
+<div>
+<div class="flex items-center gap-1.5">
+<h4 class="text-label-lg font-label-lg text-on-surface">Carlos Mendoza</h4>
+<span class="material-symbols-outlined text-secondary text-[16px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<div class="flex items-center gap-1 text-body-sm font-body-sm text-on-surface-variant mt-0.5">
+<span class="material-symbols-outlined text-secondary-container text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-bold text-on-surface">4.9</span>
+<span>(Tambo Rider)</span>
+</div>
+<div class="text-[11px] text-on-surface-variant mt-0.5">Honda CB 125F • Placa 8421-5B</div>
+</div>
+</div>
+<!-- Quick Action Buttons: Llamar y Chat directo -->
+<div class="flex items-center gap-2">
+<button aria-label="Llamar al repartidor" class="w-11 h-11 rounded-full bg-surface-container-low text-primary hover:bg-primary-fixed border border-outline-variant flex items-center justify-center active:scale-95 transition-transform duration-150 shadow-xs" type="button">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">call</span>
+</button>
+<button aria-label="Chat directo con repartidor" class="w-11 h-11 rounded-full bg-primary-container text-on-primary hover:bg-primary flex items-center justify-center active:scale-95 transition-transform duration-150 shadow-md" type="button">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">chat</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Collapsible Purchase Detail Accordion -->
+<section class="bg-surface-container-lowest rounded-xl border border-surface-variant overflow-hidden mb-space-md">
+<details class="group" open="">
+<summary class="flex justify-between items-center p-space-md cursor-pointer list-none select-none hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">receipt_long</span>
+<span class="text-label-lg font-label-lg text-on-surface">Ver detalle de la compra</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-headline-md font-headline-md text-primary font-bold">S/ 25.90</span>
+<span class="material-symbols-outlined text-on-surface-variant transition-transform duration-200 group-open:rotate-180">expand_more</span>
+</div>
+</summary>
+<div class="px-space-md pb-space-md pt-2 border-t border-surface-variant">
+<!-- Product list -->
+<div class="space-y-3 mb-space-md">
+<!-- Item 1 -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-11 h-11 rounded-lg bg-surface-container-low border border-surface-variant flex items-center justify-center p-1">
+<span class="material-symbols-outlined text-primary text-[24px]">local_bar</span>
+</div>
+<div>
+<h5 class="text-body-md font-body-md font-semibold text-on-surface leading-tight">Pack 2 Rtd Four Loko Gold</h5>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Lata 473 ml c/u • Cant: 1</p>
+</div>
+</div>
+<div class="text-right">
+<span class="text-label-lg font-label-lg text-on-surface">S/ 14.90</span>
+<span class="block text-price-strikethrough font-price-strikethrough text-outline line-through">S/ 21.98</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-11 h-11 rounded-lg bg-surface-container-low border border-surface-variant flex items-center justify-center p-1">
+<span class="material-symbols-outlined text-primary text-[24px]">lunch_dining</span>
+</div>
+<div>
+<h5 class="text-body-md font-body-md font-semibold text-on-surface leading-tight">Empanada de Carne Tambo</h5>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Horneada artesanal • Cant: 2</p>
+</div>
+</div>
+<div class="text-right">
+<span class="text-label-lg font-label-lg text-on-surface">S/ 8.00</span>
+</div>
+</div>
+</div>
+<!-- Cost Breakdown Summary -->
+<div class="space-y-1.5 pt-2 border-t border-surface-variant text-body-sm font-body-sm text-on-surface-variant">
+<div class="flex justify-between">
+<span>Subtotal de productos</span>
+<span>S/ 22.90</span>
+</div>
+<div class="flex justify-between">
+<span>Costo de envío express</span>
+<span>S/ 3.00</span>
+</div>
+<div class="flex justify-between text-emerald-700 font-semibold">
+<span>Descuento aplicado (Promo Tambo)</span>
+<span>-S/ 7.08</span>
+</div>
+<div class="flex justify-between pt-2 border-t border-surface-variant text-label-lg font-label-lg text-on-surface">
+<span class="font-bold">Total pagado</span>
+<span class="text-headline-md font-headline-md text-primary font-bold">S/ 25.90</span>
+</div>
+</div>
+<!-- Delivery Address Cardlet -->
+<div class="mt-space-md p-3 rounded-lg bg-surface-container-low border border-surface-variant flex items-start gap-2.5">
+<span class="material-symbols-outlined text-primary text-[20px] mt-0.5">location_on</span>
+<div class="text-left">
+<div class="text-label-sm font-label-sm uppercase tracking-wide text-on-surface font-bold">Dirección de entrega</div>
+<div class="text-body-sm font-body-sm text-on-surface leading-snug">Av. Larco 400, Dpto 502, Miraflores, Lima</div>
+<div class="text-[11px] text-on-surface-variant">Instrucciones: Dejar en recepción con portero</div>
+</div>
+</div>
+</div>
+</details>
+</section>
+<!-- Primary Action CTA Button: Tactical converted state -->
+<div class="mt-2">
+<button class="w-full h-12 bg-secondary-container hover:bg-secondary-fixed-dim text-on-secondary-fixed text-label-lg font-label-lg font-semibold rounded-xl flex items-center justify-center gap-2 shadow-md active:scale-[0.99] transition-transform" type="button">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">share_location</span>
+<span>Compartir seguimiento con un amigo</span>
+</button>
+</div>
+<!-- Quick Help & Cancel Link -->
+<div class="mt-4 text-center">
+<a class="text-body-sm font-body-sm text-on-surface-variant hover:text-primary transition-colors underline" href="#">
+          ¿Tienes algún problema con tu pedido? Contáctanos
+        </a>
+</div>
+</main>
+</div>
+</body></html>

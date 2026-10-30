@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Finalizar compra - Tambo</title>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "inverse-primary": "#ffabed",
+            "surface-container": "#f0eded",
+            "inverse-surface": "#313030",
+            "on-error": "#ffffff",
+            "on-tertiary-fixed": "#3f0016",
+            "on-error-container": "#93000a",
+            "on-tertiary": "#ffffff",
+            "outline": "#83727d",
+            "on-secondary-fixed": "#271900",
+            "surface-dim": "#dcd9d9",
+            "on-tertiary-fixed-variant": "#90003b",
+            "on-secondary-fixed-variant": "#5e4200",
+            "on-secondary-container": "#6f4e00",
+            "on-primary-fixed": "#390035",
+            "secondary-fixed-dim": "#fbbc39",
+            "surface-variant": "#e5e2e1",
+            "on-primary": "#ffffff",
+            "surface": "#fcf9f8",
+            "surface-tint": "#943b89",
+            "surface-container-lowest": "#ffffff",
+            "on-background": "#1c1b1b",
+            "secondary": "#7c5800",
+            "tertiary-fixed": "#ffd9de",
+            "on-surface-variant": "#51434d",
+            "surface-container-high": "#eae7e7",
+            "on-primary-container": "#e884d7",
+            "secondary-fixed": "#ffdea8",
+            "tertiary": "#54001f",
+            "outline-variant": "#d5c1cd",
+            "surface-container-highest": "#e5e2e1",
+            "background": "#fcf9f8",
+            "on-secondary": "#ffffff",
+            "secondary-container": "#ffbe3b",
+            "error-container": "#ffdad6",
+            "tertiary-container": "#7c0032",
+            "surface-bright": "#fcf9f8",
+            "on-primary-fixed-variant": "#78216f",
+            "error": "#ba1a1a",
+            "primary-fixed": "#ffd7f3",
+            "primary-fixed-dim": "#ffabed",
+            "surface-container-low": "#f6f3f2",
+            "tertiary-fixed-dim": "#ffb2bf",
+            "inverse-on-surface": "#f3f0ef",
+            "on-tertiary-container": "#ff7d9b",
+            "on-surface": "#1c1b1b",
+            "primary": "#4c0047",
+            "primary-container": "#6b1464"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter": "0.75rem",
+            "margin": "1rem",
+            "space-lg": "1.25rem",
+            "space-md": "1rem",
+            "space-xl": "1.5rem",
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem"
+          },
+          "fontFamily": {
+            "label-sm": ["Inter"],
+            "price-headline": ["Inter"],
+            "headline-md": ["Inter"],
+            "price-strikethrough": ["Inter"],
+            "body-sm": ["Inter"],
+            "label-lg": ["Inter"],
+            "headline-xl": ["Inter"],
+            "label-md": ["Inter"],
+            "headline-lg": ["Inter"],
+            "body-md": ["Inter"],
+            "body-lg": ["Inter"]
+          },
+          "fontSize": {
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "700" }],
+            "price-headline": ["20px", { "lineHeight": "24px", "fontWeight": "800" }],
+            "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "700" }],
+            "price-strikethrough": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+            "label-lg": ["15px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "headline-xl": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+            "label-md": ["13px", { "lineHeight": "18px", "fontWeight": "600" }],
+            "headline-lg": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "body-lg": ["16px", { "lineHeight": "22px", "fontWeight": "500" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body-md text-on-surface antialiased flex justify-center min-h-screen selection:bg-primary selection:text-on-primary">
+<!-- Mobile Screen Container (Format Vertical) -->
+<main class="w-full max-w-md bg-background min-h-screen flex flex-col relative shadow-2xl pb-32">
+<!-- Top Bar: Finalizar compra (Linear/Transactional header with Back action) -->
+<header class="sticky top-0 z-30 bg-primary-container text-on-primary px-margin py-space-sm shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<button aria-label="Volver" class="p-1.5 rounded-full hover:bg-primary active:scale-95 transition-transform flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</button>
+<h1 class="text-headline-md font-headline-md text-on-primary tracking-tight">Finalizar compra</h1>
+</div>
+<div class="flex items-center gap-space-xs text-on-primary-container">
+<span class="material-symbols-outlined text-[20px]">shield</span>
+<span class="text-label-sm font-label-sm uppercase tracking-wider text-on-primary">Segura</span>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<div class="p-margin flex flex-col gap-space-lg">
+<!-- Segmented Delivery / Pickup Selector -->
+<section aria-label="Método de entrega" class="bg-surface-container p-1 rounded-xl flex items-center gap-1 shadow-sm">
+<button class="flex-1 py-2.5 px-3 rounded-lg text-body-md font-label-lg font-bold bg-primary-container text-on-primary flex items-center justify-center gap-1.5 shadow-sm transition-all" id="tab-delivery" type="button">
+<span class="material-symbols-outlined text-[18px]">two_wheeler</span>
+<span>Delivery</span>
+</button>
+<button class="flex-1 py-2.5 px-3 rounded-lg text-body-md font-label-lg font-semibold text-on-surface-variant hover:text-on-surface flex items-center justify-center gap-1.5 transition-all" id="tab-pickup" type="button">
+<span class="material-symbols-outlined text-[18px]">storefront</span>
+<span>Para llevar</span>
+</button>
+</section>
+<!-- Dirección de Entrega Card -->
+<section class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm border border-surface-variant flex flex-col gap-space-md">
+<div class="flex items-center justify-between border-b border-surface-container pb-space-xs">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-[20px]" style="font-variation-settings: 'FILL' 1;">location_on</span>
+<h2 class="text-label-lg font-label-lg text-on-surface">Dirección de Entrega</h2>
+</div>
+<button class="text-label-sm font-label-sm text-primary-container font-bold hover:underline" type="button">Cambiar</button>
+</div>
+<!-- Stylized Map Preview -->
+<div class="relative w-full h-28 rounded-lg overflow-hidden border border-outline-variant bg-surface-container-high" data-location="Lima" style="">
+<img class="w-full h-full object-cover" data-alt="A modern stylized top-down vector map of Lima Peru urban streets in soft lavender and off-white tones with clean street lines. In the center, a prominent deep berry purple location pin points sharply to an address. Warm light-mode aesthetic consistent with high-contrast tactical retail branding." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAiUOPJhczssGax3_9DDG2-8g2gZ4s1t9zSfZj_Ws9SqnURs-wHkzyO5JlTDh3-1LNGUeD0vZCZgK_fmzd__RKpsIQgecAqF2cobGiY0tvdF32zRc-YdOQfjOCkojcTPAIUxCq3a6fMDfagZvHAiT9aQ1sLU0hO3aTxCQ0QsCPjunBhCNWDTZpatMM_ISWkilE6bne2QSLvBIgXPHfQT99nUwwXn_K79sE8caXLFeg"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/30 to-transparent pointer-events-none"></div>
+<div class="absolute bottom-2 left-2 bg-surface-container-lowest/90 backdrop-blur-sm px-2 py-0.5 rounded text-label-sm font-label-sm text-on-surface flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-[14px] text-primary-container" style="font-variation-settings: 'FILL' 1;">my_location</span>
+<span>Magdalena del Mar, Lima</span>
+</div>
+</div>
+<!-- Address details -->
+<div class="flex flex-col gap-1">
+<p class="text-body-md font-body-lg font-bold text-on-surface leading-tight">Av. Juan de Aliaga 400, Dpto 502</p>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Magdalena del Mar, Lima</p>
+</div>
+<!-- Reference Field / Input toggle -->
+<div class="pt-1">
+<button class="group flex items-center gap-1.5 text-primary-container hover:text-primary transition-colors text-label-md font-label-md" type="button">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+<span class="underline decoration-dotted underline-offset-4 font-semibold">+ Agregar referencia (ej. frente al parque, timbre 502)</span>
+</button>
+</div>
+</section>
+<!-- Programación de Horario de Entrega -->
+<section class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm border border-surface-variant flex flex-col gap-space-sm">
+<div class="flex items-center gap-2 mb-1">
+<span class="material-symbols-outlined text-primary-container text-[20px]" style="font-variation-settings: 'FILL' 1;">schedule</span>
+<h2 class="text-label-lg font-label-lg text-on-surface">Horario de Entrega</h2>
+</div>
+<div class="grid grid-cols-1 gap-2.5">
+<!-- Opción 1: Lo antes posible (Selected) -->
+<label class="flex items-center justify-between p-3 rounded-xl border-2 border-primary-container bg-primary-fixed/20 cursor-pointer transition-all">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-secondary-container text-on-secondary-fixed flex items-center justify-center shadow-xs">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</div>
+<div class="flex flex-col">
+<span class="text-label-lg font-label-lg text-on-surface leading-snug">Lo antes posible</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant font-medium">Llega en 25 - 35 min aprox.</span>
+</div>
+</div>
+<input checked="" class="w-5 h-5 text-primary-container focus:ring-primary border-outline" name="delivery_time" type="radio"/>
+</label>
+<!-- Opción 2: Programar horario -->
+<label class="flex flex-col p-3 rounded-xl border border-surface-variant bg-surface-container-lowest cursor-pointer hover:border-outline-variant transition-all">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+</div>
+<div class="flex flex-col">
+<span class="text-label-lg font-label-lg text-on-surface leading-snug">Programar horario</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant">Elige el momento de entrega</span>
+</div>
+</div>
+<input class="w-5 h-5 text-primary-container focus:ring-primary border-outline" name="delivery_time" type="radio"/>
+</div>
+<!-- Dropdown selector (when programming) -->
+<div class="mt-3 pl-11">
+<div class="relative">
+<select class="w-full h-11 bg-surface-container-low border border-surface-variant rounded-lg px-3 pr-8 text-body-md font-body-md text-on-surface focus:outline-none focus:border-primary-container">
+<option selected="">Hoy: 05:00 PM - 06:00 PM</option>
+<option>Hoy: 06:00 PM - 07:00 PM</option>
+<option>Hoy: 07:00 PM - 08:00 PM</option>
+<option>Mañana: 09:00 AM - 10:00 AM</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-3 text-[18px] text-on-surface-variant pointer-events-none">expand_more</span>
+</div>
+</div>
+</label>
+</div>
+</section>
+<!-- Método de Pago Card -->
+<section class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm border border-surface-variant flex flex-col gap-space-sm">
+<div class="flex items-center justify-between mb-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-[20px]" style="font-variation-settings: 'FILL' 1;">payments</span>
+<h2 class="text-label-lg font-label-lg text-on-surface">Método de pago</h2>
+</div>
+<span class="text-label-sm font-label-sm bg-secondary-fixed text-on-secondary-fixed px-2 py-0.5 rounded-full font-bold">Sin comisiones</span>
+</div>
+<div class="flex flex-col gap-2.5">
+<!-- 1. Yape / Plin (Selected) -->
+<label class="flex flex-col p-3 rounded-xl border-2 border-primary-container bg-primary-fixed/20 cursor-pointer">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-primary-container text-on-primary flex items-center justify-center font-black text-xs tracking-tighter">
+<span class="text-secondary-container text-headline-md font-bold">Y</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="text-label-lg font-label-lg text-on-surface font-bold">Yape / Plin</span>
+<span class="text-[10px] font-bold bg-primary text-on-primary px-1.5 py-0.2 rounded">Recomendado</span>
+</div>
+<span class="text-body-sm font-body-sm text-on-surface-variant">Paga rápido con QR o número móvil</span>
+</div>
+</div>
+<input checked="" class="w-5 h-5 text-primary-container focus:ring-primary border-outline" name="payment_method" type="radio" value="yape"/>
+</div>
+</label>
+<!-- 2. Tarjeta de Crédito / Débito -->
+<label class="flex items-center justify-between p-3 rounded-xl border border-surface-variant bg-surface-container-lowest cursor-pointer hover:border-outline-variant">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-surface-container text-on-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">credit_card</span>
+</div>
+<div class="flex flex-col">
+<span class="text-label-lg font-label-lg text-on-surface">Tarjeta Crédito / Débito</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant">Visa, Mastercard, Diners, Amex</span>
+</div>
+</div>
+<input class="w-5 h-5 text-primary-container focus:ring-primary border-outline" name="payment_method" type="radio" value="card"/>
+</label>
+<!-- 3. Efectivo -->
+<div class="border border-surface-variant rounded-xl overflow-hidden">
+<label class="flex items-center justify-between p-3 bg-surface-container-lowest cursor-pointer hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-surface-container text-on-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">local_atm</span>
+</div>
+<div class="flex flex-col">
+<span class="text-label-lg font-label-lg text-on-surface">Efectivo contra entrega</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant">Paga al recibir tu pedido</span>
+</div>
+</div>
+<input class="w-5 h-5 text-primary-container focus:ring-primary border-outline" id="radio-cash" name="payment_method" type="radio" value="cash"/>
+</label>
+<!-- Dynamic cash amount input helper (simulated display) -->
+<div class="p-3 bg-surface-container-low border-t border-surface-variant flex flex-col gap-2" id="cash-helper">
+<label class="text-label-sm font-label-sm text-on-surface-variant" for="cash-amount">¿Con cuánto vas a pagar? (Ej. S/ 50.00 para tu vuelto)</label>
+<div class="relative">
+<span class="absolute left-3 top-2.5 font-bold text-on-surface-variant text-body-md font-body-md">S/</span>
+<input class="w-full h-10 pl-9 pr-3 rounded-lg bg-surface-container-lowest border border-outline-variant text-body-md font-body-md font-bold focus:border-primary-container focus:ring-1 focus:ring-primary-container" id="cash-amount" placeholder="50.00" step="10" type="number"/>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Resumen final de la orden -->
+<section class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm border border-surface-variant flex flex-col gap-2.5">
+<h2 class="text-label-lg font-label-lg text-on-surface border-b border-surface-container pb-2">Resumen de la orden</h2>
+<div class="flex justify-between items-center text-body-md font-body-md text-on-surface-variant">
+<span>Subtotal (2 productos)</span>
+<span class="font-medium text-on-surface">S/ 21.40</span>
+</div>
+<div class="flex justify-between items-center text-body-md font-body-md text-on-surface-variant">
+<span class="flex items-center gap-1">
+            Costo de envío
+            <span class="material-symbols-outlined text-[14px] text-outline">help</span>
+</span>
+<span class="font-medium text-on-surface">S/ 4.50</span>
+</div>
+<div class="border-t border-dashed border-outline-variant pt-2.5 flex justify-between items-baseline">
+<div>
+<span class="text-headline-md font-headline-md text-on-surface">Total a pagar</span>
+<p class="text-[11px] text-on-surface-variant">Incluye impuestos de ley (IGV)</p>
+</div>
+<span class="text-price-headline font-price-headline text-primary-container font-extrabold text-[22px]">S/ 25.90</span>
+</div>
+</section>
+<!-- Cupón de descuento banner -->
+<div class="bg-surface-container-low border border-dashed border-outline-variant rounded-xl p-3 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[22px]">local_offer</span>
+<span class="text-label-md font-label-md text-on-surface">¿Tienes un cupón de descuento?</span>
+</div>
+<button class="text-label-sm font-label-sm text-primary-container font-bold hover:underline" type="button">Ingresar</button>
+</div>
+</div>
+<!-- Sticky Bottom Confirmation CTA (Tactical Yellow-Gold Tambo Button) -->
+<footer class="fixed bottom-0 left-0 w-full z-40 bg-surface-container-lowest/95 backdrop-blur-md px-margin py-3 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] border-t border-surface-container flex justify-center">
+<div class="w-full max-w-md flex flex-col gap-1.5">
+<button class="w-full h-12 bg-secondary-container hover:bg-[#e5a824] active:scale-[0.98] transition-all rounded-xl shadow-md flex items-center justify-between px-5 text-on-secondary-fixed" type="button">
+<span class="text-label-lg font-label-lg font-extrabold uppercase tracking-wide">Confirmar pedido</span>
+<div class="flex items-center gap-1 font-extrabold text-[17px]">
+<span>•</span>
+<span class="font-price-headline font-extrabold">S/ 25.90</span>
+<span class="material-symbols-outlined text-[20px] font-bold">arrow_forward</span>
+</div>
+</button>
+<p class="text-center text-[10px] text-on-surface-variant font-medium">Al pulsar confirmas los términos y condiciones de entrega Tambo</p>
+</div>
+</footer>
+</main>
+<!-- Interactive script for demo toggling -->
+<script>
+    // Segmented tab active status toggle
+    const tabDelivery = document.getElementById('tab-delivery');
+    const tabPickup = document.getElementById('tab-pickup');
+
+    tabPickup?.addEventListener('click', () => {
+      tabPickup.className = 'flex-1 py-2.5 px-3 rounded-lg text-body-md font-label-lg font-bold bg-primary-container text-on-primary flex items-center justify-center gap-1.5 shadow-sm transition-all';
+      tabDelivery.className = 'flex-1 py-2.5 px-3 rounded-lg text-body-md font-label-lg font-semibold text-on-surface-variant hover:text-on-surface flex items-center justify-center gap-1.5 transition-all';
+    });
+
+    tabDelivery?.addEventListener('click', () => {
+      tabDelivery.className = 'flex-1 py-2.5 px-3 rounded-lg text-body-md font-label-lg font-bold bg-primary-container text-on-primary flex items-center justify-center gap-1.5 shadow-sm transition-all';
+      tabPickup.className = 'flex-1 py-2.5 px-3 rounded-lg text-body-md font-label-lg font-semibold text-on-surface-variant hover:text-on-surface flex items-center justify-center gap-1.5 transition-all';
+    });
+  </script>
+</body></html>

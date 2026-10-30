@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mis Pedidos - Tambo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "inverse-primary": "#ffabed",
+            "surface-container": "#f0eded",
+            "inverse-surface": "#313030",
+            "on-error": "#ffffff",
+            "on-tertiary-fixed": "#3f0016",
+            "on-error-container": "#93000a",
+            "on-tertiary": "#ffffff",
+            "outline": "#83727d",
+            "on-secondary-fixed": "#271900",
+            "surface-dim": "#dcd9d9",
+            "on-tertiary-fixed-variant": "#90003b",
+            "on-secondary-fixed-variant": "#5e4200",
+            "on-secondary-container": "#6f4e00",
+            "on-primary-fixed": "#390035",
+            "secondary-fixed-dim": "#fbbc39",
+            "surface-variant": "#e5e2e1",
+            "on-primary": "#ffffff",
+            "surface": "#fcf9f8",
+            "surface-tint": "#943b89",
+            "surface-container-lowest": "#ffffff",
+            "on-background": "#1c1b1b",
+            "secondary": "#7c5800",
+            "tertiary-fixed": "#ffd9de",
+            "on-surface-variant": "#51434d",
+            "surface-container-high": "#eae7e7",
+            "on-primary-container": "#e884d7",
+            "secondary-fixed": "#ffdea8",
+            "tertiary": "#54001f",
+            "outline-variant": "#d5c1cd",
+            "surface-container-highest": "#e5e2e1",
+            "background": "#fcf9f8",
+            "on-secondary": "#ffffff",
+            "secondary-container": "#ffbe3b",
+            "error-container": "#ffdad6",
+            "tertiary-container": "#7c0032",
+            "surface-bright": "#fcf9f8",
+            "on-primary-fixed-variant": "#78216f",
+            "error": "#ba1a1a",
+            "primary-fixed": "#ffd7f3",
+            "primary-fixed-dim": "#ffabed",
+            "surface-container-low": "#f6f3f2",
+            "tertiary-fixed-dim": "#ffb2bf",
+            "inverse-on-surface": "#f3f0ef",
+            "on-tertiary-container": "#ff7d9b",
+            "on-surface": "#1c1b1b",
+            "primary": "#4c0047",
+            "primary-container": "#6b1464"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter": "0.75rem",
+            "margin": "1rem",
+            "space-lg": "1.25rem",
+            "space-md": "1rem",
+            "space-xl": "1.5rem",
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem"
+          },
+          "fontFamily": {
+            "label-sm": ["Inter"],
+            "price-headline": ["Inter"],
+            "headline-md": ["Inter"],
+            "price-strikethrough": ["Inter"],
+            "body-sm": ["Inter"],
+            "label-lg": ["Inter"],
+            "headline-xl": ["Inter"],
+            "label-md": ["Inter"],
+            "headline-lg": ["Inter"],
+            "body-md": ["Inter"],
+            "body-lg": ["Inter"]
+          },
+          "fontSize": {
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "700" }],
+            "price-headline": ["20px", { "lineHeight": "24px", "fontWeight": "800" }],
+            "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "700" }],
+            "price-strikethrough": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+            "label-lg": ["15px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "headline-xl": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+            "label-md": ["13px", { "lineHeight": "18px", "fontWeight": "600" }],
+            "headline-lg": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "body-lg": ["16px", { "lineHeight": "22px", "fontWeight": "500" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface antialiased min-h-screen flex justify-center selection:bg-secondary-container selection:text-on-secondary-fixed">
+<!-- Mobile Container Shell -->
+<main class="w-full max-w-md min-h-screen bg-surface-bright flex flex-col relative pb-28 shadow-xl">
+<!-- Top Bar: Mis Pedidos header with search -->
+<header class="sticky top-0 z-40 bg-primary-container text-on-primary px-margin py-space-sm shadow-sm flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<button aria-label="Atrás" class="p-1 rounded-full hover:bg-primary text-on-primary transition-colors flex items-center justify-center" type="button">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</button>
+<h1 class="font-headline-lg text-headline-lg text-on-primary font-bold tracking-tight">Mis Pedidos</h1>
+</div>
+<div class="flex items-center space-x-1">
+<button aria-label="Buscar pedidos" class="w-10 h-10 rounded-full hover:bg-primary text-on-primary flex items-center justify-center transition-transform active:scale-95" type="button">
+<span class="material-symbols-outlined text-[22px]">search</span>
+</button>
+<button aria-label="Ayuda" class="w-10 h-10 rounded-full hover:bg-primary text-on-primary flex items-center justify-center transition-transform active:scale-95" type="button">
+<span class="material-symbols-outlined text-[22px]">support_agent</span>
+</button>
+</div>
+</header>
+<!-- Subheader Segmented Tabs -->
+<nav class="sticky top-[56px] z-30 bg-surface-container-lowest px-margin pt-2 border-b border-surface-container flex items-center justify-between">
+<div class="flex space-x-6 w-full">
+<!-- Tab 1: En curso (Active) -->
+<button class="flex items-center space-x-2 pb-3 border-b-2 border-primary text-primary font-label-lg text-label-lg transition-colors relative">
+<span>En curso</span>
+<span class="inline-flex items-center justify-center bg-primary-fixed text-primary font-label-sm text-label-sm px-2 py-0.5 rounded-full">1</span>
+</button>
+<!-- Tab 2: Historial (Inactive) -->
+<button class="flex items-center space-x-2 pb-3 border-b-2 border-transparent text-on-surface-variant hover:text-on-surface font-label-lg text-label-lg transition-colors">
+<span>Historial</span>
+<span class="inline-flex items-center justify-center bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm px-2 py-0.5 rounded-full">14</span>
+</button>
+</div>
+</nav>
+<!-- Content Feed -->
+<div class="px-margin pt-4 space-y-4 flex-1">
+<!-- Order Card 1: ACTIVE ORDER (En curso) -->
+<article class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm border border-surface-container relative overflow-hidden transition-all duration-200 hover:shadow-md">
+<!-- Live Delivery Accent Bar -->
+<div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-secondary-container via-primary-container to-primary"></div>
+<!-- Top Order Info & Status Badge -->
+<div class="flex items-start justify-between gap-2 mt-1">
+<div>
+<div class="flex items-center space-x-2">
+<span class="font-label-lg text-label-lg text-primary font-bold">Pedido #TB-84920</span>
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Hoy, 4:18 PM</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[16px] text-primary">store</span>
+              Tambo Juan de Aliaga - Magdalena
+            </p>
+</div>
+<!-- Status Pill: En camino -->
+<span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 rounded-full text-label-sm font-label-sm shrink-0">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            En camino (12 min)
+          </span>
+</div>
+<!-- Product Summary Items -->
+<div class="mt-3.5 pt-3 border-t border-surface-container flex items-center justify-between gap-3">
+<div class="flex items-center space-x-3 overflow-hidden">
+<!-- Mini Thumbnails Stack -->
+<div class="flex -space-x-2 shrink-0">
+<img class="w-12 h-12 rounded-lg object-cover border-2 border-surface-container-lowest bg-surface-container" data-alt="Pack of two vibrant Four Loko cans in bold metallic gold and purple foil packaging, photographed cleanly against an ultra minimal crisp studio white background for retail display in bright warm lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKs1-lva6bAxbIIRyFCk5vr0xeTJshxzuz0Zx-rZCI6Upw0UBKjrTsAok3ttJ83qaRtGmCSMSpHH1Z2FVQrCUuW2hPpyCwrNkkHrs-MmX6QWKUMsZnh-ysibS5Vbj3KSCTy0YRrp1W96KH0Kj03nT9q6rIGNeaKS8M1p7XjzhGfyagTu_zZn0L0jwEQaLEsnykNU015IJPRZpZY8epQyMsi97omBKrRVoHRkcOp9M"/>
+<img class="w-12 h-12 rounded-lg object-cover border-2 border-surface-container-lowest bg-surface-container" data-alt="Bag of classic golden yellow Lay's potato chips package isolated crisply with subtle studio shadow on clean bright commercial setup highlighting fresh crunch convenience retail theme." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbBk_5yIwgU4q9rqMHXbUOaTqRNQRDY6DwGu3Qu7SxGT8wThf0KV3N3iqcpxH1M7CSDEQ0WvuybL0yINmHwiaPP9r0iE-J1TLgw6vJuZ-CcdRm5VWMA6-w0IPQofgpUquwaojdoEIQi9zylUXos17ED-7HISH2NIF7udojCm2DUpxZM9A_qPRNFELeX7ozYZD9-pDF6NJlmO_wgebIuPkIHC56zWGmwhL85Pgp5UI"/>
+</div>
+<div class="truncate">
+<h3 class="font-label-md text-label-md text-on-surface truncate">Pack 2 Four Loko + Papas Lays Clásicas</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">2 productos • Entrega Express</p>
+</div>
+</div>
+<!-- Order Total -->
+<div class="text-right shrink-0">
+<span class="font-body-sm text-body-sm text-on-surface-variant block">Total</span>
+<span class="font-price-headline text-price-headline text-on-surface font-extrabold">S/ 25.90</span>
+</div>
+</div>
+<!-- Progress Tracker Bar -->
+<div class="mt-3 bg-surface-container-low rounded-lg p-2.5">
+<div class="flex items-center justify-between text-body-sm font-body-sm text-on-surface font-medium mb-1.5">
+<span class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[16px]">moped</span>
+              Motorizado en ruta
+            </span>
+<span class="text-on-surface-variant font-label-sm text-label-sm">80% completado</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full rounded-full transition-all duration-500" style="width: 80%"></div>
+</div>
+</div>
+<!-- Actions -->
+<div class="mt-3.5 grid grid-cols-2 gap-2">
+<button class="w-full py-2.5 px-3 rounded-xl font-label-lg text-label-lg font-bold bg-secondary-container hover:bg-secondary-fixed-dim text-on-secondary-fixed flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">near_me</span>
+            Rastrear pedido
+          </button>
+<button class="w-full py-2.5 px-3 rounded-xl font-label-lg text-label-lg font-semibold bg-surface-container-low hover:bg-surface-container text-on-surface flex items-center justify-center gap-1 border border-outline-variant/30 active:scale-95 transition-all" type="button">
+            Ver detalle
+          </button>
+</div>
+</article>
+<!-- Section Title for Past Orders -->
+<div class="pt-2 flex items-center justify-between">
+<h2 class="font-label-lg text-label-lg text-on-surface-variant uppercase tracking-wider">Historial reciente</h2>
+<span class="font-body-sm text-body-sm text-primary font-semibold cursor-pointer">Ver todos</span>
+</div>
+<!-- Order Card 2: HISTORIAL (Entregado) -->
+<article class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm border border-surface-container relative transition-all duration-200 hover:shadow-md">
+<!-- Top Info & Delivered Badge -->
+<div class="flex items-start justify-between gap-2">
+<div>
+<div class="flex items-center space-x-2">
+<span class="font-label-lg text-label-lg text-on-surface font-bold">Pedido #TB-79301</span>
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">3 artículos</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[16px] text-outline">storefront</span>
+              Tambo Larco 400 - Miraflores
+            </p>
+</div>
+<!-- Status Badge: Entregado -->
+<span class="inline-flex items-center gap-1 bg-surface-container text-on-surface-variant px-2.5 py-1 rounded-full text-label-sm font-label-sm shrink-0">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+            Entregado • 24 Oct
+          </span>
+</div>
+<!-- Product Preview List -->
+<div class="mt-3 pt-3 border-t border-surface-container flex items-center justify-between gap-3">
+<div class="flex items-center space-x-3 overflow-hidden">
+<img class="w-12 h-12 rounded-lg object-cover border border-surface-container bg-surface-container shrink-0" data-alt="A commercial packaging display of Peruvian snacks including chocolate wafer biscuits and ice cold soda bottle on a bright neutral light surface, rendered with punchy contrast and vibrant commercial appeal." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDfEJdpab0IXd0wwoXjnHN7huvTdFKZkoZKqYSZjuwa2PN42M1uemLXI1zSRODqXe78Ku-MeAtPnmbVr9vlDDc59cD4gczYS3bnyggxLUigT_11OI0vOa6G83GcrO-9pewvK_pEmKA1Cv2oKK61rwx7OxwRrOXz1nQaPyuao3pltsfbU4XiRDthkC3s9l8wZu7EAziUGIBhcGPV4y2A6gEA9HDpIrlrU06DwmbQ44"/>
+<div class="truncate">
+<h3 class="font-label-md text-label-md text-on-surface truncate">Pack Gaseosa Inca Kola 1.5L + Snack Mix</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Pagado con Tarjeta Visa ••••• 4120</p>
+</div>
+</div>
+<!-- Price -->
+<div class="text-right shrink-0">
+<span class="font-body-sm text-body-sm text-on-surface-variant block">Total</span>
+<span class="font-headline-md text-headline-md text-on-surface font-bold">S/ 38.50</span>
+</div>
+</div>
+<!-- Actions -->
+<div class="mt-3.5 flex items-center justify-between gap-2 pt-2 border-t border-surface-container-low">
+<button class="text-on-surface-variant hover:text-primary font-label-md text-label-md flex items-center gap-1 py-1.5 px-2" type="button">
+<span class="material-symbols-outlined text-[16px]">receipt</span>
+            Boleta electrónica
+          </button>
+<button class="py-2 px-4 rounded-xl font-label-md text-label-md font-bold bg-primary-container hover:bg-primary text-on-primary flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">replay</span>
+            Volver a pedir
+          </button>
+</div>
+</article>
+<!-- Order Card 3: HISTORIAL (Anterior) -->
+<article class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm border border-surface-container relative transition-all duration-200 hover:shadow-md">
+<div class="flex items-start justify-between gap-2">
+<div>
+<div class="flex items-center space-x-2">
+<span class="font-label-lg text-label-lg text-on-surface font-bold">Pedido #TB-76412</span>
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">1 artículo</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[16px] text-outline">shopping_bag</span>
+              Para llevar • Tambo Benavides
+            </p>
+</div>
+<span class="inline-flex items-center gap-1 bg-surface-container text-on-surface-variant px-2.5 py-1 rounded-full text-label-sm font-label-sm shrink-0">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+            Entregado • 18 Oct
+          </span>
+</div>
+<div class="mt-3 pt-3 border-t border-surface-container flex items-center justify-between gap-3">
+<div class="flex items-center space-x-3 overflow-hidden">
+<img class="w-12 h-12 rounded-lg object-cover border border-surface-container bg-surface-container shrink-0" data-alt="Pack of artisanal Peruvian empanadas with fresh lime wedges on a clean white takeout bakery box, shot under warm bright appetizing convenience store culinary lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkilKIVGRf6ol7R5tRDbHDhxB9Rbr-fKzfOC_e1vyhDZF4vz5xaDvoIkY5DnbXSeK-FNCApHOGnXvro75n7icyxcM6-88bQeq1UMyZ0pYXoKiT5y0FK4x_uEMSEcTJR6n2EUu53h5BZv6QgA_5dvNMk_MVjpHOlNIq6ZLOYm5CcE1byfirbKp87EQympmloK-M3aa22IXEkPkiuMLafP5LRjCL-Vy7w8tVrTNHUHg"/>
+<div class="truncate">
+<h3 class="font-label-md text-label-md text-on-surface truncate">Empanada de Carne Tradicional x 2</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Retiro express en tienda</p>
+</div>
+</div>
+<div class="text-right shrink-0">
+<span class="font-body-sm text-body-sm text-on-surface-variant block">Total</span>
+<span class="font-headline-md text-headline-md text-on-surface font-bold">S/ 11.80</span>
+</div>
+</div>
+<div class="mt-3.5 flex items-center justify-between gap-2 pt-2 border-t border-surface-container-low">
+<button class="text-on-surface-variant hover:text-primary font-label-md text-label-md flex items-center gap-1 py-1.5 px-2" type="button">
+<span class="material-symbols-outlined text-[16px]">receipt</span>
+            Boleta electrónica
+          </button>
+<button class="py-2 px-4 rounded-xl font-label-md text-label-md font-bold bg-primary-container hover:bg-primary text-on-primary flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">replay</span>
+            Volver a pedir
+          </button>
+</div>
+</article>
+<!-- Customer Help Banner -->
+<div class="bg-primary/5 rounded-xl p-3.5 border border-primary/10 flex items-center justify-between mt-2">
+<div class="flex items-center space-x-3">
+<div class="w-10 h-10 rounded-full bg-primary-fixed text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">help_center</span>
+</div>
+<div>
+<h4 class="font-label-md text-label-md text-on-surface font-bold">¿Tienes dudas con tu pedido?</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Chatea con soporte Tambo al instante</p>
+</div>
+</div>
+<button class="font-label-sm text-label-sm text-primary font-bold hover:underline shrink-0">
+          Ayuda
+        </button>
+</div>
+</div>
+<!-- BottomNavBar Shared Component -->
+<!-- Destination 4: "Órdenes" is active according to the semantic intent and exact match -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter py-space-xs bg-surface-container-lowest dark:bg-inverse-surface border-t border-surface-variant dark:border-outline-variant shadow-lg dark:shadow-none">
+<!-- 1. Inicio -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-space-sm py-space-xs hover:bg-surface-container dark:hover:bg-surface-container-high active:scale-95 transition-all duration-150 rounded-xl" href="#">
+<span class="material-symbols-outlined text-[24px]">storefront</span>
+<span class="text-label-sm font-label-sm mt-0.5">Inicio</span>
+</a>
+<!-- 2. Categorías -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-space-sm py-space-xs hover:bg-surface-container dark:hover:bg-surface-container-high active:scale-95 transition-all duration-150 rounded-xl" href="#">
+<span class="material-symbols-outlined text-[24px]">grid_view</span>
+<span class="text-label-sm font-label-sm mt-0.5">Categorías</span>
+</a>
+<!-- 3. Descuentos -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-space-sm py-space-xs hover:bg-surface-container dark:hover:bg-surface-container-high active:scale-95 transition-all duration-150 rounded-xl relative" href="#">
+<span class="material-symbols-outlined text-[24px]">local_offer</span>
+<span class="text-label-sm font-label-sm mt-0.5">Descuentos</span>
+<span class="absolute top-1 right-2 w-2 h-2 rounded-full bg-secondary-container"></span>
+</a>
+<!-- 4. Órdenes (ACTIVE STATE) -->
+<a class="flex flex-col items-center justify-center bg-primary-fixed dark:bg-primary-container text-primary dark:text-on-primary-container rounded-xl px-space-sm py-space-xs font-bold active:scale-95 transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+<span class="text-label-sm font-label-sm mt-0.5">Órdenes</span>
+</a>
+<!-- 5. Perfil -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-space-sm py-space-xs hover:bg-surface-container dark:hover:bg-surface-container-high active:scale-95 transition-all duration-150 rounded-xl" href="#">
+<span class="material-symbols-outlined text-[24px]">person</span>
+<span class="text-label-sm font-label-sm mt-0.5">Perfil</span>
+</a>
+</nav>
+</main>
+</body></html>

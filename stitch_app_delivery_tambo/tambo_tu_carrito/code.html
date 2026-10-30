@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tambo - Tu Carrito</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "inverse-primary": "#ffabed",
+            "surface-container": "#f0eded",
+            "inverse-surface": "#313030",
+            "on-error": "#ffffff",
+            "on-tertiary-fixed": "#3f0016",
+            "on-error-container": "#93000a",
+            "on-tertiary": "#ffffff",
+            "outline": "#83727d",
+            "on-secondary-fixed": "#271900",
+            "surface-dim": "#dcd9d9",
+            "on-tertiary-fixed-variant": "#90003b",
+            "on-secondary-fixed-variant": "#5e4200",
+            "on-secondary-container": "#6f4e00",
+            "on-primary-fixed": "#390035",
+            "secondary-fixed-dim": "#fbbc39",
+            "surface-variant": "#e5e2e1",
+            "on-primary": "#ffffff",
+            "surface": "#fcf9f8",
+            "surface-tint": "#943b89",
+            "surface-container-lowest": "#ffffff",
+            "on-background": "#1c1b1b",
+            "secondary": "#7c5800",
+            "tertiary-fixed": "#ffd9de",
+            "on-surface-variant": "#51434d",
+            "surface-container-high": "#eae7e7",
+            "on-primary-container": "#e884d7",
+            "secondary-fixed": "#ffdea8",
+            "tertiary": "#54001f",
+            "outline-variant": "#d5c1cd",
+            "surface-container-highest": "#e5e2e1",
+            "background": "#fcf9f8",
+            "on-secondary": "#ffffff",
+            "secondary-container": "#ffbe3b",
+            "error-container": "#ffdad6",
+            "tertiary-container": "#7c0032",
+            "surface-bright": "#fcf9f8",
+            "on-primary-fixed-variant": "#78216f",
+            "error": "#ba1a1a",
+            "primary-fixed": "#ffd7f3",
+            "primary-fixed-dim": "#ffabed",
+            "surface-container-low": "#f6f3f2",
+            "tertiary-fixed-dim": "#ffb2bf",
+            "inverse-on-surface": "#f3f0ef",
+            "on-tertiary-container": "#ff7d9b",
+            "on-surface": "#1c1b1b",
+            "primary": "#4c0047",
+            "primary-container": "#6b1464"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter": "0.75rem",
+            "margin": "1rem",
+            "space-lg": "1.25rem",
+            "space-md": "1rem",
+            "space-xl": "1.5rem",
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem"
+          },
+          "fontFamily": {
+            "label-sm": ["Inter"],
+            "price-headline": ["Inter"],
+            "headline-md": ["Inter"],
+            "price-strikethrough": ["Inter"],
+            "body-sm": ["Inter"],
+            "label-lg": ["Inter"],
+            "headline-xl": ["Inter"],
+            "label-md": ["Inter"],
+            "headline-lg": ["Inter"],
+            "body-md": ["Inter"],
+            "body-lg": ["Inter"]
+          },
+          "fontSize": {
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "700" }],
+            "price-headline": ["20px", { "lineHeight": "24px", "fontWeight": "800" }],
+            "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "700" }],
+            "price-strikethrough": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+            "label-lg": ["15px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "headline-xl": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+            "label-md": ["13px", { "lineHeight": "18px", "fontWeight": "600" }],
+            "headline-lg": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "body-lg": ["16px", { "lineHeight": "22px", "fontWeight": "500" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    /* Ambient shadow levels from Brand Guidelines */
+    .shadow-level-1 {
+      box-shadow: 0 2px 8px rgba(107, 20, 100, 0.04), 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    .shadow-sheet {
+      box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.12);
+    }
+    .shadow-docked-footer {
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-[#120011] min-h-screen flex justify-center items-center p-0 md:p-6 text-on-surface antialiased">
+<!-- Mobile Screen Container -->
+<div class="relative w-full max-w-[420px] bg-background min-h-screen md:min-h-[880px] md:h-[900px] overflow-hidden md:rounded-[32px] md:shadow-2xl flex flex-col">
+<!-- Atmospheric Dimmed App Background (Mimicking Tambo Storefront Underneath Bottom Sheet) -->
+<div class="absolute inset-0 bg-[#280026] opacity-95 pointer-events-none z-0">
+<!-- Background Store Header Preview -->
+<div class="p-margin flex items-center justify-between opacity-40">
+<div class="flex items-center gap-space-xs text-on-primary">
+<span class="material-symbols-outlined" data-icon="storefront">storefront</span>
+<span class="font-label-md text-label-md">Retiro en Juan de Aliaga</span>
+</div>
+<div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-sm" data-icon="shopping_bag">shopping_bag</span>
+</div>
+</div>
+<!-- Promo banner preview -->
+<div class="mx-margin mt-2 h-36 bg-gradient-to-r from-primary-container to-primary rounded-xl opacity-30 p-4 border border-white/10"></div>
+</div>
+<!-- Scrim Overlay for Task-Focused Cart Journey -->
+<div class="absolute inset-0 bg-inverse-surface/60 backdrop-blur-[2px] z-10 transition-opacity"></div>
+<!-- Bottom Sheet Cart Canvas -->
+<div class="relative z-20 mt-10 flex-1 bg-background rounded-t-[28px] shadow-sheet flex flex-col overflow-hidden animate-slide-up">
+<!-- Drag Handle Bar Indicator -->
+<div class="w-full flex justify-center pt-3 pb-1">
+<div class="w-10 h-1 bg-[#D0D5DD] rounded-full"></div>
+</div>
+<!-- Cart Header & Dismiss Action -->
+<div class="px-margin pt-2 pb-3 flex items-center justify-between border-b border-surface-variant/40">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-base" data-icon="shopping_cart" data-weight="fill" style="font-variation-settings: 'FILL' 1;">shopping_cart</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">Tu Carrito <span class="text-on-surface-variant font-label-md text-label-md font-normal">(2 ítems)</span></h1>
+</div>
+<button aria-label="Cerrar carrito" class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:bg-surface-variant active:scale-95 transition-transform duration-150" type="button">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+<!-- Scrollable Cart Content Canvas -->
+<div class="flex-1 overflow-y-auto px-margin py-space-sm space-y-space-md pb-32">
+<!-- Fulfillment Mode & Store Selector Block -->
+<div class="bg-surface-container-lowest p-space-sm rounded-xl border border-surface-variant shadow-level-1">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Punto de Entrega</span>
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-primary-container font-semibold">
+<span class="material-symbols-outlined text-sm" data-icon="schedule">schedule</span> 15-25 min
+            </span>
+</div>
+<!-- Dropdown Trigger / Location Card -->
+<div class="flex items-center justify-between p-space-sm bg-surface-container-low rounded-lg border border-outline-variant hover:border-primary cursor-pointer active:scale-[0.99] transition-all">
+<div class="flex items-start gap-2.5 overflow-hidden">
+<div class="mt-0.5 text-primary">
+<span class="material-symbols-outlined" data-icon="location_on" data-weight="fill" style="font-variation-settings: 'FILL' 1;">location_on</span>
+</div>
+<div class="truncate">
+<p class="font-label-md text-label-md text-on-surface font-bold truncate">Tambo Juan de Aliaga - Magdalena</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Av. Juan de Aliaga 400, Magdalena del Mar</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant flex-shrink-0 ml-1" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<!-- Cart Items List Section -->
+<div class="space-y-3">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-bold">PRODUCTOS EN TU BOLSA</span>
+<span class="font-label-sm text-label-sm text-primary-container font-semibold">Precios en S/</span>
+</div>
+<!-- Item 1: Pack 2 Rtd Four Loko Gold -->
+<div class="bg-surface-container-lowest p-space-sm rounded-xl border border-surface-variant shadow-level-1 flex flex-col gap-2">
+<div class="flex gap-3">
+<!-- Thumbnail -->
+<div class="w-[72px] h-[72px] rounded-lg bg-surface-container-low p-1.5 flex-shrink-0 flex items-center justify-center border border-surface-variant/50">
+<img class="w-full h-full object-contain" data-alt="Two gold metallic cans of Four Loko malt beverage positioned close together on a clean neutral studio background with crisp warm highlights and bold convenience store commercial lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLiWNFiXsO78jPnSxISwacnMwc4cIt_FNF1bk2d8FaP5YX1uo8Veu-7RbIsLysBnFPSXHltsIV8oFn7TAtZSls_-4_JpiuzENGdXH5FMmR3i4Nxr51e75CgeCqnOdlixhaftybJMxw0gKbgBcpTJvup9Tn4GF-9468s21vhv7Cq4zm9JFqKalnM7djer8cMgBfhiavVjNKY2oefy8XdpXGxSzOthkpUS2F9lycCm8"/>
+</div>
+<!-- Details & Pricing -->
+<div class="flex-1 flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-body-md text-body-md font-bold text-on-surface leading-snug">Pack (2 Rtd Four Loko Gold x 473 Ml)</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Lata 473ml - Bebida alcohólica</p>
+</div>
+</div>
+<div class="flex items-baseline justify-between mt-1">
+<div class="flex items-baseline gap-2">
+<span class="font-price-headline text-price-headline text-primary font-extrabold">S/ 14.90</span>
+<span class="font-price-strikethrough text-price-strikethrough text-outline line-through">S/ 21.98</span>
+</div>
+<span class="px-1.5 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm font-bold">-32%</span>
+</div>
+</div>
+</div>
+<!-- Item Controls: Stepper, Delete, Edit -->
+<div class="pt-2 border-t border-surface-container flex items-center justify-between">
+<!-- Stepper -->
+<div class="flex items-center bg-surface-container-low rounded-lg border border-outline-variant px-1 py-0.5">
+<button aria-label="Eliminar un ítem" class="w-7 h-7 flex items-center justify-center text-error hover:bg-error-container/40 rounded transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="delete">delete</span>
+</button>
+<span class="w-8 text-center font-label-md text-label-md font-bold text-on-surface">1</span>
+<button aria-label="Agregar un ítem" class="w-7 h-7 flex items-center justify-center text-primary hover:bg-primary-fixed rounded transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+</button>
+</div>
+<!-- Secondary Actions -->
+<div class="flex items-center gap-2">
+<button class="px-3 py-1 rounded-lg text-primary font-label-sm text-label-sm font-bold bg-primary-fixed/50 hover:bg-primary-fixed transition-colors" type="button">
+                  Editar
+                </button>
+</div>
+</div>
+</div>
+<!-- Item 2: Papas Lays Clásicas -->
+<div class="bg-surface-container-lowest p-space-sm rounded-xl border border-surface-variant shadow-level-1 flex flex-col gap-2">
+<div class="flex gap-3">
+<!-- Thumbnail -->
+<div class="w-[72px] h-[72px] rounded-lg bg-surface-container-low p-1.5 flex-shrink-0 flex items-center justify-center border border-surface-variant/50">
+<img class="w-full h-full object-contain" data-alt="A vivid yellow commercial bag of Lays classic potato chips 160g placed neatly against a soft off-white background with professional studio food lighting and vibrant packaging clarity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3ETTK30TEnhFN-y4w6LhdP5GTbrZoi9OSQwULMz5FE9MgDdok-F5uMK5khNU691i32Ajd477025b5EM1voOcljIq8-fADdx3EbmmJSHiT_gX7aXjW-4B3HvRQlz33iX1mSBkfhdliM88LHMv6xUt-0l19bNZ5IjsawxLvh9HOeTR5JDY2XpVuWzWrGcfc0CuY_dZfjikctoaMqKp8FEqVqe1oRalsGjhh_fipHOw"/>
+</div>
+<!-- Details & Pricing -->
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<h3 class="font-body-md text-body-md font-bold text-on-surface leading-snug">Papas Lays Clásicas 160g</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Snack crocante x 160g</p>
+</div>
+<div class="flex items-baseline justify-between mt-1">
+<div class="flex items-baseline gap-2">
+<span class="font-price-headline text-price-headline text-primary font-extrabold">S/ 6.50</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Precio regular</span>
+</div>
+</div>
+</div>
+<!-- Item Controls -->
+<div class="pt-2 border-t border-surface-container flex items-center justify-between">
+<!-- Stepper -->
+<div class="flex items-center bg-surface-container-low rounded-lg border border-outline-variant px-1 py-0.5">
+<button aria-label="Restar ítem" class="w-7 h-7 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant rounded transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="remove">remove</span>
+</button>
+<span class="w-8 text-center font-label-md text-label-md font-bold text-on-surface">1</span>
+<button aria-label="Sumar ítem" class="w-7 h-7 flex items-center justify-center text-primary hover:bg-primary-fixed rounded transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+</button>
+</div>
+<!-- Secondary Action -->
+<button class="text-error/80 hover:text-error flex items-center gap-1 font-label-sm text-label-sm" type="button">
+<span class="material-symbols-outlined text-sm" data-icon="delete_outline">delete_outline</span> Quitar
+              </button>
+</div>
+</div>
+</div>
+<!-- Promo Code Input Field -->
+<div class="bg-surface-container-lowest p-space-sm rounded-xl border border-surface-variant shadow-level-1">
+<label class="block font-label-sm text-label-sm font-bold text-on-surface mb-1.5 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-primary-container" data-icon="local_offer">local_offer</span>
+            ¿Tienes un cupón de descuento?
+          </label>
+<div class="flex gap-2">
+<div class="relative flex-1">
+<input class="w-full h-11 px-3 pl-9 rounded-lg bg-surface-container-low border border-outline-variant text-on-surface placeholder:text-outline font-body-sm text-body-sm focus:outline-none focus:border-primary-container focus:ring-1 focus:ring-primary-container" placeholder="Ingresa código (ej. TAMBOAPP)" type="text"/>
+<span class="material-symbols-outlined absolute left-2.5 top-3 text-outline text-lg" data-icon="loyalty">loyalty</span>
+</div>
+<button class="h-11 px-4 rounded-lg bg-primary-container text-on-primary font-label-md text-label-md font-bold hover:bg-primary active:scale-95 transition-all duration-150 flex items-center justify-center shadow-sm" type="button">
+              Aplicar
+            </button>
+</div>
+<p class="font-body-sm text-body-sm text-primary-container font-medium mt-1.5 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="check_circle">check_circle</span>
+            Cupón verificado: ¡Ahorras S/ 7.08 en esta compra!
+          </p>
+</div>
+<!-- Breakdown & Financial Summary Card -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl border border-surface-variant shadow-level-1 space-y-2.5">
+<h4 class="font-label-md text-label-md font-bold text-on-surface border-b border-surface-container pb-1.5">Resumen de tu pedido</h4>
+<div class="flex justify-between items-center font-body-md text-body-md text-on-surface">
+<span>Total Productos</span>
+<span class="font-semibold">S/ 28.48</span>
+</div>
+<div class="flex justify-between items-center font-body-md text-body-md text-tertiary-container">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-base" data-icon="savings">savings</span> Descuentos
+            </span>
+<span class="font-bold">- S/ 7.08</span>
+</div>
+<div class="flex justify-between items-center font-body-md text-body-md text-on-surface">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-base text-outline" data-icon="delivery_dining">delivery_dining</span> Costo de envío (Delivery)
+            </span>
+<span class="font-semibold text-on-surface">S/ 4.50</span>
+</div>
+<div class="pt-2 border-t-2 border-dashed border-surface-variant flex justify-between items-baseline">
+<div>
+<p class="font-headline-md text-headline-md font-extrabold text-on-surface">Total a pagar</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Incluye I.G.V. y boleta electrónica</p>
+</div>
+<div class="text-right">
+<span class="font-headline-xl text-headline-xl text-primary font-black">S/ 25.90</span>
+</div>
+</div>
+</div>
+<!-- Satisfaction Guarantee Badge -->
+<div class="flex items-center justify-center gap-2 py-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-base text-primary-container" data-icon="verified_user">verified_user</span>
+<span class="font-label-sm text-label-sm font-semibold">Compra 100% segura con Tambo Express</span>
+</div>
+</div>
+<!-- Sticky Tactical Checkout Actions Container (Docked Footer) -->
+<div class="absolute bottom-0 left-0 w-full bg-surface-container-lowest border-t border-surface-variant/80 p-margin pt-3 shadow-docked-footer z-30">
+<!-- Primary Conversion CTA: Warm Golden Yellow (#e5a824 / secondary-container) -->
+<button class="w-full h-12 bg-secondary-container hover:bg-secondary-fixed-dim text-[#1a1a1a] rounded-xl font-label-lg text-label-lg font-bold flex items-center justify-between px-5 shadow-md active:scale-[0.98] transition-all duration-150" type="button">
+<span class="flex items-center gap-2">
+<span>Continuar con la compra</span>
+<span class="material-symbols-outlined text-xl" data-icon="arrow_forward">arrow_forward</span>
+</span>
+<span class="bg-[#1a1a1a]/10 px-2.5 py-1 rounded-md text-sm font-black">S/ 25.90</span>
+</button>
+<!-- Secondary Ghost Action: Keep Shopping -->
+<button class="w-full mt-2 py-2 text-center text-primary-container hover:text-primary font-label-md text-label-md font-bold tracking-wide active:scale-95 transition-all duration-150 flex items-center justify-center gap-1" type="button">
+<span class="material-symbols-outlined text-sm" data-icon="shopping_basket">shopping_basket</span> Seguir comprando
+        </button>
+</div>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Mi Perfil - Tambo</title>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "inverse-primary": "#ffabed",
+            "surface-container": "#f0eded",
+            "inverse-surface": "#313030",
+            "on-error": "#ffffff",
+            "on-tertiary-fixed": "#3f0016",
+            "on-error-container": "#93000a",
+            "on-tertiary": "#ffffff",
+            "outline": "#83727d",
+            "on-secondary-fixed": "#271900",
+            "surface-dim": "#dcd9d9",
+            "on-tertiary-fixed-variant": "#90003b",
+            "on-secondary-fixed-variant": "#5e4200",
+            "on-secondary-container": "#6f4e00",
+            "on-primary-fixed": "#390035",
+            "secondary-fixed-dim": "#fbbc39",
+            "surface-variant": "#e5e2e1",
+            "on-primary": "#ffffff",
+            "surface": "#fcf9f8",
+            "surface-tint": "#943b89",
+            "surface-container-lowest": "#ffffff",
+            "on-background": "#1c1b1b",
+            "secondary": "#7c5800",
+            "tertiary-fixed": "#ffd9de",
+            "on-surface-variant": "#51434d",
+            "surface-container-high": "#eae7e7",
+            "on-primary-container": "#e884d7",
+            "secondary-fixed": "#ffdea8",
+            "tertiary": "#54001f",
+            "outline-variant": "#d5c1cd",
+            "surface-container-highest": "#e5e2e1",
+            "background": "#fcf9f8",
+            "on-secondary": "#ffffff",
+            "secondary-container": "#ffbe3b",
+            "error-container": "#ffdad6",
+            "tertiary-container": "#7c0032",
+            "surface-bright": "#fcf9f8",
+            "on-primary-fixed-variant": "#78216f",
+            "error": "#ba1a1a",
+            "primary-fixed": "#ffd7f3",
+            "primary-fixed-dim": "#ffabed",
+            "surface-container-low": "#f6f3f2",
+            "tertiary-fixed-dim": "#ffb2bf",
+            "inverse-on-surface": "#f3f0ef",
+            "on-tertiary-container": "#ff7d9b",
+            "on-surface": "#1c1b1b",
+            "primary": "#4c0047",
+            "primary-container": "#6b1464"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter": "0.75rem",
+            "margin": "1rem",
+            "space-lg": "1.25rem",
+            "space-md": "1rem",
+            "space-xl": "1.5rem",
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem"
+          },
+          "fontFamily": {
+            "label-sm": ["Inter"],
+            "price-headline": ["Inter"],
+            "headline-md": ["Inter"],
+            "price-strikethrough": ["Inter"],
+            "body-sm": ["Inter"],
+            "label-lg": ["Inter"],
+            "headline-xl": ["Inter"],
+            "label-md": ["Inter"],
+            "headline-lg": ["Inter"],
+            "body-md": ["Inter"],
+            "body-lg": ["Inter"]
+          },
+          "fontSize": {
+            "label-sm": [
+              "11px",
+              {
+                "lineHeight": "14px",
+                "letterSpacing": "0.02em",
+                "fontWeight": "700"
+              }
+            ],
+            "price-headline": [
+              "20px",
+              {
+                "lineHeight": "24px",
+                "fontWeight": "800"
+              }
+            ],
+            "headline-md": [
+              "18px",
+              {
+                "lineHeight": "24px",
+                "fontWeight": "700"
+              }
+            ],
+            "price-strikethrough": [
+              "13px",
+              {
+                "lineHeight": "18px",
+                "fontWeight": "400"
+              }
+            ],
+            "body-sm": [
+              "12px",
+              {
+                "lineHeight": "16px",
+                "fontWeight": "400"
+              }
+            ],
+            "label-lg": [
+              "15px",
+              {
+                "lineHeight": "20px",
+                "fontWeight": "600"
+              }
+            ],
+            "headline-xl": [
+              "28px",
+              {
+                "lineHeight": "34px",
+                "letterSpacing": "-0.02em",
+                "fontWeight": "800"
+              }
+            ],
+            "label-md": [
+              "13px",
+              {
+                "lineHeight": "18px",
+                "fontWeight": "600"
+              }
+            ],
+            "headline-lg": [
+              "22px",
+              {
+                "lineHeight": "28px",
+                "letterSpacing": "-0.01em",
+                "fontWeight": "700"
+              }
+            ],
+            "body-md": [
+              "14px",
+              {
+                "lineHeight": "20px",
+                "fontWeight": "400"
+              }
+            ],
+            "body-lg": [
+              "16px",
+              {
+                "lineHeight": "22px",
+                "fontWeight": "500"
+              }
+            ]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-outlined.fill-icon {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    body {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface antialiased font-body-md flex justify-center min-h-screen">
+<!-- Mobile Container Mockup Shell -->
+<div class="w-full max-w-md bg-surface flex flex-col min-h-screen relative shadow-2xl pb-28">
+<!-- Top App Bar (Header Anchor) -->
+<header class="sticky top-0 z-40 bg-primary-container text-on-primary px-margin py-3.5 flex justify-between items-center shadow-sm">
+<div class="flex items-center gap-space-sm">
+<h1 class="font-headline-lg text-headline-lg tracking-tight text-on-primary">Mi Perfil</h1>
+</div>
+<div class="flex items-center gap-space-sm">
+<button aria-label="Notificaciones" class="relative p-2 rounded-full hover:bg-white/10 active:scale-95 transition-transform duration-150 flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-[24px]">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-secondary-container rounded-full ring-2 ring-primary-container"></span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 px-margin pt-space-md space-y-space-md">
+<!-- User Profile Header Card -->
+<section class="bg-surface-container-lowest rounded-xl p-space-md border border-surface-variant/40 shadow-sm relative overflow-hidden">
+<!-- Ambient decorative glow -->
+<div class="absolute -right-10 -top-10 w-32 h-32 bg-primary-fixed/20 rounded-full blur-2xl pointer-events-none"></div>
+<div class="flex items-start gap-space-md relative z-10">
+<!-- Avatar with Edit Badge -->
+<div class="relative shrink-0">
+<div class="w-16 h-16 rounded-full overflow-hidden ring-2 ring-primary-fixed p-0.5 bg-surface-container-lowest">
+<img alt="Avatar de Rodrigo Vega" class="w-full h-full object-cover rounded-full" data-alt="Modern close-up portrait of a young Peruvian professional named Rodrigo with a warm, confident smile in modern ambient light. The setting is clean and minimalist with soft purple backlighting accents matching contemporary mobile e-commerce aesthetics." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhxjP4FmhkOdX5YsG9F0oP4sUewFQPx4Uek_a6GDQAcSz1MLBEZFTMooTvTRhLOaFwFi4MQcRE9jmZwnhrpJOh_BRwbe3gbd0t0AonY-eGrTncblooyVdAHcuuCrmCOKauug1lPkhpOI0p7PeyPMOOis97p9Df1tNZlIlZtLkhtbQcOt9tW-_xbt-J0mJS25GZMMP4NoALcOTxHvR_vPgcDfXyEICDn_Rn6Zv6w0Y"/>
+</div>
+<button class="absolute -bottom-1 -right-1 bg-primary text-on-primary rounded-full p-1 shadow-md hover:bg-primary-container active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[14px]">edit</span>
+</button>
+</div>
+<!-- User Details -->
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-md text-headline-md text-on-surface truncate">Hola, Rodrigo Vega</h2>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate mt-0.5 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-outline">mail</span>
+              rodrigo.vega@email.com
+            </p>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate mt-0.5 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-outline">call</span>
+              +51 987 654 321
+            </p>
+<!-- Loyalty Program Badge -->
+<div class="mt-2.5 inline-flex items-center gap-1.5 bg-secondary-container/25 border border-secondary-container/40 rounded-full px-2.5 py-1">
+<span class="material-symbols-outlined text-[16px] text-on-secondary-container fill-icon">stars</span>
+<span class="font-label-sm text-label-sm text-on-secondary-container font-bold">
+                Tambo Lover • 450 Puntos
+              </span>
+</div>
+</div>
+</div>
+</section>
+<!-- Loyalty Promotional Rewards Banner -->
+<section class="bg-gradient-to-r from-primary-container to-primary rounded-xl p-space-md text-on-primary shadow-sm relative overflow-hidden flex items-center justify-between">
+<div class="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white/5 to-transparent pointer-events-none"></div>
+<div class="flex items-center gap-space-sm pr-2 z-10">
+<div class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[22px] fill-icon">card_giftcard</span>
+</div>
+<div>
+<p class="font-label-lg text-label-lg text-secondary-fixed leading-tight">Gana puntos en cada compra</p>
+<p class="font-body-sm text-body-sm text-on-primary/90 mt-0.5">Canjea chelitas y snacks gratis en tu Tambo más cercano.</p>
+</div>
+</div>
+<button class="bg-secondary-container hover:bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm px-3 py-2 rounded-lg font-bold shrink-0 active:scale-95 transition-all shadow-sm">
+          Ver Club
+        </button>
+</section>
+<!-- Account Settings Options Bento-List -->
+<section class="space-y-space-sm">
+<h3 class="font-label-lg text-label-lg text-on-surface-variant px-1 font-bold">Mi Cuenta y Pedidos</h3>
+<div class="bg-surface-container-lowest rounded-xl border border-surface-variant/40 divide-y divide-surface-variant/30 shadow-sm overflow-hidden">
+<!-- Option: Direcciones -->
+<a class="flex items-center justify-between p-3.5 hover:bg-surface-container-low active:bg-surface-container transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-primary-fixed/40 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">location_on</span>
+</div>
+<div>
+<p class="font-label-lg text-label-lg text-on-surface group-hover:text-primary transition-colors">Mis Direcciones guardadas</p>
+<p class="font-body-sm text-body-sm text-outline">Casa, Oficina - Magdalena, Miraflores</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px] group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</a>
+<!-- Option: Metodos de Pago -->
+<a class="flex items-center justify-between p-3.5 hover:bg-surface-container-low active:bg-surface-container transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-secondary-fixed/40 text-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+</div>
+<div>
+<p class="font-label-lg text-label-lg text-on-surface group-hover:text-primary transition-colors">Métodos de pago</p>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="bg-purple-100 text-purple-900 font-label-sm text-[10px] px-1.5 py-0.2 rounded font-bold">Yape</span>
+<p class="font-body-sm text-body-sm text-outline">• Visa 4092</p>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px] group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</a>
+<!-- Option: Cupones y Descuentos -->
+<a class="flex items-center justify-between p-3.5 hover:bg-surface-container-low active:bg-surface-container transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-tertiary-fixed text-tertiary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px] fill-icon">local_offer</span>
+</div>
+<div>
+<p class="font-label-lg text-label-lg text-on-surface group-hover:text-primary transition-colors">Mis Cupones y Descuentos</p>
+<p class="font-body-sm text-body-sm text-tertiary-container font-semibold">2 cupones disponibles por canjear</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px] group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</a>
+<!-- Option: Favoritos -->
+<a class="flex items-center justify-between p-3.5 hover:bg-surface-container-low active:bg-surface-container transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-primary-fixed/40 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">favorite</span>
+</div>
+<div>
+<p class="font-label-lg text-label-lg text-on-surface group-hover:text-primary transition-colors">Mis Favoritos</p>
+<p class="font-body-sm text-body-sm text-outline">Tus productos guardados de siempre</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px] group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</a>
+</div>
+</section>
+<!-- App Settings and Help Section -->
+<section class="space-y-space-sm">
+<h3 class="font-label-lg text-label-lg text-on-surface-variant px-1 font-bold">Ajustes y Soporte</h3>
+<div class="bg-surface-container-lowest rounded-xl border border-surface-variant/40 divide-y divide-surface-variant/30 shadow-sm overflow-hidden">
+<!-- Option: Notificaciones -->
+<a class="flex items-center justify-between p-3.5 hover:bg-surface-container-low active:bg-surface-container transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-surface-container text-on-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">tune</span>
+</div>
+<p class="font-label-lg text-label-lg text-on-surface group-hover:text-primary transition-colors">Notificaciones y preferencias</p>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px] group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</a>
+<!-- Option: Ayuda -->
+<a class="flex items-center justify-between p-3.5 hover:bg-surface-container-low active:bg-surface-container transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-surface-container text-on-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">support_agent</span>
+</div>
+<div>
+<p class="font-label-lg text-label-lg text-on-surface group-hover:text-primary transition-colors">Centro de Ayuda y Preguntas frecuentes</p>
+<p class="font-body-sm text-body-sm text-outline">Atención al cliente 24/7</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px] group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</a>
+<!-- Option: Legal -->
+<a class="flex items-center justify-between p-3.5 hover:bg-surface-container-low active:bg-surface-container transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-surface-container text-on-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">policy</span>
+</div>
+<p class="font-label-lg text-label-lg text-on-surface group-hover:text-primary transition-colors">Términos y condiciones / Libro de reclamaciones</p>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px] group-hover:translate-x-0.5 transition-transform">chevron_right</span>
+</a>
+</div>
+</section>
+<!-- Logout Button Area -->
+<section class="pt-2">
+<button class="w-full bg-error-container/40 hover:bg-error-container/70 active:scale-[0.98] transition-all text-error font-label-lg text-label-lg py-3 px-4 rounded-xl flex items-center justify-center gap-2 border border-error/20">
+<span class="material-symbols-outlined text-[20px] text-error">logout</span>
+          Cerrar sesión
+        </button>
+<p class="text-center font-body-sm text-[11px] text-outline mt-3">Versión 4.12.0 • Tambo+ Perú</p>
+</section>
+</main>
+<!-- BottomNavBar (Shared Component from JSON) -->
+<!-- Rule execution: style_bg_color, style_active_navigation for 'Perfil', style_inactive_navigation for others -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter py-space-xs bg-surface-container-lowest shadow-lg max-w-md mx-auto right-0 border-t border-surface-variant/40">
+<!-- Tab 1: Inicio (Inactive) -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-space-sm py-space-xs active:scale-95 transition-all duration-150">
+<span class="material-symbols-outlined text-[22px]">storefront</span>
+<span class="font-label-sm text-label-sm mt-0.5">Inicio</span>
+</button>
+<!-- Tab 2: Categorías (Inactive) -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-space-sm py-space-xs active:scale-95 transition-all duration-150">
+<span class="material-symbols-outlined text-[22px]">grid_view</span>
+<span class="font-label-sm text-label-sm mt-0.5">Categorías</span>
+</button>
+<!-- Tab 3: Descuentos (Inactive) -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-space-sm py-space-xs active:scale-95 transition-all duration-150 relative">
+<span class="material-symbols-outlined text-[22px]">local_offer</span>
+<span class="font-label-sm text-label-sm mt-0.5">Descuentos</span>
+<span class="absolute top-1 right-3 w-2 h-2 bg-secondary rounded-full"></span>
+</button>
+<!-- Tab 4: Órdenes (Inactive) -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-space-sm py-space-xs active:scale-95 transition-all duration-150">
+<span class="material-symbols-outlined text-[22px]">receipt_long</span>
+<span class="font-label-sm text-label-sm mt-0.5">Órdenes</span>
+</button>
+<!-- Tab 5: Perfil (ACTIVE - Exact Match Priority with style_active_navigation) -->
+<button class="flex flex-col items-center justify-center bg-primary-fixed text-primary rounded-xl px-space-sm py-space-xs font-bold active:scale-95 transition-all duration-150">
+<span class="material-symbols-outlined text-[22px] fill-icon">person</span>
+<span class="font-label-sm text-label-sm mt-0.5">Perfil</span>
+</button>
+</nav>
+</div>
+</body></html>

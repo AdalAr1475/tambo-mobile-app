@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-surface" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Pedido Confirmado - Tambo+</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Inter Google Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "inverse-primary": "#ffabed",
+            "surface-container": "#f0eded",
+            "inverse-surface": "#313030",
+            "on-error": "#ffffff",
+            "on-tertiary-fixed": "#3f0016",
+            "on-error-container": "#93000a",
+            "on-tertiary": "#ffffff",
+            "outline": "#83727d",
+            "on-secondary-fixed": "#271900",
+            "surface-dim": "#dcd9d9",
+            "on-tertiary-fixed-variant": "#90003b",
+            "on-secondary-fixed-variant": "#5e4200",
+            "on-secondary-container": "#6f4e00",
+            "on-primary-fixed": "#390035",
+            "secondary-fixed-dim": "#fbbc39",
+            "surface-variant": "#e5e2e1",
+            "on-primary": "#ffffff",
+            "surface": "#fcf9f8",
+            "surface-tint": "#943b89",
+            "surface-container-lowest": "#ffffff",
+            "on-background": "#1c1b1b",
+            "secondary": "#7c5800",
+            "tertiary-fixed": "#ffd9de",
+            "on-surface-variant": "#51434d",
+            "surface-container-high": "#eae7e7",
+            "on-primary-container": "#e884d7",
+            "secondary-fixed": "#ffdea8",
+            "tertiary": "#54001f",
+            "outline-variant": "#d5c1cd",
+            "surface-container-highest": "#e5e2e1",
+            "background": "#fcf9f8",
+            "on-secondary": "#ffffff",
+            "secondary-container": "#ffbe3b",
+            "error-container": "#ffdad6",
+            "tertiary-container": "#7c0032",
+            "surface-bright": "#fcf9f8",
+            "on-primary-fixed-variant": "#78216f",
+            "error": "#ba1a1a",
+            "primary-fixed": "#ffd7f3",
+            "primary-fixed-dim": "#ffabed",
+            "surface-container-low": "#f6f3f2",
+            "tertiary-fixed-dim": "#ffb2bf",
+            "inverse-on-surface": "#f3f0ef",
+            "on-tertiary-container": "#ff7d9b",
+            "on-surface": "#1c1b1b",
+            "primary": "#4c0047",
+            "primary-container": "#6b1464"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter": "0.75rem",
+            "margin": "1rem",
+            "space-lg": "1.25rem",
+            "space-md": "1rem",
+            "space-xl": "1.5rem",
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem"
+          },
+          "fontFamily": {
+            "label-sm": ["Inter"],
+            "price-headline": ["Inter"],
+            "headline-md": ["Inter"],
+            "price-strikethrough": ["Inter"],
+            "body-sm": ["Inter"],
+            "label-lg": ["Inter"],
+            "headline-xl": ["Inter"],
+            "label-md": ["Inter"],
+            "headline-lg": ["Inter"],
+            "body-md": ["Inter"],
+            "body-lg": ["Inter"]
+          },
+          "fontSize": {
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "700" }],
+            "price-headline": ["20px", { "lineHeight": "24px", "fontWeight": "800" }],
+            "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "700" }],
+            "price-strikethrough": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+            "label-lg": ["15px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "headline-xl": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+            "label-md": ["13px", { "lineHeight": "18px", "fontWeight": "600" }],
+            "headline-lg": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "body-lg": ["16px", { "lineHeight": "22px", "fontWeight": "500" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-fill {
+      font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24;
+    }
+    /* Confetti Particle Float */
+    @keyframes floatParticle {
+      0% { transform: translateY(0px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-45px) rotate(180deg); opacity: 0; }
+    }
+    .confetti-particle {
+      animation: floatParticle 2.4s ease-out infinite;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface antialiased font-body-md min-h-screen flex justify-center selection:bg-primary-fixed selection:text-primary">
+<!-- Mobile Container Emulation -->
+<main class="w-full max-w-md bg-background min-h-screen flex flex-col relative pb-margin shadow-2xl">
+<!-- Top App Bar Navigation / Minimal Header -->
+<header class="w-full bg-primary-container text-on-primary px-margin py-space-md flex items-center justify-between shadow-sm">
+<div class="flex items-center space-x-space-sm">
+<span class="font-headline-md text-headline-md font-bold tracking-tight text-white flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary-container inline-block"></span>
+          Tambo+
+        </span>
+</div>
+<button aria-label="Cerrar confirmación" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 transition-transform flex items-center justify-center text-white" onclick="window.location.reload()">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</header>
+<!-- Main Content Area -->
+<div class="flex-1 px-margin pt-space-lg flex flex-col items-center">
+<!-- Celebratory Success Indicator -->
+<div class="relative flex items-center justify-center mb-space-md mt-space-xs">
+<!-- Subtle Confetti Elements -->
+<span class="confetti-particle absolute -top-3 -left-5 text-secondary-container font-extrabold text-sm" style="animation-delay: 0.2s;">✦</span>
+<span class="confetti-particle absolute -top-4 right-1 text-primary-container font-extrabold text-xs" style="animation-delay: 0.5s;">▲</span>
+<span class="confetti-particle absolute top-3 -right-6 text-secondary font-bold text-xs" style="animation-delay: 0.8s;">●</span>
+<span class="confetti-particle absolute bottom-2 -left-6 text-on-primary-container font-bold text-sm" style="animation-delay: 0.3s;">★</span>
+<!-- Concentric Radial Glows -->
+<div class="w-24 h-24 rounded-full bg-primary-fixed/60 flex items-center justify-center p-1.5 animate-pulse">
+<div class="w-20 h-20 rounded-full bg-primary-container flex items-center justify-center shadow-lg shadow-primary-container/30">
+<span class="material-symbols-outlined material-symbols-fill text-white text-[44px]">
+              check_circle
+            </span>
+</div>
+</div>
+</div>
+<!-- Main Status Headlines -->
+<div class="text-center mb-space-lg max-w-xs">
+<span class="inline-flex items-center gap-1 bg-primary-fixed text-primary px-space-sm py-0.5 rounded-full font-label-sm text-label-sm mb-space-xs font-bold uppercase tracking-wider">
+<span class="material-symbols-outlined text-[13px] material-symbols-fill">verified</span>
+          Confirmado
+        </span>
+<h1 class="font-headline-xl text-headline-xl text-primary font-extrabold leading-tight">
+          ¡Tu pedido está confirmado!
+        </h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-space-xs">
+          Estamos preparando tus antojos en <span class="font-bold text-on-surface">Tambo Juan de Aliaga</span>
+</p>
+</div>
+<!-- Bento-Styled Order Status & Details Grid -->
+<div class="w-full space-y-space-sm mb-space-xl">
+<!-- Live Preparation & ETA Card -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm border border-surface-variant/70 flex items-center justify-between">
+<div class="flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-secondary-fixed/50 flex items-center justify-center text-on-secondary-fixed">
+<span class="material-symbols-outlined text-[28px] material-symbols-fill text-secondary">
+                timer
+              </span>
+</div>
+<div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Tiempo estimado</p>
+<h2 class="font-headline-md text-headline-md text-on-surface font-extrabold flex items-center gap-1.5">
+                25 - 35 minutos
+              </h2>
+</div>
+</div>
+<span class="relative flex h-3 w-3 mr-1">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary-container opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-secondary"></span>
+</span>
+</div>
+<!-- Key Order Information Sheet -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm border border-surface-variant/70 divide-y divide-surface-container">
+<!-- Order ID & Status Code -->
+<div class="pb-space-sm flex justify-between items-center">
+<div>
+<span class="font-body-sm text-body-sm text-on-surface-variant block">Código de pedido</span>
+<span class="font-label-lg text-label-lg font-bold text-primary font-mono tracking-wide">#TB-84920</span>
+</div>
+<button class="px-space-sm py-1 bg-surface-container-low hover:bg-surface-container rounded-lg text-on-surface-variant font-label-sm text-label-sm flex items-center gap-1 transition-colors active:scale-95" onclick="navigator.clipboard?.writeText('TB-84920')">
+<span class="material-symbols-outlined text-[14px]">content_copy</span>
+              Copiar
+            </button>
+</div>
+<!-- Fulfillment Mode & Delivery Address -->
+<div class="py-space-sm flex items-start gap-space-sm">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary-container shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[20px]">two_wheeler</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md font-bold text-on-surface">Delivery Express</span>
+<span class="text-[10px] bg-secondary-container/30 text-on-secondary-fixed px-1.5 py-0.5 rounded font-bold uppercase">En camino pronto</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                Av. Juan de Aliaga 400, Dpto 502
+              </p>
+<span class="font-body-sm text-body-sm text-outline text-[11px]">Magdalena del Mar, Lima</span>
+</div>
+</div>
+<!-- Payment Verification -->
+<div class="pt-space-sm flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-lg bg-primary-fixed/40 flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-[20px]">payments</span>
+</div>
+<div>
+<span class="font-label-md text-label-md font-bold text-on-surface block">Método de pago</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Yape (QR Aprobado)</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-label-sm text-label-sm text-primary font-bold bg-primary-fixed px-2 py-0.5 rounded-full inline-block mb-0.5">Pagado</span>
+<p class="font-label-lg text-label-lg font-bold text-on-surface">S/ 25.90</p>
+</div>
+</div>
+</div>
+<!-- Order Items Preview Pill / Card -->
+<div class="bg-surface-container-low rounded-xl p-space-md border border-surface-variant/60 flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-lg bg-surface-container-lowest border border-surface-variant/80 flex items-center justify-center text-primary shrink-0 shadow-xs">
+<span class="material-symbols-outlined text-[20px] text-primary-container">shopping_bag</span>
+</div>
+<div>
+<p class="font-label-md text-label-md font-bold text-on-surface">Resumen de productos (2)</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-1">Pack Four Loko Gold + Papas Lays</p>
+</div>
+</div>
+<button aria-label="Ver detalle de productos" class="w-7 h-7 rounded-full hover:bg-surface-container flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Action Button Group (Bottom Anchors) -->
+<div class="w-full space-y-space-sm mt-auto pt-space-xs">
+<!-- Primary Tactical Conversion CTA -->
+<a class="w-full h-12 bg-secondary-container hover:bg-secondary-fixed-dim text-on-secondary-fixed font-label-lg text-label-lg font-extrabold rounded-xl shadow-md shadow-secondary-container/25 flex items-center justify-center gap-space-sm active:scale-[0.98] transition-all text-center" href="#tracking">
+<span class="material-symbols-outlined text-[20px] material-symbols-fill">
+            near_me
+          </span>
+          Seguir mi pedido
+        </a>
+<!-- Secondary Return Link / Button -->
+<a class="w-full h-11 bg-surface-container-lowest hover:bg-surface-container text-primary border border-surface-variant/80 font-label-md text-label-md font-bold rounded-xl flex items-center justify-center gap-space-xs active:scale-[0.98] transition-all text-center" href="#inicio">
+<span class="material-symbols-outlined text-[18px]">storefront</span>
+          Ir al Inicio
+        </a>
+<!-- Need Help / Support Micro-link -->
+<div class="text-center pt-space-xs">
+<button class="text-on-surface-variant hover:text-primary font-body-sm text-body-sm inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">help</span>
+            ¿Tienes dudas con tu entrega? Contáctanos
+          </button>
+</div>
+</div>
+</div>
+<!-- Subdued Indicator Bar (iOS style bottom pill) -->
+<div class="w-full flex justify-center pt-space-md">
+<div class="w-32 h-1 bg-surface-dim rounded-full"></div>
+</div>
+</main>
+</body></html>
