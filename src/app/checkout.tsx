@@ -1,40 +1,55 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  KeyboardAvoidingView,
+  Linking,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  TextInput,
+  View,
+} from 'react-native';
+import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { DemoOnly } from '@/components/DemoOnly';
 import { DeliveryPointSheet, useDeliveryPoint } from '@/components/delivery';
 import { Icon, type IconName } from '@/components/Icon';
-import { EmptyState, FulfillmentToggle, RadioCard, ScreenHeader, TextField } from '@/components/layout';
+import { EmptyState, FulfillmentBadge, RadioCard, ScreenHeader, TextField } from '@/components/layout';
+import { SmartMap } from '@/components/map/SmartMap';
+import { OtpInput } from '@/components/otp';
+import { POINTS_ICON } from '@/components/points';
+import { AUTOPILOT_BENEFIT, AUTOPILOT_ICON } from '@/components/routines';
 import { Sheet } from '@/components/Sheet';
 import { SummaryRow } from '@/components/summary';
 import { Badge, Button, Card, Chip, Divider, Row, Tap, Txt } from '@/components/ui';
 import { getProduct } from '@/data/products';
-import { toOrderItems } from '@/data/seedOrders';
-import type { Order, PaymentMethodType, SavedCard } from '@/data/types';
+import type { Order, PaymentMethodType, PickupMethod, SavedCard } from '@/data/types';
 import { money, round2 } from '@/lib/format';
 import { haptic } from '@/lib/feedback';
+import { addressCoords, deliveryStoreFor } from '@/lib/geo';
+import { InsufficientPointsError, placeOrder } from '@/lib/placeOrder';
+import { formatPoints, pointsForSoles, pointsValue, pts } from '@/lib/points';
 import { checkCoupon } from '@/lib/pricing';
+import { buildSlots, HOLD_MINUTES, slotDisplay, type Slot } from '@/lib/slots';
 import { useCart, useCartTotals } from '@/store/cart';
-import { newOrderId, randomCode, timestamp, useOrders } from '@/store/orders';
+import { randomCode, useNow } from '@/store/orders';
 import { useSession } from '@/store/session';
 import { toast, useUi } from '@/store/ui';
+import { useBalance } from '@/store/wallet';
 import { colors, elevation, fonts, radius, space } from '@/theme/tokens';
 
 const MAP = require('../../assets/images/map-lima.jpg');
 
-function buildSlots() {
-  const now = new Date();
-  const fmt = (h: number) => {
-    const hh = h % 12 || 12;
-    return `${String(hh).padStart(2, '0')}:00 ${h < 12 || h === 24 ? 'AM' : 'PM'}`;
-  };
-  const slots: string[] = [];
-  for (let h = now.getHours() + 1; h < 23 && slots.length < 4; h++)
-    slots.push(`Hoy: ${fmt(h)} - ${fmt(h + 1)}`);
-  for (const h of [9, 11, 13, 18, 20]) slots.push(`Mañana: ${fmt(h)} - ${fmt(h + 1)}`);
-  return slots;
-}
+/** Últimos 9 dígitos (celular peruano sin +51). */
+const localPhone = (phone: string) => phone.replace(/\D/g, '').slice(-9);
+const isYapePhone = (digits: string) => /^9\d{8}$/.test(digits);
+
+const PAYMENT_LABEL: Partial<Record<PaymentMethodType, string>> = {
+  yape: 'Yape · Código de aprobación',
+  plin: 'Plin · Solicitud de pago',
+};
 
 const cardBrand = (n: string): SavedCard['brand'] =>
   n.startsWith('4')
@@ -47,16 +62,28 @@ const cardBrand = (n: string): SavedCard['brand'] =>
 
 export default function CheckoutScreen() {
   const insets = useSafeAreaInsets();
-  const totals = useCartTotals();
+  // "Usar mis puntos": descuento libre (100 pts = S/ 1) sobre lo que queda por pagar en productos.
+  const balance = useBalance();
+  const [usePoints, setUsePoints] = useState(false);
+  const [pointsToUse, setPointsToUse] = useState(0);
+  const base = useCartTotals();
+  const maxUsable = Math.max(
+    0,
+    Math.min(balance - base.pointsFromLines, pointsForSoles(base.subtotal - base.couponDiscount)),
+  );
+  const appliedPoints = usePoints ? Math.min(pointsToUse, maxUsable) : 0;
+  const totals = useCartTotals({ pointsToUse: appliedPoints });
+  const needsPayment = totals.total > 0;
   const items = useCart((s) => s.items);
   const couponCode = useCart((s) => s.couponCode);
   const setCoupon = useCart((s) => s.setCoupon);
-  const clearCart = useCart((s) => s.clear);
-  const place = useOrders((s) => s.place);
   const point = useDeliveryPoint();
   const session = useSession();
 
-  const slots = useMemo(() => buildSlots(), []);
+  // Los bloques se recalculan cada minuto (y al cambiar de modalidad).
+  const now = useNow(60_000);
+  const minute = Math.floor(now / 60_000);
+  const slots = useMemo(() => buildSlots(new Date(minute * 60_000), point.fulfillment), [minute, point.fulfillment]);
   const [pointOpen, setPointOpen] = useState(false);
   const [couponOpen, setCouponOpen] = useState(false);
   // Referencia editable por dirección (si cambia la dirección se usa la guardada en ella).
@@ -67,14 +94,37 @@ export default function CheckoutScreen() {
   const setReference = (t: string) => setRefs((r) => ({ ...r, [addressKey]: t }));
   const showReference = refOpen[addressKey] || !!point.address?.reference;
   const setShowReference = (v: boolean) => setRefOpen((r) => ({ ...r, [addressKey]: v }));
+  // Retiro: Smart Locker por defecto si la tienda tiene casilleros libres.
+  const lockersFree = point.store.lockers?.free ?? 0;
+  const [pickupChoice, setPickupChoice] = useState<PickupMethod>();
+  const pickupMethod: PickupMethod = lockersFree > 0 ? (pickupChoice ?? 'locker') : 'counter';
   const [schedule, setSchedule] = useState<'asap' | 'scheduled'>('asap');
-  const [slot, setSlot] = useState(slots[0]);
+  const [slotId, setSlotId] = useState<string>();
+  const slot: Slot | undefined = slots.find((s) => s.id === slotId) ?? slots[0];
   const [method, setMethod] = useState<PaymentMethodType>(session.preferredPayment);
   const [cardId, setCardId] = useState<string | 'new'>(session.cards[0]?.id ?? 'new');
   const [card, setCard] = useState({ number: '', expiry: '', cvv: '', holder: '' });
   const [cash, setCash] = useState('');
+  const [yapePhone, setYapePhone] = useState(() => localPhone(session.profile.phone));
+  const [yapeOtp, setYapeOtp] = useState('');
+  const [yapeSimulating, setYapeSimulating] = useState(false);
+  const [yapeApproved, setYapeApproved] = useState(false);
+  const simTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [placing, setPlacing] = useState(false);
+
+  // Si el bloque elegido ya pasó, `slot` cae solo al siguiente disponible; aquí solo se avisa (una vez).
+  const notifiedSlot = useRef<string>(undefined);
+  useEffect(() => {
+    if (schedule !== 'scheduled' || !slotId || slots.some((s) => s.id === slotId)) return;
+    if (notifiedSlot.current === slotId) return;
+    if (Number(slotId.split('-')[1]) < Date.now()) {
+      notifiedSlot.current = slotId;
+      toast('Tu horario ya no está disponible: elegimos el siguiente', { icon: 'clock-alert-outline' });
+    }
+  }, [slots, slotId, schedule]);
+
+  useEffect(() => () => simTimers.current.forEach(clearTimeout), []);
 
   if (items.length === 0 && !placing) {
     return (
@@ -98,26 +148,55 @@ export default function CheckoutScreen() {
   const curYY = today.getFullYear() % 100;
   const expiryValid = mm >= 1 && mm <= 12 && (yy > curYY || (yy === curYY && mm >= today.getMonth() + 1));
 
+  // Con total S/ 0.00 (canje 100% con puntos) no se valida ningún medio de pago.
+  const pay = needsPayment ? method : undefined;
+  const newCard = pay === 'card' && cardId === 'new';
   const errors = {
     address:
       point.fulfillment === 'delivery' && !point.address ? 'Agrega una dirección de entrega.' : undefined,
-    cardNumber:
-      method === 'card' && cardId === 'new' && cardDigits.length < 15
-        ? 'Número de tarjeta inválido.'
-        : undefined,
-    cardExpiry: method === 'card' && cardId === 'new' && !expiryValid ? 'Fecha inválida (MM/AA).' : undefined,
-    cardCvv:
-      method === 'card' && cardId === 'new' && !/^\d{3,4}$/.test(card.cvv) ? 'CVV inválido.' : undefined,
-    cardHolder:
-      method === 'card' && cardId === 'new' && card.holder.trim().length < 3
-        ? 'Ingresa el nombre del titular.'
-        : undefined,
+    cardNumber: newCard && cardDigits.length < 15 ? 'Número de tarjeta inválido.' : undefined,
+    cardExpiry: newCard && !expiryValid ? 'Fecha inválida (MM/AA).' : undefined,
+    cardCvv: newCard && !/^\d{3,4}$/.test(card.cvv) ? 'CVV inválido.' : undefined,
+    cardHolder: newCard && card.holder.trim().length < 3 ? 'Ingresa el nombre del titular.' : undefined,
     cash:
-      method === 'cash' && cash.trim() !== '' && !(cashAmount >= totals.total)
+      pay === 'cash' && cash.trim() !== '' && !(cashAmount >= totals.total)
         ? `El monto debe ser mayor o igual a ${money(totals.total)}.`
+        : undefined,
+    yapePhone:
+      pay === 'yape' && !isYapePhone(yapePhone)
+        ? 'Ingresa tu celular Yape (9 dígitos, empieza con 9).'
+        : undefined,
+    yapeOtp:
+      pay === 'yape' && yapeOtp.length < 6 ? 'Ingresa el código de aprobación de 6 dígitos.' : undefined,
+    slot: schedule === 'scheduled' && !slot ? 'No hay horarios disponibles, elige "Lo antes posible".' : undefined,
+    points:
+      totals.pointsToRedeem > balance
+        ? `Te faltan ${pts(totals.pointsToRedeem - balance)} para tus canjes.`
         : undefined,
   };
   const hasErrors = Object.values(errors).some(Boolean);
+
+  const simulateYape = () => {
+    simTimers.current.forEach(clearTimeout);
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    setYapePhone(isYapePhone(yapePhone) ? yapePhone : '987654321');
+    setYapeOtp('');
+    setYapeApproved(false);
+    setYapeSimulating(true);
+    simTimers.current = [...code].map((_, i) =>
+      setTimeout(() => {
+        setYapeOtp(code.slice(0, i + 1));
+        if (i === code.length - 1) {
+          setYapeSimulating(false);
+          setYapeApproved(true);
+          haptic.success();
+        }
+      }, 120 * (i + 1)),
+    );
+  };
+
+  const openYape = () =>
+    Linking.openURL('yape://').catch(() => toast('Instala Yape para continuar', { tone: 'error' }));
 
   const confirm = async () => {
     setSubmitted(true);
@@ -133,8 +212,8 @@ export default function CheckoutScreen() {
       return;
     }
     setPlacing(true);
-    let paymentLabel = 'Yape (QR Aprobado)';
-    if (method === 'card') {
+    let paymentLabel = PAYMENT_LABEL[method] ?? '';
+    if (needsPayment && method === 'card') {
       let used = session.cards.find((c) => c.id === cardId);
       if (!used) {
         used = {
@@ -151,43 +230,51 @@ export default function CheckoutScreen() {
     if (method === 'cash') {
       paymentLabel = point.fulfillment === 'delivery' ? 'Efectivo contra entrega' : 'Pago en caja';
     }
+    // Simula la autorización de la pasarela (Yape valida el código de aprobación).
     await new Promise((r) => setTimeout(r, 1400));
 
-    const order: Order = {
-      id: newOrderId(),
-      createdAt: timestamp(),
-      items: toOrderItems(items),
-      fulfillment: point.fulfillment,
-      storeId: point.store.id,
-      address:
-        point.fulfillment === 'delivery' && point.address
-          ? { ...point.address, reference: reference.trim() || undefined }
-          : undefined,
-      schedule: schedule === 'asap' ? { type: 'asap' } : { type: 'scheduled', slot },
-      payment: {
-        method,
-        label: paymentLabel,
-        cashAmount: method === 'cash' && cashAmount > 0 ? round2(cashAmount) : undefined,
-      },
-      couponCode: totals.coupon?.code,
-      totals: {
-        regularSubtotal: totals.regularSubtotal,
-        productDiscount: totals.productDiscount,
-        couponDiscount: totals.couponDiscount,
-        shipping: totals.shipping,
-        total: totals.total,
-      },
-    };
-    place(order);
-    session.addPoints(Math.floor(totals.total));
-    session.setPreferredPayment(method);
-    if (totals.coupon) session.markCouponUsed(totals.coupon.code);
-    haptic.success();
-    router.replace(`/pedido/confirmado/${order.id}`);
-    clearCart();
+    const orderSchedule: Order['schedule'] =
+      schedule === 'scheduled' && slot
+        ? { type: 'scheduled', slot: slotDisplay(slot), start: slot.start, end: slot.end }
+        : { type: 'asap' };
+    // Guarda el pedido, registra puntos, marca el cupón y vacía el carrito en un solo paso.
+    try {
+      const order = placeOrder({
+        items,
+        fulfillment: point.fulfillment,
+        storeId: point.store.id,
+        address: point.address ? { ...point.address, reference: reference.trim() || undefined } : undefined,
+        schedule: orderSchedule,
+        payment: {
+          method,
+          label: paymentLabel,
+          cashAmount: method === 'cash' && cashAmount > 0 ? round2(cashAmount) : undefined,
+        },
+        couponCode,
+        pickupMethod,
+        pointsToUse: appliedPoints,
+      });
+      if (needsPayment) session.setPreferredPayment(method);
+      haptic.success();
+      router.replace(`/pedido/confirmado/${order.id}`);
+    } catch (e) {
+      setPlacing(false);
+      haptic.warning();
+      toast(e instanceof InsufficientPointsError ? e.message : 'No pudimos registrar tu pedido', {
+        tone: 'error',
+      });
+    }
+  };
+
+  const togglePoints = (on: boolean) => {
+    setUsePoints(on);
+    if (on) setPointsToUse(maxUsable);
+    haptic.tap();
   };
 
   const delivery = point.fulfillment === 'delivery';
+  // El delivery lo despacha la tienda más cercana a la dirección (igual que en placeOrder).
+  const servingStore = deliveryStoreFor(point.address);
 
   return (
     <View style={{ flex: 1 }}>
@@ -204,27 +291,50 @@ export default function CheckoutScreen() {
       />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
-          <FulfillmentToggle value={point.fulfillment} onChange={session.setFulfillment} tone="light" />
-
-          {/* Dirección o tienda */}
+          {/* Dirección o tienda. La modalidad se decide en "¿Cómo quieres tu pedido?" (un solo lugar). */}
           <Card style={styles.block}>
+            <Row style={{ justifyContent: 'space-between' }}>
+              <FulfillmentBadge value={point.fulfillment} />
+              <Tap
+                onPress={() => setPointOpen(true)}
+                hitSlop={10}
+                style={styles.changeMode}
+                accessibilityLabel={`Cambiar modalidad o ${delivery ? 'dirección' : 'tienda'}`}
+              >
+                <Icon name="swap-horizontal" size={16} color={colors.primary} />
+                <Txt variant="labelMd" weight="bold" color={colors.primary}>
+                  Cambiar modalidad
+                </Txt>
+              </Tap>
+            </Row>
             <BlockTitle
               icon={delivery ? 'map-marker-outline' : 'storefront-outline'}
               title={delivery ? 'Dirección de entrega' : 'Tienda de retiro'}
-              action="Cambiar"
-              onAction={() => setPointOpen(true)}
             />
             {delivery ? (
               point.address ? (
                 <>
                   <View style={styles.map}>
-                    <Image source={MAP} style={StyleSheet.absoluteFill} contentFit="cover" />
-                    <View style={styles.mapPin}>
-                      <Icon name="map-marker" size={40} color={colors.primary} />
-                    </View>
+                    <SmartMap
+                      height={120}
+                      interactive={false}
+                      markers={[
+                        { id: 'home', kind: 'home', position: addressCoords(point.address) },
+                        { id: 'store', kind: 'store', position: servingStore.coords },
+                      ]}
+                      fit={[addressCoords(point.address), servingStore.coords]}
+                      fallback={
+                        <>
+                          <Image source={MAP} style={StyleSheet.absoluteFill} contentFit="cover" />
+                          <View style={styles.mapPin}>
+                            <Icon name="map-marker" size={40} color={colors.primary} />
+                          </View>
+                        </>
+                      }
+                    />
                     <Row style={styles.mapLabel}>
-                      <Icon name="crosshairs-gps" size={14} color={colors.primary} />
-                      <Txt variant="labelSm">{point.address.district}</Txt>
+                      <Icon name="storefront-outline" size={14} color={colors.primary} />
+                      <Txt variant="labelSm">Te atiende {servingStore.name}</Txt>
                     </Row>
                   </View>
                   <View>
@@ -289,10 +399,39 @@ export default function CheckoutScreen() {
                     />
                   </View>
                 </Row>
+                <Txt variant="labelMd" color={colors.textMuted}>
+                  ¿Cómo quieres retirarlo?
+                </Txt>
+                <RadioCard
+                  selected={pickupMethod === 'locker'}
+                  onPress={() => (lockersFree > 0 ? setPickupChoice('locker') : undefined)}
+                  title="Tambo Smart Locker"
+                  subtitle={
+                    lockersFree > 0
+                      ? 'Retiro autónomo 24/7 con QR, sin colas • casillero climatizado'
+                      : 'Sin casilleros libres en esta tienda ahora'
+                  }
+                  icon="locker-multiple"
+                  badge={
+                    <Badge
+                      label={lockersFree > 0 ? `${lockersFree} libres` : 'Lleno'}
+                      tone={lockersFree > 0 ? 'success' : 'neutral'}
+                    />
+                  }
+                />
+                <RadioCard
+                  selected={pickupMethod === 'counter'}
+                  onPress={() => setPickupChoice('counter')}
+                  title="Mostrador express"
+                  subtitle="Muestra tu QR en caja y te lo entregan"
+                  icon="storefront-outline"
+                />
                 <Row style={styles.info}>
                   <Icon name="information-outline" size={18} color={colors.primary} />
                   <Txt variant="bodySm" color={colors.textMuted} style={{ flex: 1 }}>
-                    Muestra tu código de pedido en caja. Te avisaremos cuando esté listo para recoger.
+                    {pickupMethod === 'locker'
+                      ? 'Cuando esté listo te asignamos un casillero y un QR que cambia cada 30 s. Solo tu QR abre la puerta.'
+                      : 'Te avisaremos cuando esté listo. En caja escanean tu QR para entregártelo.'}
                   </Txt>
                 </Row>
               </>
@@ -318,21 +457,139 @@ export default function CheckoutScreen() {
               selected={schedule === 'scheduled'}
               onPress={() => setSchedule('scheduled')}
               title="Programar horario"
-              subtitle={schedule === 'scheduled' ? slot : 'Elige el momento de entrega'}
+              subtitle={
+                schedule === 'scheduled' && slot
+                  ? slotDisplay(slot)
+                  : delivery
+                    ? 'Elige cuándo te lo llevamos (bloques de 30 min)'
+                    : 'Elige cuándo lo recoges (bloques de 20 min)'
+              }
               icon="calendar-clock-outline"
             >
               {schedule === 'scheduled' && (
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.slots}
-                >
-                  {slots.map((s) => (
-                    <Chip key={s} label={s} active={slot === s} onPress={() => setSlot(s)} />
-                  ))}
-                </ScrollView>
+                <View style={styles.slotsBox}>
+                  {(['hoy', 'manana'] as const).map((day) => {
+                    const daySlots = slots.filter((s) => s.day === day);
+                    return (
+                      <View key={day} style={{ gap: space.sm }}>
+                        <Txt variant="labelSm" color={colors.textMuted} style={styles.slotDay}>
+                          {day === 'hoy' ? 'Hoy' : 'Mañana'}
+                        </Txt>
+                        {daySlots.length === 0 ? (
+                          <Txt variant="bodySm" color={colors.textMuted} style={styles.slotDay}>
+                            Ya no hay horarios para hoy. Programa tu pedido para mañana.
+                          </Txt>
+                        ) : (
+                          <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={styles.slots}
+                          >
+                            {daySlots.map((s) => (
+                              <Chip
+                                key={s.id}
+                                label={s.label}
+                                active={slot?.id === s.id}
+                                onPress={() => setSlotId(s.id)}
+                              />
+                            ))}
+                          </ScrollView>
+                        )}
+                      </View>
+                    );
+                  })}
+                  <Row style={styles.guarantee}>
+                    <Icon name="timer-outline" size={18} color={colors.goldText} />
+                    <Txt variant="bodySm" color={colors.goldText} style={{ flex: 1 }}>
+                      {delivery
+                        ? 'Tu pedido llegará dentro del bloque elegido. Te avisaremos cuando salga de la tienda.'
+                        : `Estará listo al iniciar tu bloque y lo guardamos hasta ${HOLD_MINUTES} min ${
+                            pickupMethod === 'locker' ? 'en tu Smart Locker climatizado' : 'en tienda'
+                          }.`}
+                    </Txt>
+                  </Row>
+                  {submitted && errors.slot && (
+                    <Txt variant="bodySm" color={colors.error} style={styles.slotDay}>
+                      {errors.slot}
+                    </Txt>
+                  )}
+                </View>
               )}
             </RadioCard>
+            <Tap
+              onPress={() => router.push('/rutinas/nueva?desde=carrito')}
+              style={styles.autopilot}
+              accessibilityLabel="Repetir este pedido automáticamente con Tambo Auto-Pilot"
+            >
+              <View style={styles.autopilotIcon}>
+                <Icon name={AUTOPILOT_ICON} size={20} color={colors.onGold} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Txt variant="labelLg">Repetir este pedido (Auto-Pilot)</Txt>
+                <Txt variant="bodySm" color={colors.textMuted}>
+                  Prográmalo cada día o semana: {AUTOPILOT_BENEFIT}.
+                </Txt>
+              </View>
+              <Icon name="chevron-right" size={22} color={colors.textMuted} />
+            </Tap>
+          </Card>
+
+          {/* Tambo Lover Puntos */}
+          <Card style={[styles.block, styles.pointsCard]}>
+            <Row style={{ gap: space.md }}>
+              <View style={styles.pointsIcon}>
+                <Icon name={POINTS_ICON} size={22} color={colors.onGold} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Txt variant="labelLg">Usar mis puntos Tambo Lover</Txt>
+                <Txt variant="bodySm" color={colors.textMuted}>
+                  Tienes {pts(balance - totals.pointsFromLines)} disponibles • 100 pts = S/ 1.00
+                </Txt>
+              </View>
+              <Switch
+                value={usePoints}
+                onValueChange={togglePoints}
+                disabled={maxUsable === 0}
+                trackColor={{ true: colors.goldDark, false: colors.surfaceHigh }}
+                thumbColor={colors.white}
+                accessibilityLabel="Usar mis puntos como descuento"
+              />
+            </Row>
+            {usePoints && maxUsable > 0 && (
+              <Animated.View entering={FadeIn} style={{ gap: space.sm }}>
+                <Row style={{ flexWrap: 'wrap' }}>
+                  {[...new Set([500, 1000, maxUsable].filter((v) => v <= maxUsable))].map((v) => (
+                    <Chip
+                      key={v}
+                      label={v === maxUsable ? `Máximo (${formatPoints(v)})` : formatPoints(v)}
+                      active={appliedPoints === v}
+                      onPress={() => setPointsToUse(v)}
+                    />
+                  ))}
+                </Row>
+                <Txt variant="labelMd" color={colors.goldText}>
+                  Usas {pts(totals.pointsUsed)} y descuentas {money(totals.pointsUsedValue)}
+                </Txt>
+              </Animated.View>
+            )}
+            {maxUsable === 0 && totals.pointsFromLines === 0 && (
+              <Txt variant="bodySm" color={colors.textMuted}>
+                Junta puntos con tus compras para usarlos como descuento.
+              </Txt>
+            )}
+            {totals.pointsFromLines > 0 && (
+              <Row style={{ gap: 6 }}>
+                <Icon name="gift-outline" size={16} color={colors.goldText} />
+                <Txt variant="bodySm" color={colors.goldText} style={{ flex: 1 }}>
+                  Tus canjes usan {pts(totals.pointsFromLines)} ({money(totals.pointsLinesValue)} en productos).
+                </Txt>
+              </Row>
+            )}
+            {submitted && errors.points && (
+              <Txt variant="bodySm" color={colors.error}>
+                {errors.points}
+              </Txt>
+            )}
           </Card>
 
           {/* Pago */}
@@ -340,13 +597,22 @@ export default function CheckoutScreen() {
             <BlockTitle
               icon="cash-multiple"
               title="Método de pago"
-              right={<Badge label="Sin comisiones" tone="warning" />}
+              right={needsPayment ? <Badge label="Sin comisiones" tone="warning" /> : undefined}
             />
+            {!needsPayment ? (
+              <Row style={styles.freeOrder}>
+                <Icon name="gift-outline" size={22} color={colors.success} />
+                <Txt variant="bodySm" color={colors.success} style={{ flex: 1 }}>
+                  Pagas el 100% con Tambo Lover Puntos. No necesitas ningún medio de pago.
+                </Txt>
+              </Row>
+            ) : (
+              <>
             <RadioCard
               selected={method === 'yape'}
               onPress={() => setMethod('yape')}
-              title="Yape / Plin"
-              subtitle="Paga rápido con QR o número móvil"
+              title="Yape"
+              subtitle="Paga con tu código de aprobación"
               badge={<Badge label="Recomendado" tone="combo" />}
               iconNode={
                 <View style={styles.yape}>
@@ -357,12 +623,87 @@ export default function CheckoutScreen() {
               }
             >
               {method === 'yape' && (
-                <Row style={styles.methodBody}>
-                  <Icon name="cellphone-message" size={18} color={colors.primary} />
-                  <Txt variant="bodySm" color={colors.textMuted} style={{ flex: 1 }}>
-                    Al confirmar te llegará una solicitud de pago a tu app Yape ({session.profile.phone}).
+                <View style={[styles.methodBody, { flexDirection: 'column', alignItems: 'stretch' }]}>
+                  <TextField
+                    label="Celular Yape"
+                    icon="cellphone"
+                    prefix="+51"
+                    placeholder="987 654 321"
+                    keyboardType="number-pad"
+                    maxLength={9}
+                    value={yapePhone}
+                    onChangeText={(t) => {
+                      setYapePhone(t.replace(/\D/g, ''));
+                      setYapeApproved(false);
+                    }}
+                    error={submitted ? errors.yapePhone : undefined}
+                  />
+                  <Txt variant="labelMd" color={colors.textMuted}>
+                    Código de aprobación
                   </Txt>
-                </Row>
+                  <OtpInput
+                    value={yapeOtp}
+                    onChange={(c) => {
+                      setYapeOtp(c);
+                      setYapeApproved(false);
+                    }}
+                    error={submitted && !!errors.yapeOtp}
+                  />
+                  {submitted && errors.yapeOtp ? (
+                    <Txt variant="bodySm" color={colors.error}>
+                      {errors.yapeOtp}
+                    </Txt>
+                  ) : (
+                    <Row style={{ alignItems: 'flex-start', gap: 6 }}>
+                      <Icon name="information-outline" size={16} color={colors.primary} />
+                      <Txt variant="bodySm" color={colors.textMuted} style={{ flex: 1 }}>
+                        Lo encuentras en tu app Yape → menú → Código de aprobación. Vence en 2 minutos.
+                      </Txt>
+                    </Row>
+                  )}
+                  {yapeApproved && (
+                    <Animated.View entering={ZoomIn.springify().damping(14)} style={styles.yapeOk}>
+                      <Icon name="check-decagram" size={20} color={colors.success} />
+                      <Txt variant="labelMd" color={colors.success}>
+                        Yape aprobado • {money(totals.total)}
+                      </Txt>
+                    </Animated.View>
+                  )}
+                  <Tap onPress={openYape} style={styles.linkRow} accessibilityLabel="Abrir la app Yape">
+                    <Icon name="open-in-app" size={18} color={colors.primary} />
+                    <Txt variant="labelMd" color={colors.primary} style={{ textDecorationLine: 'underline' }}>
+                      Abrir Yape para ver mi código
+                    </Txt>
+                  </Tap>
+                  <DemoOnly>
+                    <Button
+                      label={yapeSimulating ? 'Generando código…' : 'Simular código Yape'}
+                      icon="lightning-bolt"
+                      variant="outline"
+                      size="sm"
+                      disabled={yapeSimulating}
+                      onPress={simulateYape}
+                    />
+                  </DemoOnly>
+                </View>
+              )}
+            </RadioCard>
+            <RadioCard
+              selected={method === 'plin'}
+              onPress={() => setMethod('plin')}
+              title="Plin"
+              subtitle="Te enviamos una solicitud de pago"
+              icon="cellphone-message"
+            >
+              {method === 'plin' && (
+                <Animated.View entering={FadeIn}>
+                  <Row style={styles.methodBody}>
+                    <Icon name="bell-ring-outline" size={18} color={colors.primary} />
+                    <Txt variant="bodySm" color={colors.textMuted} style={{ flex: 1 }}>
+                      Al confirmar te llegará una solicitud de pago a tu app Plin ({session.profile.phone}).
+                    </Txt>
+                  </Row>
+                </Animated.View>
               )}
             </RadioCard>
             <RadioCard
@@ -512,6 +853,8 @@ export default function CheckoutScreen() {
                 </View>
               )}
             </RadioCard>
+              </>
+            )}
           </Card>
 
           {/* Resumen */}
@@ -540,6 +883,14 @@ export default function CheckoutScreen() {
                 icon="ticket-percent-outline"
               />
             )}
+            {totals.pointsDiscount > 0 && (
+              <SummaryRow
+                label={`Tambo Lover Puntos (${pts(totals.pointsToRedeem)})`}
+                value={`- ${money(totals.pointsDiscount)}`}
+                tone="discount"
+                icon={POINTS_ICON}
+              />
+            )}
             <SummaryRow
               label={delivery ? 'Costo de envío' : 'Retiro en tienda'}
               value={totals.shipping === 0 ? 'Gratis' : money(totals.shipping)}
@@ -555,6 +906,13 @@ export default function CheckoutScreen() {
               </View>
               <Txt variant="headlineLg" weight="extrabold" color={colors.primary}>
                 {money(totals.total)}
+              </Txt>
+            </Row>
+            <Row style={{ gap: 6 }}>
+              <Icon name={POINTS_ICON} size={16} color={colors.goldText} />
+              <Txt variant="bodySm" color={colors.goldText}>
+                Sumarás {pts(totals.pointsEarned)} Tambo Lover con esta compra
+                {totals.pointsEarned > 0 ? ` (≈ ${money(pointsValue(totals.pointsEarned))})` : ''}
               </Txt>
             </Row>
           </Card>
@@ -584,9 +942,13 @@ export default function CheckoutScreen() {
         />
         <Txt variant="bodySm" align="center" color={colors.textMuted} style={{ marginTop: 6, fontSize: 11 }}>
           {placing
-            ? method === 'yape'
-              ? 'Esperando aprobación de Yape...'
-              : 'Procesando tu pedido...'
+            ? !needsPayment
+              ? 'Canjeando tus puntos…'
+              : method === 'yape'
+              ? 'Validando código con Yape…'
+              : method === 'plin'
+                ? 'Esperando aprobación de Plin…'
+                : 'Procesando tu pedido…'
             : 'Al pulsar confirmas los términos y condiciones de entrega Tambo'}
         </Txt>
       </View>
@@ -747,7 +1109,57 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     alignItems: 'flex-start',
   },
-  slots: { gap: space.sm, paddingHorizontal: space.md, paddingBottom: space.md },
+  changeMode: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 32 },
+  pointsCard: { borderColor: colors.goldBorder, backgroundColor: colors.goldTint },
+  autopilot: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
+    padding: space.md,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: colors.primary,
+    backgroundColor: colors.primaryTint,
+  },
+  autopilotIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.gold,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pointsIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.gold,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  freeOrder: { padding: space.md, gap: space.sm, borderRadius: radius.lg, backgroundColor: colors.successSoft },
+  slotsBox: { gap: space.md, paddingBottom: space.md },
+  slotDay: { paddingHorizontal: space.md, textTransform: 'uppercase' },
+  slots: { gap: space.sm, paddingHorizontal: space.md },
+  guarantee: {
+    alignItems: 'flex-start',
+    gap: 6,
+    marginHorizontal: space.md,
+    padding: space.sm,
+    borderRadius: radius.md,
+    backgroundColor: colors.goldSoft,
+  },
+  yapeOk: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+    paddingHorizontal: space.md,
+    paddingVertical: 6,
+    borderRadius: radius.full,
+    backgroundColor: colors.successSoft,
+  },
   yape: {
     width: 40,
     height: 40,

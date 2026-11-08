@@ -13,6 +13,11 @@ export const colors = {
   goldSoft: '#FFF1D2',
   onGold: '#1A1A1A',
   goldText: '#7C5800',
+  /** Borde y fondo de superficies Tambo Lover (canjes con puntos). */
+  goldBorder: '#F6DA9B',
+  goldTint: '#FFFBF1',
+  /** Punto azul de "tu ubicación" y ruta a pie en los mapas. */
+  userLocation: '#1E88E5',
   magenta: '#D81B60',
   magentaSoft: '#FFD9DE',
   wine: '#7C0032',

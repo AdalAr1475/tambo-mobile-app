@@ -36,6 +36,12 @@
           "image": "./assets/splash-icon.png",
           "imageWidth": 160
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Tambo+ usa tu ubicación para mostrarte las tiendas cercanas y cómo llegar a recoger tu pedido."
+        }
       ]
     ],
     "scheme": "tambo",

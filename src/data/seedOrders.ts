@@ -1,14 +1,31 @@
-import { computeTotals, lineTotal } from '@/lib/pricing';
+import { computeTotals, lineTotal, redeemOption } from '@/lib/pricing';
+import { round2 } from '@/lib/format';
 import { getProduct } from './products';
 import { seedAddresses } from './stores';
-import type { Order, OrderItem } from './types';
+import type { Order, OrderItem, RedeemMode } from './types';
 
 const DAY = 24 * 60 * 60 * 1000;
 
-export const toOrderItems = (lines: { productId: string; qty: number }[]): OrderItem[] =>
-  lines.flatMap(({ productId, qty }) => {
+export const toOrderItems = (lines: { productId: string; qty: number; redeem?: RedeemMode }[]): OrderItem[] =>
+  lines.flatMap(({ productId, qty, redeem }) => {
     const p = getProduct(productId);
     if (!p) return [];
+    const opt = redeem ? redeemOption(p, redeem) : undefined;
+    if (redeem && opt) {
+      return [
+        {
+          productId,
+          name: p.name,
+          subtitle: p.subtitle,
+          qty,
+          price: opt.cash,
+          regularPrice: p.regularPrice ?? p.price,
+          lineTotal: round2(opt.cash * qty),
+          redeem,
+          points: opt.points,
+        },
+      ];
+    }
     return [
       {
         productId,
@@ -21,6 +38,9 @@ export const toOrderItems = (lines: { productId: string; qty: number }[]): Order
       },
     ];
   });
+
+/** Clave estable de una línea de pedido (un producto puede venir normal y canjeado). */
+export const orderItemKey = (i: OrderItem) => `${i.productId}-${i.redeem ?? 'std'}`;
 
 const build = (
   id: string,
@@ -49,6 +69,7 @@ const build = (
     },
     seeded: true,
     rating: 5,
+    pointsEarned: t.pointsEarned,
     ...rest,
   };
 };

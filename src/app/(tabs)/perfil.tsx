@@ -5,47 +5,30 @@ import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Icon, type IconName } from '@/components/Icon';
 import { ScreenHeader } from '@/components/layout';
+import { POINTS_ICON } from '@/components/points';
 import { Sheet } from '@/components/Sheet';
 import { Badge, Button, Card, IconButton, Row, Tap, Txt } from '@/components/ui';
 import { coupons, user } from '@/data/stores';
 import { haptic } from '@/lib/feedback';
-import { randomCode } from '@/store/orders';
+import { levelFor, pts } from '@/lib/points';
 import { useSession } from '@/store/session';
-import { toast } from '@/store/ui';
+import { useBalance, useLifetime } from '@/store/wallet';
 import { colors, radius, space } from '@/theme/tokens';
-
-const REWARDS = [
-  { id: 'cafe', title: 'Café americano gratis', points: 150, icon: 'coffee-outline' as IconName },
-  { id: 'empanada', title: 'Empanada de carne gratis', points: 250, icon: 'food-croissant' as IconName },
-  { id: 'chela', title: 'Chelita Pilsen 355 ml gratis', points: 400, icon: 'glass-mug-variant' as IconName },
-  { id: 'combo', title: 'Combo Piqueo gratis', points: 600, icon: 'ticket-percent-outline' as IconName },
-];
 
 export default function ProfileScreen() {
   const profile = useSession((s) => s.profile);
-  const points = useSession((s) => s.points);
+  const balance = useBalance();
+  const lifetime = useLifetime();
   const addresses = useSession((s) => s.addresses);
   const cards = useSession((s) => s.cards);
   const favorites = useSession((s) => s.favorites);
   const usedCoupons = useSession((s) => s.usedCoupons);
-  const addPoints = useSession((s) => s.addPoints);
   const logout = useSession((s) => s.logout);
   const notifications = useSession((s) => s.notifications);
-  const [clubOpen, setClubOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
 
   const availableCoupons = coupons.filter((c) => !usedCoupons.includes(c.code)).length;
-  const level = points >= 1000 ? 'Tambo Pro' : points >= 300 ? 'Tambo Lover' : 'Tambo Fan';
-
-  const redeem = (r: (typeof REWARDS)[number]) => {
-    addPoints(-r.points);
-    haptic.success();
-    setClubOpen(false);
-    toast(`¡Canjeaste ${r.title}! Muestra el código ${randomCode('CLUB')} en caja`, {
-      icon: 'gift-outline',
-      tone: 'success',
-    });
-  };
+  const { level } = levelFor(lifetime);
 
   return (
     <View style={{ flex: 1 }}>
@@ -67,14 +50,20 @@ export default function ProfileScreen() {
       <ScrollView contentContainerStyle={styles.body}>
         <Card style={styles.userCard}>
           <View>
-            <View style={styles.avatarRing}>
-              <Image
-                source={user.avatar}
-                style={styles.avatar}
-                contentFit="cover"
-                accessibilityLabel={`Foto de ${profile.name}`}
-              />
-            </View>
+            {/* Acceso oculto al Modo Presentador: mantener presionada la foto 2 s. */}
+            <Tap
+              onLongPress={() => {
+                haptic.success();
+                router.push('/demo');
+              }}
+              delayLongPress={2000}
+              pressedStyle={{ opacity: 1 }}
+              style={styles.avatarRing}
+              accessibilityRole="image"
+              accessibilityLabel={`Foto de ${profile.name}`}
+            >
+              <Image source={user.avatar} style={styles.avatar} contentFit="cover" />
+            </Tap>
             <IconButton
               icon="pencil"
               label="Editar perfil"
@@ -101,12 +90,13 @@ export default function ProfileScreen() {
                 {profile.phone}
               </Txt>
             </Row>
-            <Badge
-              label={`${level} • ${points} Puntos`}
-              tone="warning"
-              icon="star-circle-outline"
-              style={{ marginTop: 6 }}
-            />
+            <Tap
+              onPress={() => router.push('/puntos')}
+              accessibilityLabel={`${level.name}, ${pts(balance)}. Ver mis puntos`}
+              hitSlop={6}
+            >
+              <Badge label={`${level.name} • ${pts(balance)}`} tone="warning" icon={POINTS_ICON} style={{ marginTop: 6 }} />
+            </Tap>
           </View>
         </Card>
 
@@ -121,13 +111,13 @@ export default function ProfileScreen() {
           </View>
           <View style={{ flex: 1 }}>
             <Txt variant="headlineMd" color={colors.gold}>
-              Gana puntos en cada compra
+              Tambo Lover Puntos
             </Txt>
             <Txt variant="bodySm" color="rgba(255,255,255,0.9)">
-              Canjea chelitas y snacks gratis en tu Tambo más cercano.
+              Tienes {pts(balance)}. Canjea cafés, sánguches y más al 100% o con puntos + soles.
             </Txt>
           </View>
-          <Button label="Ver Club" size="sm" full={false} onPress={() => setClubOpen(true)} />
+          <Button label="Canjear" size="sm" full={false} onPress={() => router.push('/puntos')} />
         </LinearGradient>
 
         <Txt variant="headlineMd" style={styles.groupTitle}>
@@ -210,58 +200,6 @@ export default function ProfileScreen() {
           Versión 4.12.0 • Tambo+ Perú (prototipo)
         </Txt>
       </ScrollView>
-
-      <Sheet
-        visible={clubOpen}
-        onClose={() => setClubOpen(false)}
-        title="Club Tambo Lover"
-        subtitle={`Tienes ${points} puntos • 1 punto por cada S/ 1`}
-      >
-        <View style={{ gap: space.md }}>
-          <View style={styles.levelBox}>
-            <Row style={{ justifyContent: 'space-between' }}>
-              <Txt variant="labelMd">{level}</Txt>
-              <Txt variant="labelSm" color={colors.textMuted}>
-                {points >= 1000
-                  ? 'Nivel máximo'
-                  : `${(points >= 300 ? 1000 : 300) - points} pts para el siguiente nivel`}
-              </Txt>
-            </Row>
-            <View style={styles.track}>
-              <View
-                style={[
-                  styles.fill,
-                  { width: `${Math.min(100, (points / (points >= 300 ? 1000 : 300)) * 100)}%` },
-                ]}
-              />
-            </View>
-          </View>
-          {REWARDS.map((r) => {
-            const can = points >= r.points;
-            return (
-              <Row key={r.id} style={styles.reward}>
-                <View style={styles.rewardIcon}>
-                  <Icon name={r.icon} size={22} color={colors.primary} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Txt variant="labelLg">{r.title}</Txt>
-                  <Txt variant="bodySm" color={colors.textMuted}>
-                    {r.points} puntos
-                  </Txt>
-                </View>
-                <Button
-                  label={can ? 'Canjear' : `Faltan ${r.points - points}`}
-                  size="sm"
-                  variant={can ? 'brand' : 'soft'}
-                  full={false}
-                  disabled={!can}
-                  onPress={() => redeem(r)}
-                />
-              </Row>
-            );
-          })}
-        </View>
-      </Sheet>
 
       <Sheet
         visible={logoutOpen}
@@ -381,24 +319,5 @@ const styles = StyleSheet.create({
     borderColor: '#F7C1BB',
     backgroundColor: '#FFF1EF',
     marginTop: space.md,
-  },
-  levelBox: { padding: space.md, borderRadius: radius.lg, backgroundColor: colors.goldSoft, gap: space.sm },
-  track: { height: 8, borderRadius: 4, backgroundColor: 'rgba(0,0,0,0.08)', overflow: 'hidden' },
-  fill: { height: '100%', backgroundColor: colors.goldDark, borderRadius: 4 },
-  reward: {
-    padding: space.md,
-    borderRadius: radius.lg,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    gap: space.md,
-  },
-  rewardIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.primarySoft,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });

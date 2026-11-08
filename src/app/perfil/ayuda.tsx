@@ -30,7 +30,7 @@ const FAQ = [
   },
   {
     q: '¿Cómo uso mis puntos Tambo Lover?',
-    a: 'Sumas 1 punto por cada S/ 1. Canjéalos desde Perfil > Ver Club por cafés, empanadas o chelitas gratis.',
+    a: 'Sumas 10 puntos por cada S/ 1 que pagas en productos. Canjéalos en Perfil > Tambo Lover Puntos o en Descuentos > Canjea con puntos: al 100% con puntos o con puntos + soles. También puedes usarlos como descuento en el checkout (100 puntos = S/ 1).',
   },
   {
     q: '¿Dónde encuentro mi boleta?',

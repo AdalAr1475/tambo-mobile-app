@@ -5,11 +5,14 @@ import { Icon } from '@/components/Icon';
 import { EmptyState, ScreenHeader } from '@/components/layout';
 import { SummaryRow } from '@/components/summary';
 import { Badge, Button, Card, Divider, Row, Txt } from '@/components/ui';
-import { getProduct } from '@/data/products';
+import { POINTS_ICON, redeemLabel } from '@/components/points';
+import { orderItemKey } from '@/data/seedOrders';
 import { getStore } from '@/data/stores';
 import { friendlyDate, money, time24 } from '@/lib/format';
+import { assignLockers } from '@/lib/lockers';
+import { pts } from '@/lib/points';
 import { getOrderStatus } from '@/lib/orderProgress';
-import { useCart } from '@/store/cart';
+import { useReorder } from '@/lib/useReorder';
 import { useNow, useOrder } from '@/store/orders';
 import { useSession } from '@/store/session';
 import { toast } from '@/store/ui';
@@ -20,7 +23,7 @@ export default function OrderDetailScreen() {
   const order = useOrder(id);
   const now = useNow(2000);
   const insets = useSafeAreaInsets();
-  const replace = useCart((s) => s.replace);
+  const { reorder, sheet: reorderSheet } = useReorder();
   const email = useSession((s) => s.profile.email);
 
   if (!order) {
@@ -41,13 +44,6 @@ export default function OrderDetailScreen() {
   const igv = order.totals.total - order.totals.total / 1.18;
   const serial = `B001-${order.id.replace(/\D/g, '').padStart(8, '0')}`;
   const cancelled = status.phase === 'cancelled';
-
-  const reorder = () => {
-    replace(
-      order.items.filter((i) => getProduct(i.productId)).map((i) => ({ productId: i.productId, qty: i.qty })),
-    );
-    router.push('/carrito');
-  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -113,11 +109,13 @@ export default function OrderDetailScreen() {
             </Txt>
           </Row>
           {order.items.map((i) => (
-            <Row key={i.productId} style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <Row key={orderItemKey(i)} style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <View style={{ flex: 1 }}>
                 <Txt variant="labelMd">{i.name}</Txt>
-                <Txt variant="bodySm" color={colors.textMuted}>
-                  {i.qty} x {money(i.price)}
+                <Txt variant="bodySm" color={i.redeem ? colors.goldText : colors.textMuted}>
+                  {i.redeem && i.points
+                    ? `${i.qty} x ${redeemLabel({ points: i.points, cash: i.price })} (canje)`
+                    : `${i.qty} x ${money(i.price)}`}
                 </Txt>
               </View>
               <Txt variant="labelMd">{money(i.lineTotal)}</Txt>
@@ -136,6 +134,20 @@ export default function OrderDetailScreen() {
             <SummaryRow
               label={`Cupón ${order.couponCode}`}
               value={`- ${money(order.totals.couponDiscount)}`}
+              tone="discount"
+            />
+          )}
+          {!!order.totals.routineDiscount && (
+            <SummaryRow
+              label="Beneficio Auto-Pilot (10%)"
+              value={`- ${money(order.totals.routineDiscount)}`}
+              tone="discount"
+            />
+          )}
+          {!!order.totals.pointsDiscount && (
+            <SummaryRow
+              label={`Tambo Lover Puntos (${pts(order.pointsRedeemed ?? 0)})`}
+              value={`- ${money(order.totals.pointsDiscount)}`}
               tone="discount"
             />
           )}
@@ -158,7 +170,29 @@ export default function OrderDetailScreen() {
               value={`${order.address.line1}, ${order.address.district}`}
             />
           ) : (
-            <InfoRow icon="storefront-outline" label="Retiro" value={`${store.name}, ${store.address}`} />
+            <InfoRow
+              icon={order.pickupMethod === 'locker' ? 'locker-multiple' : 'storefront-outline'}
+              label="Retiro"
+              value={`${
+                order.pickupMethod === 'locker'
+                  ? `Smart Locker ${assignLockers(order, store)
+                      .map((s) => `#${s.code}`)
+                      .join(' y ')} • `
+                  : ''
+              }${store.name}, ${store.address}`}
+            />
+          )}
+          {(!!order.pointsEarned || !!order.pointsRedeemed) && (
+            <InfoRow
+              icon={POINTS_ICON}
+              label="Puntos"
+              value={[
+                order.pointsEarned ? `+${pts(order.pointsEarned)} ganados` : '',
+                order.pointsRedeemed ? `−${pts(order.pointsRedeemed)} canjeados` : '',
+              ]
+                .filter(Boolean)
+                .join(' • ')}
+            />
           )}
           {order.schedule.type === 'scheduled' && (
             <InfoRow icon="calendar-clock-outline" label="Horario" value={order.schedule.slot} />
@@ -180,7 +214,10 @@ export default function OrderDetailScreen() {
             }
           />
         )}
-        <Button label="Volver a pedir" icon="restore" variant="brand" onPress={reorder} />
+        {/* Mientras el pedido sigue en curso, la acción es "Rastrear" (tarjeta de estado). */}
+        {status.phase !== 'active' && (
+          <Button label="Volver a pedir" icon="restore" variant="brand" onPress={() => reorder(order)} />
+        )}
         <Button
           label="Necesito ayuda con este pedido"
           icon="help-circle-outline"
@@ -188,6 +225,7 @@ export default function OrderDetailScreen() {
           onPress={() => router.push('/perfil/ayuda')}
         />
       </ScrollView>
+      {reorderSheet}
     </View>
   );
 }

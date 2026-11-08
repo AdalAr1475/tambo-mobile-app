@@ -215,6 +215,9 @@ export function ProductCard({
         {showBadge && badge && (
           <Badge label={badge.label} tone={toneFor(badge.tone)} style={styles.cardBadge} />
         )}
+        {product.redeem && (
+          <Badge label="Canjeable" tone="warning" icon="star-circle" style={styles.cardRedeem} />
+        )}
       </View>
       <View style={styles.cardBody}>
         <Txt variant="labelLg" numberOfLines={2} style={{ minHeight: 40 }}>
@@ -260,6 +263,7 @@ const styles = StyleSheet.create({
     gap: space.sm,
   },
   cardBadge: { position: 'absolute', top: 8, left: 8, borderRadius: radius.sm },
+  cardRedeem: { position: 'absolute', bottom: 8, left: 8 },
   cardBody: { gap: 2 },
   cardFooter: {
     flexDirection: 'row',

@@ -6,9 +6,10 @@ import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated';
 import { LocationHeader } from '@/components/delivery';
-import { FloatingCartBar } from '@/components/FloatingCartBar';
+import { FloatingCartBar, useFloatingCartInset } from '@/components/FloatingCartBar';
 import { Icon } from '@/components/Icon';
 import { EmptyState, SearchBar } from '@/components/layout';
+import { POINTS_ICON, RedeemCard } from '@/components/points';
 import { ProductCard } from '@/components/product';
 import { Badge, Chip, Row, SectionHeader, Tap, Txt } from '@/components/ui';
 import { discountPercent, getProduct, normalize, products } from '@/data/products';
@@ -17,14 +18,17 @@ import type { PromoTag } from '@/data/types';
 import { money } from '@/lib/format';
 import { useAddToCart } from '@/lib/useAddToCart';
 import { useContentWidth } from '@/lib/useContentWidth';
-import { useCart, useCartCount } from '@/store/cart';
+import { useCart } from '@/store/cart';
+import { pts } from '@/lib/points';
 import { useSession } from '@/store/session';
 import { toast } from '@/store/ui';
+import { useBalance } from '@/store/wallet';
 import { colors, radius, space } from '@/theme/tokens';
 
-type Filter = 'todas' | PromoTag;
+type Filter = 'todas' | PromoTag | 'puntos';
 const FILTERS: { key: Filter; label: string }[] = [
   { key: 'todas', label: 'Todas' },
+  { key: 'puntos', label: 'Canjea con puntos' },
   { key: 'combos', label: 'Combos' },
   { key: '2x1', label: '2x1' },
   { key: 'descuentos', label: 'Descuentos' },
@@ -33,14 +37,23 @@ const FILTERS: { key: Filter; label: string }[] = [
 export default function PromotionsScreen() {
   const [filter, setFilter] = useState<Filter>('todas');
   const [query, setQuery] = useState('');
-  const count = useCartCount();
+  const bottomInset = useFloatingCartInset();
+  const balance = useBalance();
   const width = useContentWidth();
   const cardW = (width - space.lg * 2 - space.md) / 2;
 
   const q = normalize(query.trim());
+  const redeemable = useMemo(
+    () =>
+      filter === 'puntos'
+        ? products.filter((p) => p.redeem && (!q || normalize(`${p.name} ${p.brand}`).includes(q)))
+        : [],
+    [filter, q],
+  );
   const cards = useMemo(
     () =>
       promoCards.filter((c) => {
+        if (filter === 'puntos') return false;
         const p = getProduct(c.productId);
         const tags = new Set<PromoTag>([c.tag as PromoTag, ...(p?.promoTags ?? [])]);
         const matchesFilter = filter === 'todas' || tags.has(filter);
@@ -53,9 +66,10 @@ export default function PromotionsScreen() {
   const extra = useMemo(
     () =>
       products
+        .filter(() => filter !== 'puntos')
         .filter((p) => p.promoTags?.length || discountPercent(p) > 0)
         .filter((p) => !promoCards.some((c) => c.productId === p.id))
-        .filter((p) => filter === 'todas' || p.promoTags?.includes(filter))
+        .filter((p) => filter === 'todas' || (filter !== 'puntos' && p.promoTags?.includes(filter)))
         .filter((p) => !q || normalize(`${p.name} ${p.brand}`).includes(q))
         .sort((a, b) => discountPercent(b) - discountPercent(a)),
     [filter, q],
@@ -65,7 +79,7 @@ export default function PromotionsScreen() {
     <View style={{ flex: 1 }}>
       <LocationHeader />
       <ScrollView
-        contentContainerStyle={{ paddingBottom: count > 0 ? 112 : space.xxl }}
+        contentContainerStyle={{ paddingBottom: bottomInset }}
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.pad}>
@@ -95,10 +109,29 @@ export default function PromotionsScreen() {
 
         <View style={[styles.pad, { gap: space.lg }]}>
           {filter === 'todas' && !q && <WelcomeCoupon />}
+          {filter === 'puntos' && (
+            <Animated.View entering={FadeIn} style={{ gap: space.md }}>
+              <Tap onPress={() => router.push('/puntos')} style={styles.pointsBanner} accessibilityLabel="Ver mis puntos">
+                <Icon name={POINTS_ICON} size={26} color={colors.onGold} />
+                <View style={{ flex: 1 }}>
+                  <Txt variant="labelLg" color={colors.onGold}>
+                    Tienes {pts(balance)}
+                  </Txt>
+                  <Txt variant="bodySm" color={colors.onGold}>
+                    Canjea al 100% con puntos o paga una parte en soles.
+                  </Txt>
+                </View>
+                <Icon name="chevron-right" size={22} color={colors.onGold} />
+              </Tap>
+              {redeemable.map((p) => (
+                <RedeemCard key={p.id} product={p} />
+              ))}
+            </Animated.View>
+          )}
           {cards.map((c) => (
             <PromoCardView key={c.id} card={c} />
           ))}
-          {cards.length === 0 && extra.length === 0 && (
+          {cards.length === 0 && extra.length === 0 && redeemable.length === 0 && (
             <EmptyState
               icon="tag-off-outline"
               title="Sin promociones"
@@ -289,6 +322,14 @@ function PromoCardView({ card }: { card: PromoCard }) {
 
 const styles = StyleSheet.create({
   pad: { paddingHorizontal: space.lg },
+  pointsBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
+    padding: space.lg,
+    borderRadius: radius.xl,
+    backgroundColor: colors.gold,
+  },
   titleIcon: {
     width: 40,
     height: 40,

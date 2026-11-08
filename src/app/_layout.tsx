@@ -12,13 +12,17 @@ import { Platform, StyleSheet, View } from 'react-native';
 import { AgeGateHost } from '@/components/AgeGateHost';
 import { ToastHost } from '@/components/ToastHost';
 import { useCart } from '@/store/cart';
+import { useDemo } from '@/store/demo';
 import { useOrders } from '@/store/orders';
+import { useRoutineRunner } from '@/lib/routines';
+import { useRoutines } from '@/store/routines';
 import { useSession } from '@/store/session';
+import { useWallet } from '@/store/wallet';
 import { colors, MAX_APP_WIDTH } from '@/theme/tokens';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
-const persisted = [useCart, useSession, useOrders];
+const persisted = [useCart, useSession, useOrders, useDemo, useWallet, useRoutines];
 const allHydrated = () => persisted.every((s) => s.persist.hasHydrated());
 
 const subscribeHydration = (cb: () => void) => {
@@ -39,6 +43,8 @@ export default function RootLayout() {
   const hydrated = useHydrated();
   const ready = (fontsLoaded || !!fontError) && hydrated;
   const loggedIn = useSession((s) => s.loggedIn);
+  // Tambo Auto-Pilot: ejecuta las rutinas que tocan mientras la app está abierta.
+  useRoutineRunner(ready && loggedIn);
 
   useEffect(() => {
     if (ready) SplashScreen.hideAsync().catch(() => {});
@@ -69,6 +75,14 @@ export default function RootLayout() {
             <Stack.Screen
               name="pedido/confirmado/[id]"
               options={{ animation: 'fade_from_bottom', gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="locker/[id]"
+              options={{
+                presentation: 'fullScreenModal',
+                animation: 'slide_from_bottom',
+                contentStyle: { backgroundColor: colors.primaryDark },
+              }}
             />
           </Stack.Protected>
           <Stack.Protected guard={!loggedIn}>

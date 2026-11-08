@@ -1,18 +1,31 @@
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { getStore, stores } from '@/data/stores';
+import { districtCentroid, getStore, stores } from '@/data/stores';
 import type { Address } from '@/data/types';
+import { haptic } from '@/lib/feedback';
+import {
+  addressCoords,
+  COVERAGE_METERS,
+  DELIVERY_RANGE_METERS,
+  deliveryStoreFor,
+  formatDistance,
+  haversine,
+  storesByDistance,
+} from '@/lib/geo';
+import { useUserLocation } from '@/lib/useUserLocation';
 import { useCartCount } from '@/store/cart';
 import { useSelectedAddress, useSession } from '@/store/session';
 import { toast } from '@/store/ui';
 import { colors, radius, space } from '@/theme/tokens';
 import { Icon } from './Icon';
-import { FulfillmentToggle, TextField } from './layout';
+import { fulfillmentMeta, FulfillmentToggle, TextField } from './layout';
+import { SmartMap } from './map/SmartMap';
+import { PointsPill } from './points';
 import { Sheet } from './Sheet';
-import { Button, Chip, IconButton, Row, Tap, Txt } from './ui';
+import { Badge, Button, Chip, IconButton, Row, Tap, Txt } from './ui';
 
 /* ——— Formulario de dirección (sheet y pantalla de direcciones) ——— */
 
@@ -47,6 +60,9 @@ export function AddressForm({
       line1: line1.trim(),
       district: district.trim(),
       reference: reference.trim() || undefined,
+      // Sin geocodificación en tiempo real: se ubica en el centro del distrito (o se conserva la anterior).
+      coords:
+        initial?.coords && initial.district === district.trim() ? initial.coords : districtCentroid(district),
     };
     saveAddress(a);
     onSaved(a);
@@ -104,6 +120,8 @@ export function DeliveryPointSheet({ visible, onClose }: { visible: boolean; onC
   const selectAddress = useSession((s) => s.selectAddress);
   const selectStore = useSession((s) => s.selectStore);
   const [adding, setAdding] = useState(false);
+  const user = useUserLocation();
+  const nearby = useMemo(() => storesByDistance(user.coords), [user.coords]);
 
   const close = () => {
     setAdding(false);
@@ -147,6 +165,7 @@ export function DeliveryPointSheet({ visible, onClose }: { visible: boolean; onC
                   }
                   title={a.label}
                   subtitle={`${a.line1}, ${a.district}`}
+                  extra={<ServingStore address={a} />}
                   selected={a.id === addressId}
                   onPress={() => {
                     selectAddress(a.id);
@@ -166,12 +185,68 @@ export function DeliveryPointSheet({ visible, onClose }: { visible: boolean; onC
               <Txt variant="labelSm" color={colors.textMuted} style={styles.kicker}>
                 Tiendas cercanas
               </Txt>
-              {stores.map((s) => (
+              {/* Mapa de cobertura: tu ubicación, radio de 1.5 km y tiendas con casilleros libres. */}
+              <View style={styles.mapBox}>
+                <SmartMap
+                  height={200}
+                  interactive={false}
+                  markers={[
+                    { id: 'user', kind: 'user', position: user.coords },
+                    ...stores.map((s) => ({
+                      id: `store:${s.id}`,
+                      kind: 'store' as const,
+                      position: s.coords,
+                      selected: s.id === storeId,
+                      badge: s.lockers ? `🔒${s.lockers.free}` : undefined,
+                    })),
+                  ]}
+                  circles={[{ id: 'coverage', center: user.coords, radius: COVERAGE_METERS }]}
+                  fit={[user.coords, ...nearby.slice(0, 3).map((n) => n.store.coords)]}
+                  onMarkerPress={(id) => {
+                    if (!id.startsWith('store:')) return;
+                    selectStore(id.slice(6));
+                    haptic.tap();
+                    close();
+                  }}
+                  fallback={
+                    <View style={styles.mapFallback}>
+                      <Icon name="map-outline" size={28} color={colors.textMuted} />
+                      <Txt variant="bodySm" color={colors.textMuted}>
+                        Mapa no disponible sin conexión
+                      </Txt>
+                    </View>
+                  }
+                />
+              </View>
+              <Row style={{ gap: 4 }}>
+                <Icon name="crosshairs-gps" size={14} color={colors.textMuted} />
+                <Txt variant="bodySm" color={colors.textMuted} style={{ flex: 1 }}>
+                  {user.source === 'gps'
+                    ? 'Según tu ubicación actual'
+                    : user.source === 'approx'
+                      ? 'Ubicación aproximada (no pudimos usar tu GPS)'
+                      : 'Ubicación de demo: Parque Kennedy, Miraflores'}{' '}
+                  • cobertura inmediata de {formatDistance(COVERAGE_METERS)}
+                </Txt>
+              </Row>
+              {nearby.map(({ store: s, meters }) => (
                 <PointRow
                   key={s.id}
                   icon="storefront-outline"
                   title={`${s.name} - ${s.district}`}
-                  subtitle={`${s.address} • ${s.distanceKm} km • Listo en ${s.eta}`}
+                  subtitle={`${s.address} • a ${formatDistance(meters)} • Listo en ${s.eta}`}
+                  extra={
+                    <Row style={{ gap: 6, marginTop: 4, flexWrap: 'wrap' }}>
+                      {s.lockers && (
+                        <Badge
+                          label={s.lockers.free ? `Smart Locker: ${s.lockers.free} libres` : 'Sin casilleros libres'}
+                          tone={s.lockers.free ? 'success' : 'neutral'}
+                          icon="locker-multiple"
+                        />
+                      )}
+                      {meters > COVERAGE_METERS && <Badge label="Más lejos" tone="neutral" />}
+                    </Row>
+                  }
                   selected={s.id === storeId}
                   onPress={() => {
                     selectStore(s.id);
@@ -187,16 +262,37 @@ export function DeliveryPointSheet({ visible, onClose }: { visible: boolean; onC
   );
 }
 
+/** Tienda que atiende una dirección y si está dentro del radio de delivery. */
+function ServingStore({ address }: { address: Address }) {
+  const store = deliveryStoreFor(address);
+  const meters = haversine(addressCoords(address), store.coords);
+  const covered = meters <= DELIVERY_RANGE_METERS;
+  return (
+    <Row style={{ gap: 4, marginTop: 4 }}>
+      <Icon
+        name={covered ? 'storefront-outline' : 'map-marker-off-outline'}
+        size={14}
+        color={covered ? colors.success : colors.error}
+      />
+      <Txt variant="bodySm" color={covered ? colors.success : colors.error} numberOfLines={1} style={{ flex: 1 }}>
+        {covered ? `Te atiende ${store.name} (${formatDistance(meters)})` : 'Fuera de cobertura delivery'}
+      </Txt>
+    </Row>
+  );
+}
+
 function PointRow({
   icon,
   title,
   subtitle,
+  extra,
   selected,
   onPress,
 }: {
   icon: React.ComponentProps<typeof Icon>['name'];
   title: string;
   subtitle: string;
+  extra?: React.ReactNode;
   selected: boolean;
   onPress: () => void;
 }) {
@@ -216,6 +312,7 @@ function PointRow({
         <Txt variant="bodySm" color={colors.textMuted} numberOfLines={2}>
           {subtitle}
         </Txt>
+        {extra}
       </View>
       {selected && <Icon name="check-circle" size={22} color={colors.primary} />}
     </Tap>
@@ -251,45 +348,44 @@ export function useDeliveryPoint() {
 
 /* ——— Header de Inicio / Descuentos ——— */
 
+/**
+ * Cabecera compacta: una píldora de contexto (modalidad · ETA · dirección o tienda) que abre
+ * "¿Cómo quieres tu pedido?". La modalidad ya no se cambia aquí con un toggle propio.
+ */
 export function LocationHeader() {
   const insets = useSafeAreaInsets();
   const point = useDeliveryPoint();
-  const setFulfillment = useSession((s) => s.setFulfillment);
   const count = useCartCount();
   const [open, setOpen] = useState(false);
+  const meta = fulfillmentMeta[point.fulfillment];
 
   return (
     <View style={[styles.header, { paddingTop: insets.top + space.sm }]}>
       <StatusBar style="light" />
-      <Row style={{ gap: space.md }}>
+      <Row style={{ gap: space.sm }}>
         <Tap
           onPress={() => setOpen(true)}
-          style={styles.locationBtn}
-          accessibilityLabel={`${point.kicker}: ${point.title}. Cambiar`}
+          style={styles.contextPill}
+          accessibilityLabel={`${meta.label}, ${point.kicker.toLowerCase()} ${point.title}, ${point.eta}. Cambiar modalidad o ${point.fulfillment === 'delivery' ? 'dirección' : 'tienda'}`}
           pressedStyle={{ opacity: 0.8 }}
         >
           <View style={styles.pin}>
-            <Icon
-              name={point.fulfillment === 'delivery' ? 'map-marker-outline' : 'storefront-outline'}
-              size={20}
-              color={colors.gold}
-            />
+            <Icon name={meta.icon} size={20} color={colors.gold} />
           </View>
-          <View style={{ flexShrink: 1 }}>
-            <Txt variant="labelSm" color="rgba(255,255,255,0.8)" style={{ textTransform: 'uppercase' }}>
-              {point.kicker}:
+          <View style={{ flex: 1 }}>
+            <Txt variant="labelSm" color="rgba(255,255,255,0.8)" numberOfLines={1}>
+              {meta.label.toUpperCase()} • {point.eta}
             </Txt>
-            <Row style={{ gap: 4 }}>
-              <Txt variant="headlineMd" color={colors.white} numberOfLines={1} style={{ flexShrink: 1 }}>
-                {point.title}
-              </Txt>
-              <Icon name="chevron-down" size={20} color={colors.white} />
-            </Row>
+            <Txt variant="labelLg" weight="bold" color={colors.white} numberOfLines={1}>
+              {point.title}
+            </Txt>
           </View>
+          <Icon name="chevron-down" size={22} color={colors.white} />
         </Tap>
+        <PointsPill />
         <IconButton
           icon="shopping-outline"
-          label={`Carrito, ${count} productos`}
+          label={count > 0 ? `Carrito, ${count} ${count === 1 ? 'producto' : 'productos'}` : 'Carrito vacío'}
           color={colors.white}
           bg="rgba(255,255,255,0.14)"
           badge={count}
@@ -297,9 +393,6 @@ export function LocationHeader() {
           style={{ borderRadius: radius.lg }}
         />
       </Row>
-      <View style={{ marginTop: space.md }}>
-        <FulfillmentToggle value={point.fulfillment} onChange={setFulfillment} />
-      </View>
       <DeliveryPointSheet visible={open} onClose={() => setOpen(false)} />
     </View>
   );
@@ -307,6 +400,14 @@ export function LocationHeader() {
 
 const styles = StyleSheet.create({
   kicker: { textTransform: 'uppercase', marginTop: space.xs },
+  mapBox: { borderRadius: radius.lg, overflow: 'hidden', borderWidth: 1, borderColor: colors.border },
+  mapFallback: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: space.xs,
+    backgroundColor: colors.surfaceMid,
+  },
   point: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -331,7 +432,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.lg,
     paddingBottom: space.md,
   },
-  locationBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: space.md },
+  contextPill: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.sm,
+    minHeight: 48,
+    paddingLeft: 4,
+    paddingRight: space.sm,
+    borderRadius: radius.full,
+    backgroundColor: 'rgba(0,0,0,0.18)',
+  },
   pin: {
     width: 40,
     height: 40,

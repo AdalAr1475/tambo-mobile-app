@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { Fulfillment } from '@/data/types';
 import { colors, elevation, fonts, radius, space } from '@/theme/tokens';
 import { Icon, type IconName } from './Icon';
-import { Button, IconButton, Tap, Txt } from './ui';
+import { Badge, Button, IconButton, Tap, Txt } from './ui';
 
 /* ——— Header morado de pantallas internas ——— */
 
@@ -50,8 +50,23 @@ export function ScreenHeader({
   );
 }
 
-/* ——— Toggle Delivery / Para llevar ——— */
+/* ——— Modalidad Delivery / Para llevar ——— */
 
+export const fulfillmentMeta: Record<Fulfillment, { label: string; icon: IconName }> = {
+  delivery: { label: 'Delivery', icon: 'moped-outline' },
+  pickup: { label: 'Para llevar', icon: 'storefront-outline' },
+};
+
+/** Muestra (no cambia) la modalidad elegida. Se cambia solo en DeliveryPointSheet. */
+export function FulfillmentBadge({ value, style }: { value: Fulfillment; style?: StyleProp<ViewStyle> }) {
+  const meta = fulfillmentMeta[value];
+  return <Badge label={meta.label} icon={meta.icon} tone="soft" style={style} />;
+}
+
+/**
+ * Selector Delivery / Para llevar. Úsalo SOLO dentro de DeliveryPointSheet: es el único lugar
+ * donde se decide la modalidad (el resto de la app solo la muestra).
+ */
 export function FulfillmentToggle({
   value,
   onChange,
@@ -62,10 +77,7 @@ export function FulfillmentToggle({
   tone?: 'dark' | 'light';
 }) {
   const dark = tone === 'dark';
-  const options: { id: Fulfillment; label: string; icon: IconName }[] = [
-    { id: 'delivery', label: 'Delivery', icon: 'moped-outline' },
-    { id: 'pickup', label: 'Para llevar', icon: 'storefront-outline' },
-  ];
+  const options = (['delivery', 'pickup'] as const).map((id) => ({ id, ...fulfillmentMeta[id] }));
   return (
     <View
       style={[styles.toggle, { backgroundColor: dark ? 'rgba(0,0,0,0.22)' : colors.surfaceMid }]}

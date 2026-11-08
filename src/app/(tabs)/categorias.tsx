@@ -1,17 +1,16 @@
 import { router } from 'expo-router';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { FloatingCartBar } from '@/components/FloatingCartBar';
+import { FloatingCartBar, useFloatingCartInset } from '@/components/FloatingCartBar';
 import { Icon } from '@/components/Icon';
 import { ScreenHeader, SearchBar } from '@/components/layout';
 import { ProductImage } from '@/components/product';
 import { Tap, Txt } from '@/components/ui';
 import { categories } from '@/data/categories';
 import { productsByCategory } from '@/data/products';
-import { useCartCount } from '@/store/cart';
 import { colors, radius, space } from '@/theme/tokens';
 
 export default function CategoriesScreen() {
-  const count = useCartCount();
+  const bottomInset = useFloatingCartInset();
   return (
     <View style={{ flex: 1 }}>
       <ScreenHeader title="Categorías" back={false}>
@@ -21,7 +20,7 @@ export default function CategoriesScreen() {
           style={{ marginTop: space.sm, marginHorizontal: space.sm }}
         />
       </ScreenHeader>
-      <ScrollView contentContainerStyle={[styles.list, { paddingBottom: count > 0 ? 112 : space.xxl }]}>
+      <ScrollView contentContainerStyle={[styles.list, { paddingBottom: bottomInset }]}>
         {categories.map((c) => {
           const items = productsByCategory(c.id);
           const preview = items.slice(0, 3);

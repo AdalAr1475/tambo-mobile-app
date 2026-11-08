@@ -2,7 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { FlatList, ScrollView, StyleSheet, View } from 'react-native';
 import { useDeliveryPoint } from '@/components/delivery';
-import { FloatingCartBar } from '@/components/FloatingCartBar';
+import { FloatingCartBar, useFloatingCartInset } from '@/components/FloatingCartBar';
 import { Icon } from '@/components/Icon';
 import { EmptyState, RadioCard, ScreenHeader, SearchBar } from '@/components/layout';
 import { ProductCard } from '@/components/product';
@@ -47,6 +47,7 @@ export default function CategoryScreen() {
   const { id, sub } = useLocalSearchParams<{ id: string; sub?: string }>();
   const category = getCategory(id);
   const count = useCartCount();
+  const bottomInset = useFloatingCartInset({ bottom: space.lg, safeArea: true });
   const point = useDeliveryPoint();
   const cardW = (useContentWidth() - space.lg * 2 - space.md) / 2;
 
@@ -147,7 +148,7 @@ export default function CategoryScreen() {
         keyExtractor={(p) => p.id}
         numColumns={2}
         columnWrapperStyle={{ gap: space.md, paddingHorizontal: space.lg }}
-        contentContainerStyle={{ gap: space.md, paddingBottom: count > 0 ? 112 : space.xxl }}
+        contentContainerStyle={{ gap: space.md, paddingBottom: bottomInset }}
         ListHeaderComponent={
           <View style={{ gap: space.md, paddingTop: space.md }}>
             <Row style={styles.toolbar}>
@@ -209,7 +210,8 @@ export default function CategoryScreen() {
         }
         renderItem={({ item }) => <ProductCard product={item} width={cardW} />}
       />
-      <FloatingCartBar bottom={space.lg} />
+      {/* Sin tab bar: la barra debe quedar sobre la barra de navegación del sistema. */}
+      <FloatingCartBar bottom={space.lg} safeArea />
 
       <Sheet visible={sortOpen} onClose={() => setSortOpen(false)} title="Ordenar por">
         <View style={{ gap: space.sm }}>

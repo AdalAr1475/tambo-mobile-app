@@ -67,9 +67,9 @@ export default function PaymentsScreen() {
         </Txt>
         <RadioCard
           selected={preferred === 'yape'}
-          onPress={() => choose('yape', 'Yape / Plin')}
-          title="Yape / Plin"
-          subtitle={`Vinculado a ${phone}`}
+          onPress={() => choose('yape', 'Yape')}
+          title="Yape"
+          subtitle={`${phone} • con código de aprobación`}
           badge={<Badge label="Sin comisiones" tone="warning" />}
           iconNode={
             <View style={styles.yape}>
@@ -78,6 +78,13 @@ export default function PaymentsScreen() {
               </Txt>
             </View>
           }
+        />
+        <RadioCard
+          selected={preferred === 'plin'}
+          onPress={() => choose('plin', 'Plin')}
+          title="Plin"
+          subtitle={`Vinculado a ${phone}`}
+          icon="cellphone-message"
         />
         <RadioCard
           selected={preferred === 'card'}

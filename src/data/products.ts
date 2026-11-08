@@ -71,6 +71,7 @@ export const products: Product[] = [
   },
   {
     id: 'fourloko-sandia-pack',
+    redeem: { mixed: { points: 400, cash: 8.9 } },
     name: '2x Four Loko Sandía',
     brand: 'Four Loko',
     categoryId: 'bebidas',
@@ -269,6 +270,7 @@ export const products: Product[] = [
   },
   {
     id: 'piqueo-snax',
+    redeem: { points: 700, mixed: { points: 350, cash: 3.9 } },
     name: 'Piqueo Snax Mix 180 g',
     brand: 'Snax',
     categoryId: 'snacks',
@@ -337,6 +339,7 @@ export const products: Product[] = [
   // ——— Comida lista ———
   {
     id: 'empanada-carne',
+    redeem: { points: 400 },
     name: 'Empanada de Carne Tambo',
     brand: 'Tambo',
     categoryId: 'comida',
@@ -365,6 +368,7 @@ export const products: Product[] = [
   },
   {
     id: 'pan-chicharron',
+    redeem: { points: 1000, mixed: { points: 500, cash: 5.9 } },
     name: 'Combo Sanguchero: Pan con chicharrón + Café',
     brand: 'Combos Tambo',
     categoryId: 'comida',
@@ -409,6 +413,7 @@ export const products: Product[] = [
   // ——— Cafetería ———
   {
     id: 'cafe-americano',
+    redeem: { points: 350, mixed: { points: 200, cash: 1.5 } },
     name: 'Café Americano 12 oz',
     brand: 'Tambo Café',
     categoryId: 'cafeteria',
@@ -422,6 +427,7 @@ export const products: Product[] = [
   },
   {
     id: 'capuccino',
+    redeem: { points: 590, mixed: { points: 300, cash: 2.9 } },
     name: 'Capuccino 12 oz',
     brand: 'Tambo Café',
     categoryId: 'cafeteria',
@@ -435,6 +441,7 @@ export const products: Product[] = [
   },
   {
     id: 'croissant',
+    redeem: { points: 450, mixed: { points: 250, cash: 2.5 } },
     name: 'Croissant de Jamón y Queso',
     brand: 'Tambo Café',
     categoryId: 'cafeteria',
@@ -493,6 +500,7 @@ export const products: Product[] = [
   // ——— Abarrotes ———
   {
     id: 'hielo-2kg',
+    redeem: { points: 300 },
     name: 'Hielo en cubos 2 kg',
     brand: 'Tambo',
     categoryId: 'abarrotes',

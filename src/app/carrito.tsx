@@ -12,21 +12,26 @@ import {
 } from 'react-native';
 import Animated, { FadeIn, LinearTransition, SlideInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { UpsellRow } from '@/components/ai';
 import { DeliveryPointSheet, useDeliveryPoint } from '@/components/delivery';
 import { Icon } from '@/components/Icon';
-import { EmptyState } from '@/components/layout';
+import { EmptyState, FulfillmentBadge } from '@/components/layout';
 import { ProductImage, QuantityStepper } from '@/components/product';
 import { SummaryRow } from '@/components/summary';
 import { ToastHost } from '@/components/ToastHost';
 import { Badge, Button, Card, Divider, IconButton, Row, Tap, Txt } from '@/components/ui';
 import { coupons } from '@/data/stores';
 import { discountPercent } from '@/data/products';
+import { POINTS_ICON, redeemLabel } from '@/components/points';
 import { money } from '@/lib/format';
 import { haptic } from '@/lib/feedback';
-import { checkCoupon, lineRegular, lineTotal, type CartLine } from '@/lib/pricing';
+import { formatPoints, pts } from '@/lib/points';
+import { checkCoupon, lineRegular, lineTotal, redeemOption, type CartLine } from '@/lib/pricing';
+import { cartPointsInUse } from '@/lib/useAddToCart';
 import { useCart, useCartLines, useCartTotals } from '@/store/cart';
 import { useSession } from '@/store/session';
 import { toast, useUi } from '@/store/ui';
+import { useBalance } from '@/store/wallet';
 import { colors, elevation, fonts, radius, space } from '@/theme/tokens';
 
 export default function CartScreen() {
@@ -34,8 +39,9 @@ export default function CartScreen() {
   const lines = useCartLines();
   const totals = useCartTotals();
   const point = useDeliveryPoint();
+  const balance = useBalance();
   const [pointOpen, setPointOpen] = useState(false);
-  const close = () => (router.canGoBack() ? router.back() : router.replace('/'));
+  const close =() => (router.canGoBack() ? router.back() : router.replace('/'));
 
   // El aviso "producto agregado · Ver carrito" ya no aplica dentro del carrito.
   useEffect(() => {
@@ -47,6 +53,11 @@ export default function CartScreen() {
     if (point.fulfillment === 'delivery' && !point.address) {
       toast('Agrega una dirección de entrega', { tone: 'error' });
       setPointOpen(true);
+      return;
+    }
+    if (totals.pointsFromLines > balance) {
+      haptic.warning();
+      toast(`Te faltan ${pts(totals.pointsFromLines - balance)} para tus canjes`, { tone: 'error' });
       return;
     }
     router.replace('/checkout');
@@ -99,9 +110,12 @@ export default function CartScreen() {
               >
                 <Card style={styles.block}>
                   <Row style={{ justifyContent: 'space-between' }}>
-                    <Txt variant="labelSm" color={colors.textMuted} style={styles.upper}>
-                      {point.fulfillment === 'delivery' ? 'Punto de entrega' : 'Recoges en'}
-                    </Txt>
+                    <Row style={{ gap: space.sm }}>
+                      <FulfillmentBadge value={point.fulfillment} />
+                      <Txt variant="labelSm" color={colors.textMuted} style={styles.upper}>
+                        {point.fulfillment === 'delivery' ? 'Punto de entrega' : 'Recoges en'}
+                      </Txt>
+                    </Row>
                     <Row style={{ gap: 4 }}>
                       <Icon name="clock-outline" size={16} color={colors.primary} />
                       <Txt variant="labelMd" color={colors.primary}>
@@ -112,7 +126,7 @@ export default function CartScreen() {
                   <Tap
                     onPress={() => setPointOpen(true)}
                     style={styles.point}
-                    accessibilityLabel="Cambiar punto de entrega"
+                    accessibilityLabel="Cambiar modalidad o punto de entrega"
                   >
                     <Icon
                       name={point.fulfillment === 'delivery' ? 'map-marker-outline' : 'storefront-outline'}
@@ -144,9 +158,10 @@ export default function CartScreen() {
                 </Row>
 
                 {lines.map((line, index) => (
-                  <CartItemRow key={line.product.id} line={line} index={index} />
+                  <CartItemRow key={`${line.product.id}-${line.redeem ?? 'std'}`} line={line} index={index} />
                 ))}
 
+                <UpsellRow lines={lines} />
                 <CouponBox />
                 <Summary />
 
@@ -162,7 +177,11 @@ export default function CartScreen() {
                 <Button
                   label="Continuar con la compra"
                   iconRight="arrow-right"
-                  trailing={money(totals.total)}
+                  trailing={
+                    totals.pointsFromLines > 0
+                      ? `${money(totals.total)} + ${formatPoints(totals.pointsFromLines)} pts`
+                      : money(totals.total)
+                  }
                   size="lg"
                   onPress={goCheckout}
                 />
@@ -200,29 +219,40 @@ function FreeShippingBar({ gap, subtotal }: { gap: number; subtotal: number }) {
 }
 
 function CartItemRow({ line, index }: { line: CartLine; index: number }) {
-  const { product, qty } = line;
+  const { product, qty, redeem } = line;
   const setQty = useCart((s) => s.setQty);
   const remove = useCart((s) => s.remove);
   const restore = useCart((s) => s.restore);
+  const balance = useBalance();
   const total = lineTotal(product, qty);
   const regular = lineRegular(product, qty);
   const pct = discountPercent(product);
   const multiApplied = product.multiBuy && qty >= product.multiBuy.qty;
+  const option = redeem ? redeemOption(product, redeem) : undefined;
 
   const removeItem = () => {
     haptic.warning();
-    remove(product.id);
+    remove(product.id, redeem);
     toast(`${product.name} eliminado`, {
       icon: 'trash-can-outline',
-      action: { label: 'Deshacer', onPress: () => restore({ productId: product.id, qty }, index) },
+      action: { label: 'Deshacer', onPress: () => restore({ productId: product.id, qty, redeem }, index) },
     });
   };
 
-  const changeQty = (n: number) => (n <= 0 ? removeItem() : setQty(product.id, n));
+  const changeQty = (n: number) => {
+    if (n <= 0) return removeItem();
+    // Un canje solo puede crecer si alcanza el saldo de puntos.
+    if (option && n > qty && cartPointsInUse() + option.points * (n - qty) > balance) {
+      haptic.warning();
+      toast('No te alcanzan los puntos para otra unidad', { tone: 'error', icon: POINTS_ICON });
+      return;
+    }
+    setQty(product.id, n, redeem);
+  };
 
   return (
     <Animated.View layout={LinearTransition} entering={FadeIn}>
-      <Card style={styles.item}>
+      <Card style={[styles.item, option && styles.itemRedeem]}>
         <Tap
           onPress={() => router.push(`/producto/${product.id}`)}
           style={styles.itemTop}
@@ -237,6 +267,22 @@ function CartItemRow({ line, index }: { line: CartLine; index: number }) {
             <Txt variant="bodySm" color={colors.textMuted} numberOfLines={1}>
               {product.subtitle}
             </Txt>
+            {option ? (
+              <Row style={{ justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 4 }}>
+                <View style={{ flexShrink: 1 }}>
+                  <Row style={{ gap: 4 }}>
+                    <Icon name={POINTS_ICON} size={18} color={colors.goldText} />
+                    <Txt variant="labelLg" weight="extrabold" color={colors.goldText}>
+                      {redeemLabel(option, qty)}
+                    </Txt>
+                  </Row>
+                  <Txt variant="priceStrike" color={colors.textSubtle}>
+                    {money(total)}
+                  </Txt>
+                </View>
+                <Badge label={redeem === 'points' ? 'Canje 100%' : 'Puntos + S/'} tone="warning" />
+              </Row>
+            ) : (
             <Row style={{ justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 4 }}>
               <Row style={{ alignItems: 'baseline', flexShrink: 1 }}>
                 <Txt variant="price" color={colors.primary}>
@@ -260,6 +306,7 @@ function CartItemRow({ line, index }: { line: CartLine; index: number }) {
                 </Txt>
               )}
             </Row>
+            )}
           </View>
         </Tap>
         <Divider />
@@ -422,6 +469,14 @@ function Summary() {
           tone="discount"
         />
       )}
+      {t.pointsLinesValue > 0 && (
+        <SummaryRow
+          label={`Canje con puntos (${pts(t.pointsFromLines)})`}
+          value={`- ${money(t.pointsLinesValue)}`}
+          icon={POINTS_ICON}
+          tone="discount"
+        />
+      )}
       <SummaryRow
         label={fulfillment === 'delivery' ? 'Costo de envío (Delivery)' : 'Retiro en tienda'}
         value={t.shipping === 0 ? 'Gratis' : money(t.shipping)}
@@ -429,6 +484,7 @@ function Summary() {
         tone={t.shipping === 0 ? 'success' : undefined}
       />
       <Divider dashed />
+      <PointsBalanceNote pointsNeeded={t.pointsFromLines} earned={t.pointsEarned} />
       <Row style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <View>
           <Txt variant="headlineMd">Total a pagar</Txt>
@@ -444,8 +500,35 @@ function Summary() {
   );
 }
 
+/** Puntos que se canjean y que se ganarán; avisa si el saldo no alcanza. */
+function PointsBalanceNote({ pointsNeeded, earned }: { pointsNeeded: number; earned: number }) {
+  const balance = useBalance();
+  const missing = pointsNeeded - balance;
+  return (
+    <View style={styles.pointsNote}>
+      <Icon name={POINTS_ICON} size={18} color={missing > 0 ? colors.error : colors.goldText} />
+      <Txt variant="bodySm" color={missing > 0 ? colors.error : colors.goldText} style={{ flex: 1 }}>
+        {missing > 0
+          ? `Te faltan ${pts(missing)} para este canje (tienes ${pts(balance)}).`
+          : pointsNeeded > 0
+            ? `Canjeas ${pts(pointsNeeded)} de tus ${pts(balance)} y sumas ${pts(earned)} con esta compra.`
+            : `Sumarás ${pts(earned)} Tambo Lover con esta compra.`}
+      </Txt>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  pointsNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    padding: space.sm,
+    borderRadius: radius.md,
+    backgroundColor: colors.goldSoft,
+  },
+  itemRedeem: { borderColor: colors.goldBorder, backgroundColor: colors.goldTint },
   scrim: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: colors.scrim },
   kav: { flex: 1, justifyContent: 'flex-end' },
   panel: {

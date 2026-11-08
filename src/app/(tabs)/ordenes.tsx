@@ -12,16 +12,18 @@ import { getStore } from '@/data/stores';
 import type { Order } from '@/data/types';
 import { friendlyDate, money, pluralize, shortDate } from '@/lib/format';
 import { getOrderStatus, type OrderStatus } from '@/lib/orderProgress';
-import { useCart } from '@/store/cart';
+import { AUTOPILOT_BENEFIT, AUTOPILOT_ICON, AutoPilotBadge, RoutineCard } from '@/components/routines';
+import { useReorder } from '@/lib/useReorder';
+import { useRoutines } from '@/store/routines';
 import { useNow, useOrders } from '@/store/orders';
-import { toast } from '@/store/ui';
 import { colors, radius, space } from '@/theme/tokens';
 
 export default function OrdersScreen() {
   const orders = useOrders((s) => s.orders);
   const focused = useIsFocused();
   const now = useNow(1000, focused);
-  const [tab, setTab] = useState<'active' | 'history'>('active');
+  const [tab, setTab] = useState<'active' | 'history' | 'routines'>('active');
+  const routines = useRoutines((s) => s.routines);
   const [searching, setSearching] = useState(false);
   const [query, setQuery] = useState('');
 
@@ -79,6 +81,7 @@ export default function OrdersScreen() {
           [
             ['active', 'En curso', active.length],
             ['history', 'Historial', history.length],
+            ['routines', 'Rutinas', routines.length],
           ] as const
         ).map(([key, label, n]) => {
           const selected = tab === key;
@@ -95,7 +98,8 @@ export default function OrdersScreen() {
               <Txt
                 variant="headlineMd"
                 color={selected ? colors.primaryDark : colors.textMuted}
-                style={{ fontSize: 17 }}
+                style={{ fontSize: 15 }}
+                numberOfLines={1}
               >
                 {label}
               </Txt>
@@ -110,7 +114,29 @@ export default function OrdersScreen() {
       </Row>
 
       <ScrollView contentContainerStyle={styles.body}>
-        {tab === 'active' ? (
+        {tab === 'routines' ? (
+          <>
+            {routines.length === 0 ? (
+              <EmptyState
+                icon={AUTOPILOT_ICON}
+                title="Aún no tienes rutinas"
+                message={`Programa tu desayuno, tu agua o tu previa y llega sola. ${AUTOPILOT_BENEFIT}.`}
+                action="Crear mi rutina"
+                onAction={() => router.push('/rutinas')}
+              />
+            ) : (
+              routines.map((r) => <RoutineCard key={r.id} routine={r} />)
+            )}
+            {routines.length > 0 && (
+              <Button
+                label="Nueva rutina"
+                icon="plus"
+                variant="outline"
+                onPress={() => router.push('/rutinas')}
+              />
+            )}
+          </>
+        ) : tab === 'active' ? (
           <>
             {active.length === 0 ? (
               <EmptyState
@@ -224,7 +250,10 @@ function ActiveOrderCard({ order, status }: { order: Order; status: OrderStatus 
                 {friendlyDate(order.createdAt)}
               </Txt>
             </View>
-            <Badge label={status.shortLabel} tone="success" icon="circle-medium" />
+            <View style={{ alignItems: 'flex-end', gap: 4 }}>
+              <Badge label={status.shortLabel} tone="success" icon="circle-medium" />
+              {order.routineId && <AutoPilotBadge />}
+            </View>
           </Row>
           <Row style={{ gap: 6 }}>
             <Icon
@@ -294,20 +323,11 @@ function ActiveOrderCard({ order, status }: { order: Order; status: OrderStatus 
 
 function HistoryCard({ order, status }: { order: Order; status: OrderStatus }) {
   const store = getStore(order.storeId);
-  const replace = useCart((s) => s.replace);
+  const { reorder, sheet: reorderSheet } = useReorder();
   const count = order.items.reduce((n, i) => n + i.qty, 0);
   const cancelled = status.phase === 'cancelled';
   const first = order.items[0];
   const firstProduct = first && getProduct(first.productId);
-
-  const reorder = () => {
-    const available = order.items.filter((i) => getProduct(i.productId));
-    replace(available.map((i) => ({ productId: i.productId, qty: i.qty })));
-    toast(`${pluralize(available.length, 'producto agregado', 'productos agregados')} al carrito`, {
-      icon: 'restore',
-    });
-    router.push('/carrito');
-  };
 
   return (
     <Card>
@@ -320,9 +340,12 @@ function HistoryCard({ order, status }: { order: Order; status: OrderStatus }) {
         <Row style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <View style={{ flex: 1 }}>
             <Txt variant="headlineMd">Pedido #{order.id}</Txt>
-            <Txt variant="bodySm" color={colors.textMuted}>
-              {pluralize(count, 'artículo', 'artículos')}
-            </Txt>
+            <Row style={{ gap: 6 }}>
+              <Txt variant="bodySm" color={colors.textMuted}>
+                {pluralize(count, 'artículo', 'artículos')}
+              </Txt>
+              {order.routineId && <AutoPilotBadge />}
+            </Row>
           </View>
           <Badge
             label={`${status.shortLabel} • ${shortDate(order.createdAt)}`}
@@ -352,7 +375,9 @@ function HistoryCard({ order, status }: { order: Order; status: OrderStatus }) {
             </Txt>
             <Txt variant="bodySm" color={colors.textMuted} numberOfLines={1}>
               {order.fulfillment === 'pickup'
-                ? 'Retiro express en tienda'
+                ? order.pickupMethod === 'locker'
+                  ? 'Retiro en Smart Locker'
+                  : 'Retiro express en tienda'
                 : `Pagado con ${order.payment.label}`}
             </Txt>
           </View>
@@ -385,9 +410,10 @@ function HistoryCard({ order, status }: { order: Order; status: OrderStatus }) {
           variant="brand"
           size="sm"
           full={false}
-          onPress={reorder}
+          onPress={() => reorder(order)}
         />
       </Row>
+      {reorderSheet}
     </Card>
   );
 }
@@ -395,15 +421,17 @@ function HistoryCard({ order, status }: { order: Order; status: OrderStatus }) {
 const styles = StyleSheet.create({
   tabs: {
     backgroundColor: colors.surface,
-    paddingHorizontal: space.lg,
-    gap: space.xl,
+    paddingHorizontal: space.md,
+    gap: space.xs,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
   tab: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: space.sm,
+    justifyContent: 'center',
+    gap: 6,
     paddingVertical: space.md,
     borderBottomWidth: 3,
     borderBottomColor: 'transparent',

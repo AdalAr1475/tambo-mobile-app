@@ -12,21 +12,47 @@ type OrdersState = {
   cancel: (id: string) => void;
   complete: (id: string) => void;
   rate: (id: string, rating: number) => void;
+  /** Adelanta el reloj de un pedido (Modo Presentador). */
+  fastForward: (id: string, ms: number) => void;
+  /** Marca el retiro como verificado (QR escaneado en el tótem o en caja). */
+  verify: (id: string) => void;
+  /** Reloj simulado: desde ahora el pedido avanza `rate`× partiendo de `t` ms de demo. */
+  simulate: (id: string, t: number, rate: number) => void;
 };
+
+const patch = (orders: Order[], id: string, fn: (o: Order) => Partial<Order>) =>
+  orders.map((o) => (o.id === id ? { ...o, ...fn(o) } : o));
 
 export const useOrders = create<OrdersState>()(
   persist(
     (set) => ({
       orders: createSeedOrders(),
       place: (order) => set((s) => ({ orders: [order, ...s.orders] })),
-      cancel: (id) =>
-        set((s) => ({ orders: s.orders.map((o) => (o.id === id ? { ...o, cancelledAt: Date.now() } : o)) })),
-      complete: (id) =>
-        set((s) => ({ orders: s.orders.map((o) => (o.id === id ? { ...o, completedAt: Date.now() } : o)) })),
-      rate: (id, rating) =>
-        set((s) => ({ orders: s.orders.map((o) => (o.id === id ? { ...o, rating } : o)) })),
+      cancel: (id) => set((s) => ({ orders: patch(s.orders, id, () => ({ cancelledAt: Date.now() })) })),
+      complete: (id) => set((s) => ({ orders: patch(s.orders, id, () => ({ completedAt: Date.now() })) })),
+      rate: (id, rating) => set((s) => ({ orders: patch(s.orders, id, () => ({ rating })) })),
+      fastForward: (id, ms) =>
+        set((s) => ({ orders: patch(s.orders, id, (o) => ({ clockOffsetMs: (o.clockOffsetMs ?? 0) + ms })) })),
+      verify: (id) =>
+        set((s) => ({ orders: patch(s.orders, id, (o) => (o.verifiedAt ? {} : { verifiedAt: Date.now() })) })),
+      simulate: (id, t, rate) =>
+        set((s) => ({ orders: patch(s.orders, id, () => ({ sim: { at: Date.now(), t, rate }, clockOffsetMs: 0 })) })),
     }),
-    { name: 'tambo-orders', storage: persistStorage },
+    {
+      name: 'tambo-orders',
+      storage: persistStorage,
+      // v2 (It. 3): el retiro manual (`completedAt`) pasa a contar como retiro verificado.
+      version: 2,
+      migrate: (persisted, version) => {
+        const state = persisted as OrdersState;
+        if (version < 2) {
+          state.orders = state.orders.map((o) =>
+            o.fulfillment === 'pickup' && o.completedAt && !o.verifiedAt ? { ...o, verifiedAt: o.completedAt } : o,
+          );
+        }
+        return state;
+      },
+    },
   ),
 );
 

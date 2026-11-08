@@ -1,0 +1,29 @@
+{
+  "_source": "Coordenadas obtenidas una sola vez de OpenStreetMap (Nominatim) el 2026-11-08. © OpenStreetMap contributors (ODbL).",
+  "stores": {
+    "aliaga": { "lat": -12.092645, "lng": -77.059207, "osm": "Avenida Juan de Aliaga, Magdalena del Mar" },
+    "larco": { "lat": -12.121928, "lng": -77.029268, "osm": "400, Avenida José Larco, Miraflores" },
+    "benavides": { "lat": -12.125391, "lng": -77.024705, "osm": "1180, Avenida Alfredo Benavides, Miraflores" },
+    "sanisidro": { "lat": -12.097412, "lng": -77.036902, "osm": "390, Avenida Camino Real, San Isidro" },
+    "losolivos": { "lat": -11.995985, "lng": -77.084113, "osm": "Avenida Santiago Antúnez de Mayolo, Los Olivos (sede demo)" },
+    "surco": { "lat": -12.104158, "lng": -76.964144, "osm": "Avenida Primavera, Santiago de Surco (sede demo)" }
+  },
+  "addresses": {
+    "casa": { "lat": -12.121448, "lng": -77.032535, "osm": "Calle Berlín, Miraflores" },
+    "oficina": { "lat": -12.093379, "lng": -77.026431, "osm": "641, Avenida Ricardo Rivera Navarrete, San Isidro" }
+  },
+  "demoUser": { "lat": -12.121781, "lng": -77.030422, "osm": "Parque John F. Kennedy, Miraflores" },
+  "districts": {
+    "Miraflores": { "lat": -12.121498, "lng": -77.025906 },
+    "San Isidro": { "lat": -12.097902, "lng": -77.035367 },
+    "Magdalena del Mar": { "lat": -12.095715, "lng": -77.068224 },
+    "Santiago de Surco": { "lat": -12.125105, "lng": -76.982161 },
+    "Los Olivos": { "lat": -11.965985, "lng": -77.073071 },
+    "Lince": { "lat": -12.085298, "lng": -77.036981 },
+    "Jesús María": { "lat": -12.078186, "lng": -77.046403 },
+    "Barranco": { "lat": -12.143959, "lng": -77.020268 },
+    "San Borja": { "lat": -12.096452, "lng": -76.99569 },
+    "Pueblo Libre": { "lat": -12.076639, "lng": -77.067858 },
+    "Surquillo": { "lat": -12.114195, "lng": -77.010504 }
+  }
+}

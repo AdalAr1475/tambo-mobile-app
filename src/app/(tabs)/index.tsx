@@ -3,8 +3,10 @@ import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
+import { ForYouSection } from '@/components/ai';
+import { AutoPilotHomeCard } from '@/components/routines';
 import { useDeliveryPoint, LocationHeader } from '@/components/delivery';
-import { FloatingCartBar } from '@/components/FloatingCartBar';
+import { FloatingCartBar, useFloatingCartInset } from '@/components/FloatingCartBar';
 import { Icon } from '@/components/Icon';
 import { SearchBar } from '@/components/layout';
 import { ProductCard } from '@/components/product';
@@ -17,14 +19,13 @@ import { money } from '@/lib/format';
 import { FREE_SHIPPING_MIN } from '@/lib/pricing';
 import { useAddToCart } from '@/lib/useAddToCart';
 import { useContentWidth } from '@/lib/useContentWidth';
-import { useCart, useCartCount } from '@/store/cart';
+import { useReorder } from '@/lib/useReorder';
 import { useOrders } from '@/store/orders';
-import { toast } from '@/store/ui';
 import { colors, radius, space } from '@/theme/tokens';
 
 export default function HomeScreen() {
   const width = useContentWidth();
-  const count = useCartCount();
+  const bottomInset = useFloatingCartInset();
   const point = useDeliveryPoint();
   const deals = useMemo(() => dealsOfTheDay(), []);
   const comboList = useMemo(() => combos(), []);
@@ -34,7 +35,7 @@ export default function HomeScreen() {
     <View style={{ flex: 1 }}>
       <LocationHeader />
       <ScrollView
-        contentContainerStyle={{ paddingBottom: count > 0 ? 112 : space.xxl }}
+        contentContainerStyle={{ paddingBottom: bottomInset }}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.pad}>
@@ -64,6 +65,7 @@ export default function HomeScreen() {
                     {point.store.name}
                   </Txt>{' '}
                   • listo en {point.eta}
+                  {point.store.lockers?.free ? ` • ${point.store.lockers.free} Smart Lockers libres` : ''}
                 </>
               )}
             </Txt>
@@ -71,7 +73,9 @@ export default function HomeScreen() {
         </View>
 
         <HeroCarousel width={width} />
+        <AutoPilotHomeCard />
         <LastOrderCard />
+        <ForYouSection />
 
         <SectionHeader
           title="Explora categorías"
@@ -240,18 +244,10 @@ function HeroCarousel({ width }: { width: number }) {
 
 function LastOrderCard() {
   const last = useOrders((s) => s.orders.find((o) => !o.cancelledAt));
-  const replace = useCart((s) => s.replace);
+  const { reorder, sheet } = useReorder();
   if (!last) return null;
   const summary = last.items.map((i) => `${i.qty} ${i.name.split(' ').slice(0, 3).join(' ')}`).join(' + ');
   const store = getStore(last.storeId);
-
-  const repeat = () => {
-    replace(
-      last.items.filter((i) => getProduct(i.productId)).map((i) => ({ productId: i.productId, qty: i.qty })),
-    );
-    toast('Agregamos tu último pedido al carrito', { icon: 'history' });
-    router.push('/carrito');
-  };
 
   return (
     <Card style={[styles.lastOrder]}>
@@ -281,9 +277,10 @@ function LastOrderCard() {
         label="Volver a pedir"
         color={colors.white}
         bg={colors.primary}
-        onPress={repeat}
+        onPress={() => reorder(last)}
         style={{ borderRadius: radius.lg, marginRight: space.md }}
       />
+      {sheet}
     </Card>
   );
 }
@@ -296,7 +293,7 @@ const styles = StyleSheet.create({
     gap: space.sm,
     marginTop: space.md,
     backgroundColor: colors.goldSoft,
-    borderColor: '#F6DA9B',
+    borderColor: colors.goldBorder,
     borderWidth: 1,
     borderRadius: radius.lg,
     paddingHorizontal: space.md,

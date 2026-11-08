@@ -1,38 +1,66 @@
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Linking, ScrollView, Share, StyleSheet, TextInput, View } from 'react-native';
+import {
+  Linking,
+  ScrollView,
+  Share,
+  StyleSheet,
+  TextInput,
+  View,
+  type ScrollViewInstance,
+} from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon } from '@/components/Icon';
 import { EmptyState, ScreenHeader } from '@/components/layout';
 import { Sheet } from '@/components/Sheet';
 import { SummaryRow } from '@/components/summary';
-import { StepProgress, TrackingMap } from '@/components/tracking';
+import { DirectionsSheet, OrderMap } from '@/components/map/OrderMap';
+import { SafeDropCard } from '@/components/safedrop';
+import { StepProgress } from '@/components/tracking';
+import { deliveryRoute } from '@/lib/geo';
 import { Badge, Button, Card, Divider, IconButton, Row, Tap, Txt } from '@/components/ui';
 import { getProduct } from '@/data/products';
 import { getStore, rider } from '@/data/stores';
 import { money } from '@/lib/format';
 import { haptic } from '@/lib/feedback';
-import { getOrderStatus } from '@/lib/orderProgress';
+import { orderItemPrice } from '@/components/points';
+import { orderItemKey } from '@/data/seedOrders';
+import { DemoOnly } from '@/components/DemoOnly';
+import { CounterPickupCard, LockerPanel, LockerPendingCard } from '@/components/locker';
+import { AutoPilotBadge } from '@/components/routines';
+import { DEMO_TIMELINE, getOrderStatus, orderClock } from '@/lib/orderProgress';
+import { cancelOrder } from '@/lib/placeOrder';
+import { pts } from '@/lib/points';
+import { useReorder } from '@/lib/useReorder';
 import { ProductImage } from '@/components/product';
 import { useNow, useOrder, useOrders } from '@/store/orders';
-import { useCart } from '@/store/cart';
 import { toast } from '@/store/ui';
 import { colors, fonts, radius, space } from '@/theme/tokens';
+
+/** "Simular recorrido GPS rápido": el tramo en camino dura esto. */
+const GPS_DEMO_MS = 15_000;
 
 export default function TrackingScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const order = useOrder(id);
   const insets = useSafeAreaInsets();
-  const cancel = useOrders((s) => s.cancel);
-  const complete = useOrders((s) => s.complete);
+  const fastForward = useOrders((s) => s.fastForward);
   const rate = useOrders((s) => s.rate);
-  const replaceCart = useCart((s) => s.replace);
+  const { reorder, sheet: reorderSheet } = useReorder();
+  const scrollRef = useRef<ScrollViewInstance>(null);
+  // Posiciones para hacer scroll a la tarjeta del código (relativas al contenedor `sheet`).
+  const [sheetY, setSheetY] = useState(0);
+  const [codeY, setCodeY] = useState(0);
+  const [safeDropY, setSafeDropY] = useState(0);
+  const [directionsOpen, setDirectionsOpen] = useState(false);
+  const simulate = useOrders((s) => s.simulate);
   const [detailOpen, setDetailOpen] = useState(true);
   const [chatOpen, setChatOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
-  const finished = !order || !!order.seeded || !!order.cancelledAt || !!order.completedAt;
+  const finished =
+    !order || !!order.seeded || !!order.cancelledAt || !!order.completedAt || !!order.verifiedAt;
   const now = useNow(1000, !finished);
 
   // Aviso háptico cuando cambia el paso.
@@ -68,6 +96,17 @@ export default function TrackingScreen() {
   const showRider = delivery && live.phase === 'active' && live.step >= 2;
   const completed = live.phase === 'completed';
   const cancelled = live.phase === 'cancelled';
+  const lockerPickup = !delivery && order.pickupMethod === 'locker';
+  const pickupReady = !delivery && live.phase === 'active' && live.step === 2;
+  // SafeDrop: aparece cuando la moto está a menos de 50 m o ya llegó.
+  const remainingMeters = showRider ? deliveryRoute(order).meters * (1 - live.route) : Infinity;
+  const showSafeDrop = !!order.safeDrop && live.phase === 'active' && (!!live.arrived || remainingMeters < 50);
+  const simulateGps = () => {
+    const t = Math.max(orderClock(order, Date.now()).t, DEMO_TIMELINE.onTheWay);
+    simulate(order.id, t, (DEMO_TIMELINE.delivered - DEMO_TIMELINE.onTheWay) / GPS_DEMO_MS);
+    haptic.tap();
+    toast('Simulando recorrido GPS en vivo', { icon: 'moped' });
+  };
 
   const shareTracking = async () => {
     try {
@@ -84,12 +123,13 @@ export default function TrackingScreen() {
       toast(`Llama a ${rider.name}: ${rider.phone}`, { icon: 'phone' }),
     );
 
-  const reorder = () => {
-    replaceCart(
-      order.items.filter((i) => getProduct(i.productId)).map((i) => ({ productId: i.productId, qty: i.qty })),
-    );
-    router.push('/carrito');
-  };
+  const goHome = () => router.dismissTo('/');
+  // Con el pedido en curso, la acción principal es seguirlo (no volver a comprar).
+  const showTracking = () => scrollRef.current?.scrollTo({ y: 0, animated: true });
+  const showCode = () =>
+    scrollRef.current?.scrollTo({ y: Math.max(0, sheetY + codeY - space.lg), animated: true });
+  const showSafeDropCard = () =>
+    scrollRef.current?.scrollTo({ y: Math.max(0, sheetY + safeDropY - space.lg), animated: true });
 
   return (
     <View style={{ flex: 1 }}>
@@ -111,28 +151,30 @@ export default function TrackingScreen() {
         }
       />
       <ScrollView
+        ref={scrollRef}
         contentContainerStyle={{ paddingBottom: insets.bottom + space.xl }}
         showsVerticalScrollIndicator={false}
       >
         <View>
-          <TrackingMap
-            progress={completed ? 1 : live.route}
-            showRider={showRider}
-            storeLabel={store.name}
-            pickup={!delivery}
-            riderLabel={`${rider.name.split(' ')[0]} en moto`}
-          />
+          {/* Mapa real (OSM) con telemetría; sin conexión cae al mapa SVG. */}
+          <OrderMap order={order} live={live} height={300} onDirections={() => setDirectionsOpen(true)} />
           {live.phase === 'active' && (
             <Row style={styles.gps}>
               <View style={styles.gpsDot} />
               <Txt variant="labelSm">
-                {showRider ? 'GPS activo en vivo' : delivery ? 'Preparando en tienda' : 'Retiro en tienda'}
+                {live.arrived
+                  ? 'Repartidor en tu puerta'
+                  : showRider
+                    ? 'GPS activo en vivo'
+                    : delivery
+                      ? 'Preparando en tienda'
+                      : 'Retiro en tienda'}
               </Txt>
             </Row>
           )}
         </View>
 
-        <View style={styles.sheet}>
+        <View style={styles.sheet} onLayout={(e) => setSheetY(e.nativeEvent.layout.y)}>
           <View style={styles.handle} />
 
           {/* Estado actual */}
@@ -169,6 +211,7 @@ export default function TrackingScreen() {
               <Txt variant="bodySm" color={colors.textMuted}>
                 {live.detail}
               </Txt>
+              {order.routineId && <AutoPilotBadge />}
             </View>
             {live.phase === 'active' && live.etaMin > 0 && (
               <View style={styles.eta}>
@@ -197,23 +240,53 @@ export default function TrackingScreen() {
             </Card>
           )}
 
-          {/* Acción para retiro en tienda */}
-          {!delivery && live.phase === 'active' && live.step === 2 && (
-            <Animated.View entering={FadeInDown}>
-              <Card style={{ padding: space.lg, gap: space.md, alignItems: 'center' }}>
-                <Txt variant="bodyMd" color={colors.textMuted}>
-                  Muestra este código en caja
-                </Txt>
-                <Txt variant="headlineXl" color={colors.primary} style={{ letterSpacing: 4 }}>
-                  {order.id}
-                </Txt>
-                <Button
-                  label="Ya recogí mi pedido"
-                  variant="brand"
-                  icon="check"
-                  onPress={() => complete(order.id)}
-                />
-              </Card>
+          {/* Delivery: handshake SafeDrop y simulación del recorrido GPS. */}
+          {showSafeDrop && (
+            <View onLayout={(e) => setSafeDropY(e.nativeEvent.layout.y)}>
+              <SafeDropCard order={order} arrived={!!live.arrived} />
+            </View>
+          )}
+          {delivery && live.phase === 'active' && !live.arrived && (
+            <DemoOnly>
+              <Button
+                label="Simular recorrido GPS rápido (15 s)"
+                icon="play-circle-outline"
+                variant="outline"
+                size="sm"
+                onPress={simulateGps}
+              />
+            </DemoOnly>
+          )}
+
+          {/* Retiro: Smart Locker (QR en el tótem) o caja. Ya no existe "Ya recogí": lo verifica el QR. */}
+          {!delivery && live.phase === 'active' && (
+            <Animated.View
+              entering={FadeInDown}
+              onLayout={(e) => setCodeY(e.nativeEvent.layout.y)}
+              style={{ gap: space.md }}
+            >
+              {lockerPickup ? (
+                pickupReady ? (
+                  <LockerPanel order={order} store={store} />
+                ) : (
+                  <LockerPendingCard />
+                )
+              ) : (
+                <CounterPickupCard order={order} ready={pickupReady} />
+              )}
+              {!pickupReady && (
+                <DemoOnly>
+                  <Button
+                    label="Adelantar a listo para retirar"
+                    icon="fast-forward"
+                    variant="outline"
+                    size="sm"
+                    onPress={() =>
+                      fastForward(order.id, DEMO_TIMELINE.pickupReady - orderClock(order, Date.now()).t)
+                    }
+                  />
+                </DemoOnly>
+              )}
             </Animated.View>
           )}
 
@@ -266,7 +339,13 @@ export default function TrackingScreen() {
             </Card>
           )}
 
-          {completed && <RateCard rating={order.rating} onRate={(r) => rate(order.id, r)} />}
+          {completed && (
+            <RateCard
+              rating={order.rating}
+              points={order.pointsEarned}
+              onRate={(r) => rate(order.id, r)}
+            />
+          )}
 
           {/* Detalle de compra */}
           <Card style={{ overflow: 'hidden' }}>
@@ -290,7 +369,7 @@ export default function TrackingScreen() {
                 {order.items.map((i) => {
                   const p = getProduct(i.productId);
                   return (
-                    <Row key={i.productId} style={{ alignItems: 'flex-start', gap: space.md }}>
+                    <Row key={orderItemKey(i)} style={{ alignItems: 'flex-start', gap: space.md }}>
                       {p && <ProductImage product={p} size={44} rounded={radius.md} />}
                       <View style={{ flex: 1 }}>
                         <Txt variant="labelMd" numberOfLines={2}>
@@ -301,7 +380,9 @@ export default function TrackingScreen() {
                         </Txt>
                       </View>
                       <View style={{ alignItems: 'flex-end' }}>
-                        <Txt variant="labelLg">{money(i.lineTotal)}</Txt>
+                        <Txt variant="labelLg" color={i.redeem ? colors.goldText : colors.text}>
+                          {orderItemPrice(i)}
+                        </Txt>
                         {i.regularPrice && i.regularPrice * i.qty > i.lineTotal && (
                           <Txt variant="priceStrike" color={colors.textSubtle}>
                             {money(i.regularPrice * i.qty)}
@@ -328,6 +409,20 @@ export default function TrackingScreen() {
                   <SummaryRow
                     label={`Cupón ${order.couponCode}`}
                     value={`-${money(order.totals.couponDiscount)}`}
+                    tone="success"
+                  />
+                )}
+                {!!order.totals.routineDiscount && (
+                  <SummaryRow
+                    label="Beneficio Auto-Pilot (10%)"
+                    value={`-${money(order.totals.routineDiscount)}`}
+                    tone="success"
+                  />
+                )}
+                {!!order.totals.pointsDiscount && (
+                  <SummaryRow
+                    label={`Tambo Lover Puntos (${pts(order.pointsRedeemed ?? 0)})`}
+                    value={`-${money(order.totals.pointsDiscount)}`}
                     tone="success"
                   />
                 )}
@@ -372,15 +467,40 @@ export default function TrackingScreen() {
             )}
           </Card>
 
-          {live.phase === 'active' && (
-            <Button
-              label="Compartir seguimiento con un amigo"
-              icon="share-variant-outline"
-              onPress={shareTracking}
-            />
-          )}
-          {(completed || cancelled) && (
-            <Button label="Volver a pedir" icon="restore" variant="brand" onPress={reorder} />
+          {live.phase === 'active' ? (
+            <>
+              {delivery ? (
+                showSafeDrop ? (
+                  <Button label="Mostrar código SafeDrop" icon="shield-check-outline" onPress={showSafeDropCard} />
+                ) : (
+                  <Button label="Ver rastreo en vivo" icon="map-marker-radius-outline" onPress={showTracking} />
+                )
+              ) : lockerPickup && pickupReady ? (
+                <Button
+                  label="Abrir casillero"
+                  icon="lock-open-variant-outline"
+                  onPress={() => router.push(`/locker/${order.id}`)}
+                />
+              ) : (
+                <Button
+                  label={lockerPickup ? 'Ver mi casillero' : 'Mostrar código de retiro'}
+                  icon={lockerPickup ? 'locker-multiple' : 'qrcode'}
+                  onPress={showCode}
+                />
+              )}
+              <Button label="Volver al inicio" icon="home-outline" variant="outline" onPress={goHome} />
+              <Button
+                label="Compartir seguimiento con un amigo"
+                icon="share-variant-outline"
+                variant="ghost"
+                onPress={shareTracking}
+              />
+            </>
+          ) : (
+            <>
+              <Button label="Volver a pedir" icon="restore" variant="brand" onPress={() => reorder(order)} />
+              <Button label="Ir al inicio" icon="home-outline" variant="outline" onPress={goHome} />
+            </>
           )}
           {live.canCancel && (
             <Button
@@ -403,6 +523,8 @@ export default function TrackingScreen() {
       </ScrollView>
 
       <ChatSheet visible={chatOpen} onClose={() => setChatOpen(false)} />
+      <DirectionsSheet visible={directionsOpen} onClose={() => setDirectionsOpen(false)} storeId={order.storeId} />
+      {reorderSheet}
       <Sheet
         visible={cancelOpen}
         onClose={() => setCancelOpen(false)}
@@ -411,16 +533,21 @@ export default function TrackingScreen() {
       >
         <View style={{ gap: space.md }}>
           <Txt variant="bodyMd" color={colors.textMuted}>
-            Si cancelas ahora te devolveremos {money(order.totals.total)} a tu método de pago en un máximo de
-            48 horas.
+            {order.totals.total > 0
+              ? `Si cancelas ahora te devolveremos ${money(order.totals.total)} a tu método de pago en un máximo de 48 horas.`
+              : 'Si cancelas ahora no se te cobrará nada.'}
+            {order.pointsRedeemed ? ` Los ${pts(order.pointsRedeemed)} que canjeaste vuelven a tu saldo.` : ''}
           </Txt>
           <Button
             label="Sí, cancelar pedido"
             variant="danger"
             onPress={() => {
-              cancel(order.id);
+              // Revierte también los puntos (ganados y canjeados) y libera el cupón.
+              cancelOrder(order.id);
               setCancelOpen(false);
-              toast('Pedido cancelado', { icon: 'close-circle-outline' });
+              toast(order.pointsRedeemed ? 'Pedido cancelado. Te devolvimos tus puntos' : 'Pedido cancelado', {
+                icon: 'close-circle-outline',
+              });
             }}
           />
           <Button label="No, mantener pedido" variant="ghost" onPress={() => setCancelOpen(false)} />
@@ -430,7 +557,15 @@ export default function TrackingScreen() {
   );
 }
 
-function RateCard({ rating, onRate }: { rating?: number; onRate: (r: number) => void }) {
+function RateCard({
+  rating,
+  points,
+  onRate,
+}: {
+  rating?: number;
+  points?: number;
+  onRate: (r: number) => void;
+}) {
   const [value, setValue] = useState(rating ?? 0);
   return (
     <Animated.View entering={FadeInDown}>
@@ -452,7 +587,13 @@ function RateCard({ rating, onRate }: { rating?: number; onRate: (r: number) => 
             />
           ))}
         </Row>
-        <Badge label="Sumaste puntos Tambo Lover con esta compra" tone="warning" icon="star-circle-outline" />
+        {!!points && (
+          <Badge
+            label={`Sumaste ${pts(points)} Tambo Lover con esta compra`}
+            tone="warning"
+            icon="star-circle-outline"
+          />
+        )}
       </Card>
     </Animated.View>
   );

@@ -8,8 +8,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon } from '@/components/Icon';
 import { EmptyState } from '@/components/layout';
 import { Badge, Button, Card, Divider, IconButton, Row, Tap, Txt } from '@/components/ui';
+import { orderItemPrice, POINTS_ICON } from '@/components/points';
+import { orderItemKey } from '@/data/seedOrders';
 import { getStore } from '@/data/stores';
 import { money } from '@/lib/format';
+import { pts } from '@/lib/points';
 import { haptic } from '@/lib/feedback';
 import { useOrder } from '@/store/orders';
 import { toast } from '@/store/ui';
@@ -149,7 +152,7 @@ export default function OrderConfirmedScreen() {
               <View style={{ flex: 1, gap: 2 }}>
                 <Row style={{ flexWrap: 'wrap' }}>
                   <Txt variant="labelLg" weight="bold">
-                    {delivery ? 'Delivery Express' : 'Para llevar'}
+                    {delivery ? 'Delivery Express' : order.pickupMethod === 'locker' ? 'Smart Locker' : 'Para llevar'}
                   </Txt>
                   <Badge label={delivery ? 'EN CAMINO PRONTO' : 'EN PREPARACIÓN'} tone="warning" />
                 </Row>
@@ -159,6 +162,11 @@ export default function OrderConfirmedScreen() {
                 <Txt variant="bodySm" color={colors.textSubtle}>
                   {delivery ? order.address?.district : store.address}
                 </Txt>
+                {order.pickupMethod === 'locker' && (
+                  <Txt variant="bodySm" color={colors.primary}>
+                    Te asignaremos un casillero climatizado cuando esté listo.
+                  </Txt>
+                )}
               </View>
             </Row>
             <Divider />
@@ -175,10 +183,36 @@ export default function OrderConfirmedScreen() {
                 </Txt>
               </View>
               <View style={{ alignItems: 'flex-end', gap: 4 }}>
-                <Badge label={paidOnline ? 'Pagado' : 'Por pagar'} tone={paidOnline ? 'soft' : 'warning'} />
+                <Badge
+                  label={order.payment.method === 'points' ? 'Canjeado' : paidOnline ? 'Pagado' : 'Por pagar'}
+                  tone={paidOnline ? 'soft' : 'warning'}
+                />
                 <Txt variant="headlineMd">{money(order.totals.total)}</Txt>
               </View>
             </Row>
+            {(!!order.pointsEarned || !!order.pointsRedeemed) && (
+              <>
+                <Divider />
+                <Row style={{ gap: space.md }}>
+                  <View style={[styles.rowIcon, { backgroundColor: colors.goldSoft }]}>
+                    <Icon name={POINTS_ICON} size={22} color={colors.goldText} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Txt variant="labelLg" weight="bold">
+                      Tambo Lover Puntos
+                    </Txt>
+                    {!!order.pointsRedeemed && (
+                      <Txt variant="bodyMd" color={colors.textMuted}>
+                        Canjeaste {pts(order.pointsRedeemed)}
+                      </Txt>
+                    )}
+                  </View>
+                  {!!order.pointsEarned && (
+                    <Badge label={`+${pts(order.pointsEarned)}`} tone="warning" icon={POINTS_ICON} />
+                  )}
+                </Row>
+              </>
+            )}
           </Card>
 
           <Tap
@@ -204,11 +238,13 @@ export default function OrderConfirmedScreen() {
             {showItems && (
               <Animated.View entering={FadeIn} style={{ gap: space.sm, marginTop: space.md }}>
                 {order.items.map((i) => (
-                  <Row key={i.productId} style={{ justifyContent: 'space-between' }}>
+                  <Row key={orderItemKey(i)} style={{ justifyContent: 'space-between' }}>
                     <Txt variant="bodyMd" style={{ flex: 1 }} numberOfLines={1}>
                       {i.qty} x {i.name}
                     </Txt>
-                    <Txt variant="labelMd">{money(i.lineTotal)}</Txt>
+                    <Txt variant="labelMd" color={i.redeem ? colors.goldText : colors.text}>
+                      {orderItemPrice(i)}
+                    </Txt>
                   </Row>
                 ))}
               </Animated.View>

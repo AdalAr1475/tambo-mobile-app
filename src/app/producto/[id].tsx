@@ -8,18 +8,22 @@ import * as Clipboard from 'expo-clipboard';
 import { DeliveryPointSheet, useDeliveryPoint } from '@/components/delivery';
 import { Icon, type IconName } from '@/components/Icon';
 import { Accordion, EmptyState } from '@/components/layout';
+import { POINTS_ICON, redeemLabel, redeemModes } from '@/components/points';
 import { AddControl, ProductImage, QuantityStepper } from '@/components/product';
-import { Badge, Button, IconButton, Row, Tap, Txt } from '@/components/ui';
+import { Badge, Button, Chip, IconButton, Row, Tap, Txt } from '@/components/ui';
 import { getCategory } from '@/data/categories';
 import { discountPercent, getProduct } from '@/data/products';
+import type { RedeemMode } from '@/data/types';
 import { money } from '@/lib/format';
 import { haptic } from '@/lib/feedback';
-import { lineTotal } from '@/lib/pricing';
+import { pts } from '@/lib/points';
+import { lineTotal, redeemOption } from '@/lib/pricing';
 import { useAddToCart } from '@/lib/useAddToCart';
 import { useContentWidth } from '@/lib/useContentWidth';
 import { useCartCount } from '@/store/cart';
 import { useSession } from '@/store/session';
 import { toast } from '@/store/ui';
+import { useBalance } from '@/store/wallet';
 import { colors, elevation, radius, space } from '@/theme/tokens';
 
 export default function ProductScreen() {
@@ -28,6 +32,9 @@ export default function ProductScreen() {
   const insets = useSafeAreaInsets();
   const width = useContentWidth();
   const [qty, setQty] = useState(1);
+  // Cómo lo paga: en soles o canjeado con Tambo Lover Puntos.
+  const [payMode, setPayMode] = useState<'cash' | RedeemMode>('cash');
+  const balance = useBalance();
   const [page, setPage] = useState(0);
   const [pointOpen, setPointOpen] = useState(false);
   const cartCount = useCartCount();
@@ -56,6 +63,9 @@ export default function ProductScreen() {
   const category = getCategory(product.categoryId);
   const pairs = (product.pairsWith ?? []).map(getProduct).filter((p) => !!p);
   const total = lineTotal(product, qty);
+  const modes = redeemModes(product);
+  const redeem = payMode === 'cash' ? undefined : payMode;
+  const option = redeem ? redeemOption(product, redeem) : undefined;
 
   const share = async () => {
     const message = `¡Mira esto en Tambo+! ${product.name} a ${money(product.price)} 🛒`;
@@ -176,6 +186,31 @@ export default function ProductScreen() {
                 en tu carrito.
               </Txt>
             </Row>
+          )}
+
+          {modes.length > 0 && (
+            <View style={styles.redeemBox}>
+              <Row style={{ justifyContent: 'space-between' }}>
+                <Row style={{ gap: 6, flexShrink: 1 }}>
+                  <Icon name={POINTS_ICON} size={20} color={colors.goldText} />
+                  <Txt variant="labelLg" color={colors.goldText}>
+                    Canjéalo con Tambo Lover Puntos
+                  </Txt>
+                </Row>
+                <Badge label={`Tienes ${pts(balance)}`} tone="warning" />
+              </Row>
+              <Row style={{ flexWrap: 'wrap' }}>
+                <Chip label={`Soles • ${money(product.price)}`} active={payMode === 'cash'} onPress={() => setPayMode('cash')} />
+                {modes.map((m) => (
+                  <Chip
+                    key={m}
+                    label={`${m === 'points' ? '100% puntos' : 'Puntos + S/'} • ${redeemLabel(redeemOption(product, m)!)}`}
+                    active={payMode === m}
+                    onPress={() => setPayMode(m)}
+                  />
+                ))}
+              </Row>
+            </View>
           )}
 
           <Tap
@@ -324,12 +359,13 @@ export default function ProductScreen() {
           style={styles.cartBtn}
         />
         <Button
-          label="Agregar al carrito"
-          trailing={money(total)}
+          label={option ? 'Canjear' : 'Agregar al carrito'}
+          icon={option ? POINTS_ICON : undefined}
+          trailing={option ? redeemLabel(option, qty) : money(total)}
           full={false}
           style={{ flex: 1 }}
           onPress={() => {
-            addToCart(product.id, qty);
+            addToCart(product.id, qty, { redeem });
             setQty(1);
           }}
         />
@@ -365,6 +401,15 @@ const styles = StyleSheet.create({
     padding: space.md,
     borderRadius: radius.lg,
     backgroundColor: colors.goldSoft,
+  },
+  redeemBox: {
+    marginTop: space.md,
+    padding: space.md,
+    gap: space.sm,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.goldBorder,
+    backgroundColor: colors.goldTint,
   },
   availability: {
     flexDirection: 'row',

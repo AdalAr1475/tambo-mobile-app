@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { seedAddresses, seedCards, user } from '@/data/stores';
+import { districtCentroid, LEGACY_SEED_LINES, seedAddresses, seedCards, user } from '@/data/stores';
 import type { Address, Fulfillment, PaymentMethodType, SavedCard } from '@/data/types';
 import { persistStorage } from './storage';
 
@@ -16,7 +16,6 @@ type Profile = { name: string; email: string; phone: string };
 type SessionState = {
   loggedIn: boolean;
   profile: Profile;
-  points: number;
   ageVerified: boolean;
   fulfillment: Fulfillment;
   addressId: string;
@@ -32,7 +31,6 @@ type SessionState = {
   login: (email: string) => void;
   logout: () => void;
   updateProfile: (p: Partial<Profile>) => void;
-  addPoints: (n: number) => void;
   verifyAge: () => void;
   setFulfillment: (f: Fulfillment) => void;
   selectAddress: (id: string) => void;
@@ -44,6 +42,8 @@ type SessionState = {
   setPreferredPayment: (m: PaymentMethodType) => void;
   toggleFavorite: (productId: string) => void;
   markCouponUsed: (code: string) => void;
+  /** Libera un cupón cuando se cancela el pedido que lo usó. */
+  unmarkCouponUsed: (code: string) => void;
   setNotification: (key: keyof NotificationPrefs, value: boolean) => void;
   pushSearch: (q: string) => void;
   clearSearches: () => void;
@@ -54,7 +54,6 @@ export const useSession = create<SessionState>()(
     (set) => ({
       loggedIn: true,
       profile: { name: user.name, email: user.email, phone: user.phone },
-      points: 450,
       ageVerified: false,
       fulfillment: 'delivery',
       addressId: seedAddresses[0].id,
@@ -70,7 +69,6 @@ export const useSession = create<SessionState>()(
       login: (email) => set((s) => ({ loggedIn: true, profile: { ...s.profile, email } })),
       logout: () => set({ loggedIn: false }),
       updateProfile: (p) => set((s) => ({ profile: { ...s.profile, ...p } })),
-      addPoints: (n) => set((s) => ({ points: s.points + n })),
       verifyAge: () => set({ ageVerified: true }),
       setFulfillment: (fulfillment) => set({ fulfillment }),
       selectAddress: (addressId) => set({ addressId }),
@@ -107,6 +105,7 @@ export const useSession = create<SessionState>()(
             : [productId, ...s.favorites],
         })),
       markCouponUsed: (code) => set((s) => ({ usedCoupons: [...new Set([...s.usedCoupons, code])] })),
+      unmarkCouponUsed: (code) => set((s) => ({ usedCoupons: s.usedCoupons.filter((c) => c !== code) })),
       setNotification: (key, value) => set((s) => ({ notifications: { ...s.notifications, [key]: value } })),
       pushSearch: (q) =>
         set((s) => ({
@@ -117,7 +116,25 @@ export const useSession = create<SessionState>()(
         })),
       clearSearches: () => set({ recentSearches: [] }),
     }),
-    { name: 'tambo-session', storage: persistStorage },
+    {
+      name: 'tambo-session',
+      storage: persistStorage,
+      // v2 (It. 2): los puntos pasan a useWallet; se descarta el campo `points` antiguo.
+      // v3 (It. 6): direcciones con coordenadas; las semilla antiguas (en la puerta de una tienda) se reemplazan.
+      version: 3,
+      migrate: (persisted, version) => {
+        const state = { ...(persisted as SessionState & { points?: number }) };
+        if (version < 2) delete state.points;
+        if (version < 3) {
+          state.addresses = state.addresses.map((a) => {
+            const seed = seedAddresses.find((s) => s.id === a.id);
+            if (seed && a.line1 === LEGACY_SEED_LINES[a.id]) return { ...seed, reference: a.reference ?? seed.reference };
+            return a.coords ? a : { ...a, coords: districtCentroid(a.district) };
+          });
+        }
+        return state as SessionState;
+      },
+    },
   ),
 );
 
