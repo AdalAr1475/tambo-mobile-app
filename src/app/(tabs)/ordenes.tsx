@@ -273,7 +273,7 @@ function ActiveOrderCard({ order, status }: { order: Order; status: OrderStatus 
                 {order.items[0]?.name}
               </Txt>
               <Txt variant="bodySm" color={colors.textMuted}>
-                {pluralize(count, 'producto', 'productos')} • {delivery ? 'Entrega' : 'Recojo'}
+                {pluralize(count, 'producto', 'productos')} • {delivery ? 'Entrega' : 'Para llevar'}
               </Txt>
             </View>
             <View style={{ alignItems: 'flex-end' }}>

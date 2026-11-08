@@ -173,7 +173,7 @@ export default function DemoScreen() {
             onPress={() => createTestOrder('delivery')}
           />
           <Button
-            label="Crear recojo listo en Smart Locker"
+            label="Crear pedido listo en Smart Locker"
             icon="storefront-outline"
             variant="outline"
             onPress={() => createTestOrder('pickup')}

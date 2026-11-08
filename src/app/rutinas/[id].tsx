@@ -271,7 +271,7 @@ export default function RoutineEditorScreen() {
           <RadioCard
             selected={draft.fulfillment === 'pickup'}
             onPress={() => set('fulfillment', 'pickup')}
-            title="Recojo en tienda"
+            title="Para llevar"
             subtitle="Listo a la hora en tu Smart Locker o en caja"
             icon="locker-multiple"
           />
@@ -332,7 +332,7 @@ export default function RoutineEditorScreen() {
             <SummaryRow label="Beneficio Auto-Pilot (10%)" value={`- ${money(totals.routineDiscount)}`} tone="discount" icon="sale" />
           )}
           <SummaryRow
-            label={draft.fulfillment === 'delivery' ? 'Delivery' : 'Recojo'}
+            label={draft.fulfillment === 'delivery' ? 'Delivery' : 'Para llevar'}
             value="Gratis"
             tone="success"
             icon={draft.fulfillment === 'delivery' ? 'moped-outline' : 'storefront-outline'}

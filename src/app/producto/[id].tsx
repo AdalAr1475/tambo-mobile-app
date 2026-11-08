@@ -115,6 +115,11 @@ export default function ProductScreen() {
               <ProductImage product={product} style={styles.galleryImage} rounded={radius.xl} />
             </View>
           )}
+          {product.imageIsReference && (
+            <Txt variant="bodySm" align="center" color={colors.textMuted} style={{ padding: space.sm }}>
+              Foto referencial. La presentación y el empaque pueden variar.
+            </Txt>
+          )}
           {images.length > 1 && (
             <Row style={styles.pager}>
               {images.map((_, i) => (

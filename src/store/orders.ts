@@ -42,7 +42,8 @@ export const useOrders = create<OrdersState>()(
       name: 'tambo-orders',
       storage: persistStorage,
       // v2 (It. 3): el retiro manual (`completedAt`) pasa a contar como retiro verificado.
-      version: 2,
+      // v3 (It. 8): split es opcional; los pedidos anteriores se conservan sin reparto.
+      version: 3,
       migrate: (persisted, version) => {
         const state = persisted as OrdersState;
         if (version < 2) {

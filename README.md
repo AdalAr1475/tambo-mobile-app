@@ -1,57 +1,89 @@
 # Tambo+ — prototipo de app móvil
 
-Prototipo funcional de la app de delivery de Tambo construido con **React Native + Expo (SDK 58) + TypeScript** y **Expo Router**. Cubre la compra, el checkout, el seguimiento del pedido y el delivery o retiro en tienda. Los diseños base están en [stitch_app_delivery_tambo/](stitch_app_delivery_tambo/), y el sistema de diseño está en [DESIGN.md](stitch_app_delivery_tambo/tambo_digital_retail_system/DESIGN.md).
+Prototipo universitario de Tambo en **Expo SDK 58, React Native 0.88, React 19 y TypeScript**, con Expo Router. Implementa las iteraciones 1 a 8 de [docs/](docs/README.md). Los diseños están en [stitch_app_delivery_tambo/](stitch_app_delivery_tambo/) y el sistema visual en [DESIGN.md](stitch_app_delivery_tambo/tambo_digital_retail_system/DESIGN.md).
 
 ## Cómo levantarla
 
-Requisitos: Node 20 o superior.
+Requiere Node compatible con Expo SDK 58 y npm (el repositorio usa `package-lock.json`).
 
 ```bash
-npm install
-npx expo start          # muestra el QR para abrir la app en Expo Go (Android/iOS)
-npx expo start --web    # abre la versión web (se centra con ancho de teléfono)
-npx expo start --android  # emulador Android
+npm ci
+npx expo start          # Expo Go en Android/iOS: plataforma principal de la demo
+npx expo start --web    # respaldo web, centrado a 480 px
 ```
 
-La app funciona en **Expo Go** porque no necesita módulos nativos adicionales ni API keys. Los datos son de prueba y se guardan en el dispositivo (AsyncStorage): el carrito, los pedidos, las direcciones y los favoritos siguen ahí aunque cierres la app.
-
-Para volver al estado inicial, borra los datos de la app (en web, el `localStorage` del sitio).
+No necesita backend, API keys ni development build. Carrito, sesión, pedidos, puntos y rutinas persisten en AsyncStorage. Los pagos, sensores IoT, repartidor y verificación del QR se simulan; no se realiza ningún cobro. Los mapas nativos descargan tiles de CARTO/OSM; en web o sin conexión usan un mapa SVG de respaldo.
 
 ## Flujos implementados
 
-| Flujo | Pantallas |
+| Flujo | Comportamiento |
 | --- | --- |
-| Compra | Inicio, Categorías, Listado por categoría (subcategorías, orden, filtros por marca y precio, búsqueda), Búsqueda global, Detalle de producto, Promociones |
-| Carrito | Bottom sheet con punto de entrega, cantidades, eliminar con *deshacer*, cupones, barra de "delivery gratis" y resumen |
-| Checkout | Delivery o Para llevar, dirección y referencia, horario (lo antes posible o programado), pago con Yape/Plin, tarjeta (guardada o nueva, con validación) o efectivo (con cálculo de vuelto) |
-| Seguimiento | Pedido confirmado, seguimiento en vivo con mapa y moto animada, pasos con hora, chat con el repartidor, llamada, cancelación, calificación y confirmación de recojo |
-| Historial | Mis pedidos (en curso e historial), boleta electrónica y volver a pedir |
-| Cuenta | Perfil, Club de puntos con canjes, direcciones (crear, editar, eliminar), métodos de pago, cupones, favoritos, notificaciones, ayuda/FAQ, términos y libro de reclamaciones, cerrar sesión e iniciar sesión |
+| Compra y carrito | Categorías, filtros, búsqueda, favoritos, promociones por paquete, cupones, deshacer, envío gratis y volver a pedir sin perder el carrito actual |
+| Checkout | Delivery / Para llevar, dirección, referencia, horarios reales, Yape con código de 6 dígitos, Plin, tarjetas y efectivo con vuelto; validación de mayoría de edad |
+| Tambo Lover Puntos | Saldo, movimientos, niveles, canje 100% puntos, puntos + soles y descuento libre sobre productos |
+| Smart Lockers | Retiro en casillero o mostrador, QR dinámico cada 30 s, PIN, reserva y telemetría demostrativa; el retiro termina con la verificación |
+| Tambo IA | Recomendaciones locales explicables, complementos y plan por presupuesto, sin LLM ni red |
+| Auto-Pilot | Rutinas editables, pausa, saltar una fecha, próxima entrega y estimación mensual; 10% en productos, envío gratis y puntos dobles |
+| Geo y SafeDrop | Tienda cercana, distancias, cobertura, GPS opcional, ruta real precalculada y entrega mediante QR/PIN |
+| Tambo Spatial | Visor 3D procedural y AR sobre cámara en celular; escala real y foto de mesa como respaldo web |
+| Party Split | De 2 a 5 personas, partes iguales o líneas por producto, nombres editables, solicitudes Yape para compartir y progreso; confirmar exige todas las cuotas pagadas |
+| Historial y cuenta | Seguimiento, cancelación con devolución de puntos/cupón, boleta con cuotas Party Split, calificación, perfil, direcciones, pagos y ayuda |
+| Catálogo y accesibilidad | Fotos locales para los 38 productos, controles etiquetados, progreso accesible, precios con `money()` y copy Delivery / Para llevar |
 
-### Datos para probar
+### Modo Presentador y datos para probar
 
-- **Cupones:** `TAMBOAPP` (10%, hasta S/ 8), `TAMBOYA10` (S/ 10 desde S/ 30) y `ENVIOGRATIS` (delivery gratis desde S/ 15).
-- **Delivery:** cuesta S/ 4.50 y es gratis desde S/ 40. "Para llevar" no tiene costo de envío.
-- **Simulación del pedido (acelerada):** se prepara a los 15 s, sale en camino a los 25 s y se entrega a los 75 s. Un pedido "Para llevar" queda listo a los 30 s. Puedes cancelar en los primeros 15 s.
-- **Login:** cualquier correo válido con una contraseña de 6 caracteres o más.
-- **Productos con alcohol:** piden confirmar la mayoría de edad (+18) la primera vez.
+Mantén presionada **2 segundos la foto de Perfil** para abrir `/demo`. Activa los controles de simulación. Allí puedes reiniciar los datos, recargar **1000 puntos**, elegir reloj ×1/×3, activar el GPS real y crear o adelantar pedidos. Reiniciar restaura los datos y conserva la configuración del presentador.
 
-## Estructura
+- **Login:** cualquier correo válido y contraseña de al menos 6 caracteres. La sesión inicial ya está abierta.
+- **Cupones:** `TAMBOAPP` (10%, máximo S/ 8.00), `TAMBOYA10` (S/ 10.00 desde S/ 30.00) y `ENVIOGRATIS` (desde S/ 15.00). Un cupón usado queda disponible de nuevo al cancelar el pedido.
+- **Envío:** S/ 4.50; gratis desde S/ 40.00 en productos pagados en soles. Para llevar es gratis.
+- **Puntos:** saldo inicial 1200; 100 pts equivalen a S/ 1.00. Café americano: 350 pts o 200 pts + S/ 1.50. Se acumulan 10 pts por sol pagado en productos; el envío no acumula.
+- **Yape:** celular de 9 dígitos que empieza con 9 (ejemplo ficticio `987654321`) y código de 6 dígitos. Con Presentador, “Simular código Yape” completa la aprobación.
+- **Party Split:** elige Yape o tarjeta, activa “¿Compras en mancha?”, selecciona 2–5 personas, completa tu medio de pago y pulsa **Autorizar mi parte**. “⚡ Simular pagos Yape de amigos” paga una cuota cada 800 ms. Compartir una solicitud no marca el pago. La boleta conserva el reparto al reiniciar la app.
+- **Ejemplos de split (Para llevar, sin puntos ni cupón):** 3 packs Four Loko Gold = S/ 44.70, entre 3 = S/ 14.90 cada uno; croissant + lejía = S/ 10.00, entre 3 = S/ 3.34 / S/ 3.33 / S/ 3.33. El residuo queda en el anfitrión. Al cambiar el total, los productos, el reparto o el medio de pago se requieren nuevas autorizaciones. En modo por producto el envío se divide por igual y los descuentos de cupón/puntos se prorratean sobre los soles de las líneas.
+- **Seguimiento a ×1:** preparación 15 s, salida 25 s, llegada 75 s; Para llevar listo a los 30 s. Se puede cancelar antes de los 15 s. Los pedidos nuevos esperan verificación QR/PIN para completar la entrega o el retiro.
+- **Auto-Pilot:** prueba “Desayuno oficina” o crea una rutina desde el carrito. Solo se ejecuta con la app abierta, dentro de los 10 minutos posteriores a la hora; puedes dispararla desde el control de demo.
+- **3D/AR:** prueba Four Loko Gold, Sandía, café, capuccino y pan con chicharrón. Cámara, permisos GPS y hoja de compartir se deben comprobar en Expo Go.
+- **Alcohol:** confirmar +18 al agregar productos, combos o favoritos, crear rutinas y confirmar checkout. “Volver a pedir” vuelve a validar en checkout.
 
+### Fotos del catálogo
+
+Las 19 fotos añadidas en It. 8 son referenciales de Pexels, con origen comentado en `src/data/products.ts` y [manifiesto de fuentes/licencias](docs/catalogo-imagenes.json). No representan necesariamente el empaque de la marca: el detalle del producto lo indica. Son JPG de 800 × 800, de menos de 80 KB cada una. Se eliminaron los dos thumbnails sin uso y la subcategoría Postres vacía.
+
+Para regenerarlas: `python scripts/build-catalog-images.py` (requiere Pillow y curl; omite archivos existentes). No se añadieron dependencias a la app en esta iteración.
+
+## Estructura y persistencia
+
+```text
+src/app/          rutas Expo Router: compra, puntos, IA, rutinas, locker, visor, pedidos y perfil
+src/components/   UI compartida; PartySplit, mapas, QR, sensores y visor espacial
+src/data/         catálogo, coordenadas y rutas precalculadas, tiendas y datos de ejemplo
+src/lib/          pricing, split, placeOrder/cancelOrder, puntos, IA, geo y rutinas
+src/store/        zustand + AsyncStorage; UI efímera
+src/theme/        colores, tipografía, espaciados y MAX_APP_WIDTH
 ```
-src/
-  app/          rutas (Expo Router): (tabs), categoria, producto, carrito, checkout, pedido, perfil, buscar, login
-  components/   UI reutilizable (botones, tarjetas, sheets, toasts, mapa de seguimiento, tab bar)
-  data/         catálogo, categorías, promociones, tiendas, cupones y pedidos de ejemplo
-  lib/          formato de precios, cálculo de totales, simulación del pedido y helpers
-  store/        estado global con zustand + persistencia (carrito, sesión, pedidos, UI)
-  theme/        tokens del sistema de diseño Tambo (colores, tipografía Inter, radios, sombras)
-```
+
+| Store | Clave | Versión |
+| --- | --- | --- |
+| `useCart` | `tambo-cart` | 2 |
+| `useSession` | `tambo-session` | 3 |
+| `useOrders` | `tambo-orders` | 3 |
+| `useDemo` | `tambo-demo` | 1 |
+| `useWallet` | `tambo-wallet` | 1 |
+| `useRoutines` | `tambo-routines` | 1 |
+
+`useUi` no persiste. `placeOrder()` centraliza totales, validación del split, guardado, puntos, cupón y vaciado del carrito; Auto-Pilot usa `clearCart: false`. `cancelOrder()` revierte puntos y libera el cupón. Los pedidos antiguos se conservan sin `split`.
+
+Las iteraciones anteriores incorporaron `expo-crypto` y `qrcode-generator` (QR), `react-native-webview` y `expo-location` (mapas/GPS), `three` **0.162.0**, `@types/three`, `expo-gl`, `expo-asset` y `expo-camera` (3D/AR). Mantén three fijado: versiones posteriores requieren WebGL 2, incompatible con este visor en Expo Go.
 
 ## Calidad
 
 ```bash
-npx tsc --noEmit   # typecheck
-npx expo lint      # lint
-npx expo-doctor    # salud del proyecto
+npm run typecheck
+npm run lint
+npm run test:split    # cálculo exacto, canjes y validación de placeOrder; sin dependencias adicionales
+npx expo export --platform web
+npx expo-doctor
 ```
+
+Pendiente de verificación manual en Expo Go: hoja de compartir, simulación secuencial, boleta tras recargar, VoiceOver/TalkBack y flujo completo en pantalla pequeña. La revisión visual automatizada de It. 8 se interrumpió porque el control del equipo no pudo verificar la URL de Chrome.

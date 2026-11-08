@@ -385,7 +385,7 @@ export function LocationHeader() {
         <PointsPill />
         <IconButton
           icon="shopping-outline"
-          label={count > 0 ? `Carrito, ${count} ${count === 1 ? 'producto' : 'productos'}` : 'Carrito vacío'}
+          label={count > 0 ? `${count} ${count === 1 ? 'producto' : 'productos'} en tu carrito. Abrir carrito` : 'Carrito vacío. Abrir carrito'}
           color={colors.white}
           bg="rgba(255,255,255,0.14)"
           badge={count}

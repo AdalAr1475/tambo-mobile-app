@@ -31,6 +31,8 @@ export function OtpInput({
         return (
           <View
             key={i}
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
             style={[
               styles.box,
               !!digit && styles.boxFilled,
@@ -56,6 +58,9 @@ export function OtpInput({
         onBlur={() => setFocused(false)}
         style={styles.hidden}
         accessibilityLabel={accessibilityLabel}
+        accessibilityRole="text"
+        accessibilityHint={`Ingresa los ${length} dígitos. Puedes pegar el código completo.`}
+        accessibilityValue={{ text: `${value.length} de ${length} dígitos ingresados${error ? '. Código incompleto o inválido' : ''}` }}
       />
     </View>
   );

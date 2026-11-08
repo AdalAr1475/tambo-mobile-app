@@ -2,7 +2,7 @@
 
 # Tambo+ — contexto del proyecto
 
-Prototipo funcional (sin backend) de la app de delivery de Tambo (tienda de conveniencia, Lima, Perú). Proyecto universitario (9no ciclo). Expo SDK 58 · React Native 0.88 · React 19 · TypeScript estricto · Expo Router · zustand + AsyncStorage. Todo el catálogo, tiendas, cupones y pedidos son datos de prueba locales; no hay API, auth real, pagos reales ni mapas reales.
+Prototipo funcional (sin backend) de la app de delivery de Tambo (tienda de conveniencia, Lima, Perú). Proyecto universitario (9no ciclo). Expo SDK 58 · React Native 0.88 · React 19 · TypeScript estricto · Expo Router · zustand + AsyncStorage. Iteraciones 1–8 implementadas. Catálogo, tiendas, cupones y pedidos son datos de prueba locales; no hay auth ni pagos reales. Los mapas nativos usan tiles CARTO/OSM y rutas precalculadas, con respaldo SVG en web o sin conexión.
 
 `AGENTS.md` (importado arriba) trae las reglas generales de Expo: usar `npx expo install`, leer docs versionadas porque SDK 58 es posterior a lo que recuerdas, no tocar `ios/`/`android/`. **Aquí solo va lo específico de este repo.**
 
@@ -20,10 +20,11 @@ npm ci                 # instalar desde lockfile
 npx expo start         # QR para Expo Go; `--web` para versión web
 npm run typecheck      # tsc --noEmit
 npm run lint           # expo lint (solo lintea src/)
+npm run test:split     # pruebas de dominio Party Split y validación transaccional
 npx expo-doctor
 ```
 
-Antes de dar una tarea por terminada: `npm run typecheck` y `npm run lint`. No hay tests automatizados ni CI.
+Antes de dar una tarea por terminada: `npm run typecheck` y `npm run lint`. Si cambia Party Split o pricing, ejecuta también `npm run test:split`. Las pruebas usan el runner de Node y TypeScript ya instalado; sustituyen solo los stores para comprobar efectos de `placeOrder`. No hay CI.
 
 **Línea base (2026-11-08, It. 1):** typecheck, lint y `expo-doctor` (20/20) pasan sin errores. Ya se corrió `npx expo install --fix`.
 
@@ -44,7 +45,7 @@ src/app/         rutas Expo Router (solo pantallas y _layout)
 src/components/  UI compartida (ui.tsx = Txt, Tap, Button, Card, Chip, Badge…; layout.tsx; product.tsx; delivery.tsx; tracking.tsx; Sheet.tsx…)
 src/data/        catálogo, categorías, promos, tiendas/cupones/dirección semilla, pedidos semilla, types.ts
 src/lib/         format, pricing (totales y cupones), orderProgress (simulación), hooks sueltos
-src/store/       zustand: cart, session, orders (persistidos) y ui (efímero)
+src/store/       zustand: cart, session, orders, demo, wallet y routines (persistidos); ui efímero
 src/theme/       tokens.ts (colores, tipografía Inter, radios, sombras)
 stitch_app_delivery_tambo/   diseños fuente (code.html + screen.png por pantalla) y DESIGN.md
 ```
@@ -57,13 +58,16 @@ Alias `@/*` → `src/*`. Importa siempre con `@/…`.
 - **Componentes base:** usa `Txt` (nunca `Text` suelto), `Tap` (Pressable con feedback), `Button` (variantes `gold`/`brand`/`ghost`/`outline`/`danger`/`soft`), `Icon` (MaterialCommunityIcons). `Tap` con `hasNestedControls` cuando una superficie pulsable contiene otros botones (en web evita `<button>` anidado).
 - **Iconos:** tipo `IconName` de `@/components/Icon`.
 - **Feedback:** `toast()` de `@/store/ui` para avisos; `haptic.tap/success/warning` de `@/lib/feedback` (ya es no-op en web).
-- **Agregar al carrito:** para un producto suelto usa `useAddToCart()` (`src/lib/useAddToCart.ts`); aplica el *age gate* (+18) a productos con `alcoholic: true`, haptic y toast. Con `{ redeem }` agrega un canje y valida el saldo de puntos. Para varios productos a la vez (combos de Tambo IA, "Arma tu plan", "Agregar todos" de favoritos) usa `useAddManyToCart()` (age gate + "Deshacer"). Excepción: "volver a pedir" usa `useReorder()` (`src/lib/useReorder.tsx`) sin gate; el checkout vuelve a verificar la mayoría de edad al confirmar. Si tocas el age gate, revisa los tres sitios (`useAddToCart`, `useAddManyToCart`, checkout).
+- **Agregar al carrito:** para un producto suelto usa `useAddToCart()` (`src/lib/useAddToCart.ts`); aplica el *age gate* (+18) a productos con `alcoholic: true`, haptic y toast. Con `{ redeem }` agrega un canje y valida el saldo de puntos. Para varios productos a la vez (combos de Tambo IA, "Arma tu plan", "Agregar todos" de favoritos) usa `useAddManyToCart()` (age gate + "Deshacer"). Excepción: "volver a pedir" usa `useReorder()` (`src/lib/useReorder.tsx`) sin gate; el checkout vuelve a verificar la mayoría de edad al confirmar. Si tocas el age gate, revisa los cuatro sitios: `useAddToCart`, `useAddManyToCart`, checkout y `src/app/rutinas/[id].tsx` (crear/editar rutinas).
 - **Tambo Auto-Pilot (rutinas):** store `useRoutines` + lógica en `src/lib/routines.ts` (`nextRun`, `dueRoutines`, `runRoutine`, plantillas). Un pedido de rutina se crea con `placeOrder({ routineId, clearCart: false })`, que aplica el beneficio (10 % en productos + envío gratis vía `computeTotals(..., { routine: true })`) y puntos dobles. Nunca toca el carrito del usuario. `useRoutineRunner` (montado en `_layout.tsx`) ejecuta rutinas solo con la app abierta, en una ventana de 10 min tras la hora; en producción esto iría en el servidor. Las rutinas con alcohol pasan el age gate al **crearlas**.
 - **Mapas y geo:** mapa real = `<SmartMap>` (`src/components/map/`): Leaflet + tiles CARTO/OSM en `react-native-webview`; en web, sin conexión o si no carga en 6 s cae al `fallback` (p. ej. `TrackingMap` SVG). Coordenadas reales en `src/data/places.json` (Nominatim, una sola vez); rutas reales precalculadas en `src/data/routes.json` con `node scripts/build-routes.mjs` (OSRM); **la app nunca llama APIs de mapas/ruteo en runtime** y no se inventan coordenadas. Utilidades en `src/lib/geo.ts` (`haversine`, `deliveryStoreFor`, `deliveryRoute`, `walkingRoute`). El delivery lo despacha la tienda más cercana a la dirección. Ubicación: `useUserLocation()` (demo fija por defecto; GPS real opcional en `/demo`).
 - **SafeDrop (delivery):** pedidos con `safeDrop: true` solo se completan al verificar el QR/PIN (`verifiedAt`); al llegar quedan en `arrived`. Los pedidos antiguos sin el flag se entregan por tiempo. "Simular recorrido GPS" usa el reloj simulado `order.sim` (`useOrders.simulate`).
 - **Tambo IA:** motor local y explicable en `src/lib/recommender.ts` (`forYou`, `upsell`, `buildPlan`), funciones puras sin red. Montos siempre con `computeTotals`/`lineTotal`. UI en `src/components/ai.tsx` y `/ia/plan`. No lo presentes como LLM: es un recomendador híbrido (historial + hora + promos + presupuesto).
 - **Volver a pedir:** siempre con `useReorder()` (renderiza su `sheet` una vez por pantalla). Si el carrito tiene productos pregunta *Reemplazar / Sumar / Cancelar*; nunca reemplaces el carrito en silencio. `useCart().replace` limpia el cupón.
-- **Crear y cancelar pedidos:** siempre con `placeOrder()` / `cancelOrder()` (`src/lib/placeOrder.ts`). `placeOrder` calcula totales, guarda el pedido, registra puntos canjeados y ganados, marca el cupón y vacía el carrito (`clearCart: false` para pedidos automáticos); lanza `InsufficientPointsError` si no alcanza el saldo. `cancelOrder` revierte puntos y libera el cupón. No repitas esos pasos en pantallas.
+- **Crear y cancelar pedidos:** siempre con `placeOrder()` / `cancelOrder()` (`src/lib/placeOrder.ts`). `placeOrder` calcula totales y valida `Order.split` antes de cualquier escritura; después guarda el pedido, registra puntos canjeados y ganados, marca el cupón y vacía el carrito (`clearCart: false` para pedidos automáticos). Lanza `InsufficientPointsError` si no alcanza el saldo y rechaza cuotas pendientes o desactualizadas. `cancelOrder` revierte puntos y libera el cupón. No repitas esos pasos en pantallas.
+- **Party Split (It. 8):** cálculos en `src/lib/split.ts`; UI en `src/components/PartySplit.tsx`. Solo con total en soles > 0 y pago Yape/tarjeta. De 2 a 5 personas; índice 0 = anfitrión. Cada línea completa pertenece a una persona. `lineCash` respeta `lineTotal` y canjes; cupón/puntos libres se prorratean y el envío se divide por igual. Se opera en céntimos, con residuo al anfitrión. Checkout exige autorizar la cuota del anfitrión y simular cada amigo (800 ms, `<DemoOnly>`). `Share.share` solo comparte texto; no confirma pagos. Cambiar el contexto de pago o reparto invalida autorizaciones. El snapshot se guarda en `Order.split` y se muestra en la boleta. No hay store nuevo para borradores ni cobros reales.
+- **Fotos (It. 8):** las 19 incorporadas son JPG 800 × 800 < 80 KB, referenciales de Pexels. Origen comentado en `img`, manifiesto en `docs/catalogo-imagenes.json`; regeneración opcional con `python scripts/build-catalog-images.py` (Pillow + curl, fuera del runtime). `Product.imageIsReference` muestra la aclaración en el detalle. Se retiraron los thumbnails sin uso y Postres sin productos.
+- **Accesibilidad:** `Tap` aporta rol de botón y `Button` etiqueta, estado disabled/busy e importe trailing; para etiquetas largas usa `multiline`. Conserva las etiquetas de bolsa, barra flotante, puntos, OTP y simulaciones. Sobre fondos claros usa `goldText` (AA); `gold`/`goldDark` son fondos o acentos sobre oscuro. Usa “Delivery / Para llevar” como modalidad y “retiro” para la acción.
 - **Modalidad:** Delivery / Para llevar se elige solo en `DeliveryPointSheet` (`FulfillmentToggle` no se usa en otro lugar). En el resto, muéstrala con `FulfillmentBadge` + un acceso que abra ese sheet.
 - **Controles de demo:** todo botón "Simular…" va dentro de `<DemoOnly>` (solo visible con el Modo Presentador).
 - **Retiro "Para llevar" (Smart Lockers):** `Order.pickupMethod` (`'locker'` por defecto si la tienda tiene `lockers.free > 0`, o `'counter'`). El retiro se completa **solo** verificando el QR dinámico (`useOrders.verify` → `verifiedAt`): tótem `/locker/[id]` o "Simular escaneo en caja". No existe confirmación manual. Casilleros, PIN y "telemetría" se derivan del pedido en `src/lib/lockers.ts`; el QR (SHA-256 por ventana de 30 s, `expo-crypto`) en `src/lib/token.ts`; el dibujo en `<QrCode>` (`src/components/qr.tsx`). Es demostrativo: no hay secreto de servidor.
@@ -74,17 +78,21 @@ Alias `@/*` → `src/*`. Importa siempre con `@/…`.
 
 ### Estado y persistencia (puntos delicados)
 
-- Stores persistidos: `useCart` (`tambo-cart`, v2), `useSession` (`tambo-session`, v3), `useOrders` (`tambo-orders`, v2), `useDemo` (`tambo-demo`, Modo Presentador), `useWallet` (`tambo-wallet`, ledger de puntos), `useRoutines` (`tambo-routines`), vía `persistStorage` (AsyncStorage). `useUi` no persiste.
+- Stores persistidos: `useCart` (`tambo-cart`, v2), `useSession` (`tambo-session`, v3), `useOrders` (`tambo-orders`, v3), `useDemo` (`tambo-demo`, v1, Modo Presentador), `useWallet` (`tambo-wallet`, v1, ledger de puntos), `useRoutines` (`tambo-routines`, v1), vía `persistStorage` (AsyncStorage). `useUi` no persiste. Pedidos v3 conserva los antiguos sin split y la migración v1→v2 de retiros.
 - **Gate de hidratación** en `_layout.tsx`: el array `persisted` decide cuándo se oculta el splash. **Si creas un store persistido nuevo, agrégalo ahí** (y, si guarda datos de la demo, en `resetDemoData()` de `src/lib/demo.ts`).
 - Todos los `persist` tienen **`version: 1` + `migrate`** (identidad). Si cambias la forma o el significado de un estado persistido, sube la `version` y transforma los datos en `migrate`; agregar campos opcionales no lo requiere.
-- **Modo Presentador** (`/demo`, se abre manteniendo presionada 2 s la foto de Perfil): activa los controles `<DemoOnly>`, reloj ×1/×3, pedidos de prueba, adelantar pedidos y **Reiniciar demo**.
+- **Modo Presentador** (`/demo`, manteniendo presionada 2 s la foto de Perfil): controles `<DemoOnly>`, reloj ×1/×3, GPS real opcional, recarga de 1000 pts, pedidos de prueba, adelantar pedidos y **Reiniciar demo**. El reinicio incluye billetera y rutinas y conserva `useDemo`.
 - `useSession.loggedIn` arranca en **`true`** a propósito (prototipo): `login` es una pantalla de demo (cualquier email válido + contraseña ≥ 6). El guard es `Stack.Protected` en `_layout.tsx`; `logout` te lleva a `/login`.
 - **El estado del pedido no se guarda: se deriva.** `getOrderStatus(order, now)` (`src/lib/orderProgress.ts`) calcula fase/paso/ETA a partir de `createdAt` y el reloj (`useNow`). Tiempos acelerados en `DEMO_TIMELINE`: preparado 15 s, en camino 25 s, entregado 75 s; pickup listo a 30 s; cancelable los primeros 15 s. Los pedidos `seeded: true` salen como entregados. Para cambiar el ritmo de la demo toca solo `DEMO_TIMELINE`. El tiempo de cada pedido pasa por `orderClock()`: multiplicador global `useDemo.fastClock` + adelanto propio `order.clockOffsetMs` (`useOrders.fastForward`).
 - `carrito.tsx` es una ruta modal transparente; en iOS monta su propio `ToastHost` para que los toasts queden sobre el modal.
 
+### Dependencias incorporadas en las iteraciones
+
+QR: `expo-crypto`, `qrcode-generator`. Mapas y GPS: `react-native-webview`, `expo-location`. Visor 3D/AR: `three` **0.162.0**, `@types/three`, `expo-gl`, `expo-asset`, `expo-camera`. It. 8 no agrega dependencias: usa `Share` de React Native. Las fotos y los tests tienen scripts fuera del runtime; datos para probar todos los flujos en [README.md](README.md).
+
 ## Lo que NO existe todavía (no asumas que está)
 
-Backend/API, autenticación real, pasarela de pago, GPS real del repartidor (la moto se simula sobre una ruta real), geocodificación en tiempo real, notificaciones push, tests, CI, `eas.json`, variables de entorno. La app corre en **Expo Go** sin módulos nativos propios; si agregas uno con código nativo, necesitarás development build (ver AGENTS.md).
+Backend/API, autenticación real, pasarela de pago, GPS real del repartidor (la moto se simula sobre una ruta real), geocodificación en tiempo real, notificaciones push, CI, `eas.json`, variables de entorno. La app corre en **Expo Go** sin módulos nativos propios; si agregas uno con código nativo, necesitarás development build (ver AGENTS.md).
 
 ## Flujo de trabajo sugerido
 

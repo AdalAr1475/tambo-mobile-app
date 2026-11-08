@@ -68,7 +68,7 @@ export function DayPicker({ value, onChange }: { value: number[]; onChange: (day
 const destinationLabel = (r: Routine, addressLabel?: string) =>
   r.fulfillment === 'delivery'
     ? `Delivery a ${addressLabel ?? 'tu dirección'}`
-    : `${r.pickupMethod === 'locker' ? 'Smart Locker' : 'Recojo'} en ${getStore(r.storeId).name}`;
+    : `${r.pickupMethod === 'locker' ? 'Smart Locker' : 'Para llevar'} en ${getStore(r.storeId).name}`;
 
 /** Tarjeta de una rutina: próxima entrega, productos, pausa, saltar, editar y simulación. */
 export function RoutineCard({ routine: r }: { routine: Routine }) {

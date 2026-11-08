@@ -50,6 +50,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
+    "test:split": "node --test scripts/split.test.cjs",
     "lint": "expo lint"
   },
   "private": true

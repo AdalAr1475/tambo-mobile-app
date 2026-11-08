@@ -163,6 +163,27 @@ export default function OrderDetailScreen() {
           </Row>
           <Divider dashed />
           <InfoRow icon="credit-card-outline" label="Pago" value={order.payment.label} />
+          {order.split && (
+            <View style={{ gap: space.sm }}>
+              <Txt variant="labelLg">Party Split · {order.split.mode === 'equal' ? 'Partes iguales' : 'Por producto'}</Txt>
+              {order.split.participants.map((p, index) => (
+                <View key={index} style={{ gap: space.xs }}>
+                  <SummaryRow label={p.name} value={money(p.amount)} />
+                  <Txt variant="bodySm" color={colors.textMuted}>
+                    {p.paid ? 'Pagado' : 'Pendiente'} con {p.method === 'card' ? 'tarjeta' : 'Yape'} · demo
+                  </Txt>
+                  {order.split?.mode === 'items' && order.items.map((item, line) =>
+                    order.split?.assignment?.[line] === index ? (
+                      <Txt key={line} variant="bodySm" color={colors.textMuted}>{item.qty} × {item.name}</Txt>
+                    ) : null,
+                  )}
+                </View>
+              ))}
+              <Txt variant="bodySm" color={colors.textMuted}>
+                Importes finales en soles, después del canje y los descuentos, con envío incluido.
+              </Txt>
+            </View>
+          )}
           {order.fulfillment === 'delivery' && order.address ? (
             <InfoRow
               icon="map-marker-outline"

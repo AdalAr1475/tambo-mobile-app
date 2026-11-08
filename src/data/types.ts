@@ -28,6 +28,8 @@ export type Product = {
   regularPrice?: number;
   /** Resultado de require() de un asset local. */
   image?: number;
+  /** Fotografía de banco: representa el tipo de producto, no su empaque comercial. */
+  imageIsReference?: boolean;
   gallery?: number[];
   /** Si no hay foto se muestra un ícono sobre un fondo de color. */
   icon?: IconName;
@@ -135,6 +137,13 @@ export type OrderTotals = {
   total: number;
 };
 
+export type OrderSplit = {
+  mode: 'equal' | 'items';
+  /** Índice del participante por línea del pedido; solo se guarda en modo por producto. */
+  assignment?: number[];
+  participants: { name: string; amount: number; paid: boolean; method: 'yape' | 'card' }[];
+};
+
 export type Order = {
   id: string;
   createdAt: number;
@@ -145,6 +154,8 @@ export type Order = {
   /** `start`/`end` (timestamps) solo existen en pedidos programados desde la It. 1. */
   schedule: { type: 'asap' } | { type: 'scheduled'; slot: string; start?: number; end?: number };
   payment: { method: PaymentMethodType; label: string; cashAmount?: number };
+  /** Cuotas en soles después de canjes y descuentos (Party Split, It. 8). */
+  split?: OrderSplit;
   couponCode?: string;
   totals: OrderTotals;
   /** Pedidos de ejemplo del historial: ya entregados. */

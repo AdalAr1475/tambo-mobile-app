@@ -30,7 +30,7 @@ export const categories: Category[] = [
     name: 'Cafetería',
     title: 'Cafetería',
     icon: 'coffee-outline',
-    subcategories: ['Café', 'Desayunos', 'Postres'],
+    subcategories: ['Café', 'Desayunos'],
   },
   {
     id: 'lacteos',

@@ -57,7 +57,7 @@ export default function HomeScreen() {
                   <Txt variant="bodySm" weight="bold" color={colors.goldText}>
                     {point.eta}
                   </Txt>{' '}
-                  • delivery gratis desde S/ {FREE_SHIPPING_MIN}
+                  • delivery gratis desde {money(FREE_SHIPPING_MIN)}
                 </>
               ) : (
                 <>

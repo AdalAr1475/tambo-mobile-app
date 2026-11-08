@@ -86,6 +86,7 @@ type ButtonProps = Omit<TapProps, 'children'> & {
   loading?: boolean;
   size?: 'md' | 'lg' | 'sm';
   full?: boolean;
+  multiline?: boolean;
 };
 
 export function Button({
@@ -97,6 +98,7 @@ export function Button({
   loading,
   size = 'md',
   full = true,
+  multiline = false,
   style,
   disabled,
   ...rest
@@ -105,14 +107,16 @@ export function Button({
   const height = size === 'lg' ? 56 : size === 'sm' ? 38 : 48;
   return (
     <Tap
-      accessibilityLabel={label}
+      accessibilityLabel={trailing ? `${label}, ${trailing}` : label}
       accessibilityState={{ disabled: !!disabled || !!loading, busy: !!loading }}
       disabled={disabled || loading}
       {...rest}
       style={[
         styles.button,
         {
-          height,
+          height: multiline ? undefined : height,
+          minHeight: height,
+          paddingVertical: multiline ? space.sm : 0,
           backgroundColor: c.bg,
           borderColor: c.border ?? 'transparent',
           borderWidth: c.border ? 1 : 0,
@@ -129,7 +133,8 @@ export function Button({
         <>
           <View style={styles.buttonMain}>
             {icon && <Icon name={icon} size={size === 'sm' ? 18 : 20} color={c.fg} />}
-            <Txt variant={size === 'sm' ? 'labelMd' : 'labelLg'} weight="bold" color={c.fg} numberOfLines={1}>
+            <Txt variant={size === 'sm' ? 'labelMd' : 'labelLg'} weight="bold" color={c.fg}
+              numberOfLines={multiline ? undefined : 1} style={{ flexShrink: 1 }}>
               {label}
             </Txt>
             {iconRight && <Icon name={iconRight} size={20} color={c.fg} />}
@@ -169,6 +174,7 @@ export function IconButton({
   return (
     <Tap
       accessibilityLabel={label}
+      accessibilityState={{ disabled: !!rest.disabled }}
       hitSlop={6}
       {...rest}
       style={[styles.iconButton, { width: size, height: size, backgroundColor: bg }, style]}

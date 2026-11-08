@@ -46,6 +46,7 @@ export function FloatingCartBar({ bottom = space.md, safeArea = false }: Placeme
       style={[styles.wrap, { bottom: bottom + (safeArea ? insets.bottom : 0) }]}
     >
       <Tap
+        accessibilityRole="button"
         onPress={() => router.push('/carrito')}
         style={styles.bar}
         accessibilityLabel={`Ver pedido actual, ${count} ${count === 1 ? 'producto' : 'productos'}, ${money(totals.total)}. Ir a pagar`}

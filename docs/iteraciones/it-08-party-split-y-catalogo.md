@@ -4,6 +4,10 @@
 **Objetivo:** cerrar con un diferenciador social y dejar el catálogo con aspecto de producto terminado.
 **Esfuerzo:** S · **Dependencias nuevas:** ninguna.
 
+**Estado de implementación:** It. 8 implementada. Party Split se guarda y valida desde `placeOrder`, con detalle en boleta. Las 19 fotos nuevas son referenciales de Pexels ([fuentes y licencias](../catalogo-imagenes.json)); se eliminaron los thumbnails sin uso y Postres vacío. README y CLAUDE incluyen los flujos 1–8 y datos de prueba.
+
+**Verificación:** TypeScript y lint pasan. Las 5 pruebas de `npm run test:split` cubren redondeos, promociones por paquete, puntos/cupones y rechazo de cuotas pendientes antes de mutar los stores. Se generó el bundle web y sus assets. Las 19 fotos cumplen 800 × 800 y < 80 KB; crecimiento neto de imágenes: 1 163 919 bytes. `goldText` supera 4.5:1 sobre blanco, `goldSoft` y `goldTint`. Falta ensayo manual en Expo Go de compartir, pagos secuenciales, boleta al recargar y lector de pantalla. La revisión visual de Chrome se interrumpió porque el control del equipo no pudo verificar su URL.
+
 ---
 
 ## 8.1 · T12 · Tambo Party Split ("¿Compras en mancha?")

@@ -36,6 +36,7 @@ export function PointsPill() {
     <Tap
       onPress={() => router.push('/puntos')}
       style={styles.pill}
+      accessibilityRole="button"
       accessibilityLabel={`Tienes ${formatPoints(balance)} puntos Tambo Lover. Ver mis puntos`}
     >
       <Icon name={POINTS_ICON} size={18} color={colors.onGold} />

@@ -1,6 +1,44 @@
 import type { CategoryId, Product } from './types';
 
 const img = {
+  // Foto referencial (licencia Pexels): https://www.pexels.com/photo/a-cup-of-black-coffee-14568434/
+  'cafe-americano': require('../../assets/images/cafe-americano.jpg'),
+  // Foto referencial (licencia Pexels): https://www.pexels.com/photo/cappuccino-in-glass-cup-5211567/
+  'capuccino': require('../../assets/images/capuccino.jpg'),
+  // Foto referencial (licencia Pexels): https://www.pexels.com/photo/a-croissant-in-close-up-photography-4828303/
+  'croissant': require('../../assets/images/croissant.jpg'),
+  // Foto referencial (licencia Pexels): https://www.pexels.com/photo/two-ice-cubes-3675620/
+  'hielo-2kg': require('../../assets/images/hielo-2kg.jpg'),
+  // Foto referencial (licencia Pexels): https://www.pexels.com/photo/clear-disposable-bottle-on-black-surface-1000084/
+  'agua-sanluis': require('../../assets/images/agua-sanluis.jpg'),
+  // Foto referencial (licencia Pexels): https://www.pexels.com/photo/close-up-photo-of-nacho-chips-5848729/
+  'doritos': require('../../assets/images/doritos.jpg'),
+  // Foto referencial (licencia Pexels): https://www.pexels.com/photo/close-up-of-tasty-hotdog-with-mustard-drizzle-37098335/
+  'hot-dog': require('../../assets/images/hot-dog.jpg'),
+  // Foto referencial (licencia Pexels): https://www.pexels.com/fr-fr/photo/nourriture-aliments-sain-dejeuner-6763275/
+  'aji-gallina': require('../../assets/images/aji-gallina.jpg'),
+  // Foto referencial (licencia Pexels): https://www.pexels.com/photo/brown-chocolate-bars-on-a-white-surface-4113290/
+  'sublime': require('../../assets/images/sublime.jpg'),
+  // Foto referencial (licencia Pexels): https://www.pexels.com/photo/close-up-shot-of-assorted-candies-on-a-white-surface-8670040/
+  'halls': require('../../assets/images/halls.jpg'),
+  // Foto referencial (licencia Pexels): https://www.pexels.com/photo/food-dawn-glass-breakfast-7573152/
+  'leche-gloria': require('../../assets/images/leche-gloria.jpg'),
+  // Foto referencial (licencia Pexels): https://www.pexels.com/photo/strawberry-yogurt-5940/
+  'yogurt-fresa': require('../../assets/images/yogurt-fresa.jpg'),
+  // Foto referencial (licencia Pexels): https://www.pexels.com/photo/bowl-of-instant-noodles-placed-on-checkered-tablecloth-in-kitchen-6940984/
+  'ajinomen': require('../../assets/images/ajinomen.jpg'),
+  // Foto referencial (licencia Pexels): https://www.pexels.com/photo/white-rice-grains-on-wooden-spoons-7421204/
+  'arroz-costeno': require('../../assets/images/arroz-costeno.jpg'),
+  // Foto referencial (licencia Pexels): https://www.pexels.com/photo/bottles-of-bleach-placed-on-shelves-in-supermarket-7451952/
+  'clorox': require('../../assets/images/clorox.jpg'),
+  // Foto referencial (licencia Pexels): https://www.pexels.com/photo/stall-with-washing-powder-13768941/
+  'ariel': require('../../assets/images/ariel.jpg'),
+  // Foto referencial (licencia Pexels): https://www.pexels.com/photo/wooden-toothbrush-and-plastic-tube-cream-on-a-white-surface-8015798/
+  'colgate': require('../../assets/images/colgate.jpg'),
+  // Foto referencial (licencia Pexels): https://www.pexels.com/photo/person-holding-hand-sanitizer-3962344/
+  'alcohol-gel': require('../../assets/images/alcohol-gel.jpg'),
+  // Foto referencial (licencia Pexels): https://www.pexels.com/photo/white-pills-in-row-on-yellow-background-4210608/
+  'panadol': require('../../assets/images/panadol.jpg'),
   fourlokoPack: require('../../assets/images/fourloko-pack.jpg'),
   fourlokoGold: require('../../assets/images/fourloko-gold.jpg'),
   fourlokoHero: require('../../assets/images/fourloko-gold-hero.jpg'),
@@ -251,8 +289,8 @@ export const products: Product[] = [
     subtitle: 'Botella personal',
     description: 'Agua de mesa sin gas.',
     price: 1.9,
-    icon: 'water',
-    tint: '#DDEEFF',
+    image: img['agua-sanluis'],
+    imageIsReference: true,
     popularity: 60,
   },
 
@@ -308,8 +346,8 @@ export const products: Product[] = [
     subtitle: 'Tortillas de maíz',
     description: 'Tortillas de maíz sabor a queso.',
     price: 6.9,
-    icon: 'triangle-outline',
-    tint: '#FFE3C2',
+    image: img['doritos'],
+    imageIsReference: true,
     popularity: 72,
   },
   {
@@ -321,8 +359,8 @@ export const products: Product[] = [
     subtitle: 'Chocolate con maní',
     description: 'El clásico chocolate con leche y maní.',
     price: 2.2,
-    icon: 'candy-outline',
-    tint: '#F3E1D6',
+    image: img['sublime'],
+    imageIsReference: true,
     popularity: 80,
   },
   {
@@ -334,8 +372,8 @@ export const products: Product[] = [
     subtitle: 'Barra de 9 unidades',
     description: 'Caramelos refrescantes sabor menta.',
     price: 1.5,
-    icon: 'candy',
-    tint: '#D8F0EE',
+    image: img['halls'],
+    imageIsReference: true,
     popularity: 55,
   },
 
@@ -396,8 +434,8 @@ export const products: Product[] = [
     subtitle: 'Con papitas al hilo',
     description: 'Hot dog jumbo con salchicha ahumada, papitas al hilo y cremas a elección.',
     price: 6.9,
-    icon: 'food-hot-dog',
-    tint: '#FFE7CC',
+    image: img['hot-dog'],
+    imageIsReference: true,
     popularity: 78,
   },
   {
@@ -409,8 +447,8 @@ export const products: Product[] = [
     subtitle: 'Plato listo • 350 g',
     description: 'Clásico ají de gallina con arroz blanco, listo para calentar.',
     price: 12.9,
-    icon: 'bowl-mix-outline',
-    tint: '#FFF0C7',
+    image: img['aji-gallina'],
+    imageIsReference: true,
     popularity: 74,
   },
 
@@ -426,8 +464,8 @@ export const products: Product[] = [
     subtitle: 'Recién pasado',
     description: 'Café americano de granos peruanos, recién pasado.',
     price: 3.5,
-    icon: 'coffee',
-    tint: '#EBDDD3',
+    image: img['cafe-americano'],
+    imageIsReference: true,
     popularity: 82,
   },
   {
@@ -441,8 +479,8 @@ export const products: Product[] = [
     subtitle: 'Con leche espumada',
     description: 'Espresso con leche espumada y un toque de canela.',
     price: 5.9,
-    icon: 'coffee-outline',
-    tint: '#F1E4D9',
+    image: img['capuccino'],
+    imageIsReference: true,
     popularity: 70,
   },
   {
@@ -455,8 +493,8 @@ export const products: Product[] = [
     subtitle: 'Horneado del día',
     description: 'Croissant de mantequilla relleno de jamón y queso.',
     price: 5.5,
-    icon: 'food-croissant',
-    tint: '#FCE9C8',
+    image: img['croissant'],
+    imageIsReference: true,
     popularity: 68,
   },
 
@@ -485,8 +523,8 @@ export const products: Product[] = [
     subtitle: 'Lata evaporada',
     description: 'Leche evaporada entera.',
     price: 4.6,
-    icon: 'cup-outline',
-    tint: '#DCE8FA',
+    image: img['leche-gloria'],
+    imageIsReference: true,
     popularity: 66,
   },
   {
@@ -498,8 +536,8 @@ export const products: Product[] = [
     subtitle: 'Botella 1 L',
     description: 'Yogurt bebible sabor fresa.',
     price: 7.2,
-    icon: 'cup',
-    tint: '#FFD9E2',
+    image: img['yogurt-fresa'],
+    imageIsReference: true,
     popularity: 62,
   },
 
@@ -514,8 +552,8 @@ export const products: Product[] = [
     subtitle: 'Bolsa 2 kg',
     description: 'Hielo en cubos purificado, ideal para tus bebidas.',
     price: 3.5,
-    icon: 'cube-outline',
-    tint: '#DDF3FB',
+    image: img['hielo-2kg'],
+    imageIsReference: true,
     popularity: 88,
   },
   {
@@ -527,8 +565,8 @@ export const products: Product[] = [
     subtitle: 'Sobre 80 g',
     description: 'Sopa instantánea sabor gallina, lista en 3 minutos.',
     price: 2.2,
-    icon: 'noodles',
-    tint: '#FFF0C7',
+    image: img['ajinomen'],
+    imageIsReference: true,
     popularity: 64,
   },
   {
@@ -540,8 +578,8 @@ export const products: Product[] = [
     subtitle: 'Bolsa 750 g',
     description: 'Arroz extra graneado.',
     price: 4.9,
-    icon: 'rice',
-    tint: '#F2EFE6',
+    image: img['arroz-costeno'],
+    imageIsReference: true,
     popularity: 58,
   },
 
@@ -555,8 +593,8 @@ export const products: Product[] = [
     subtitle: 'Botella 1 L',
     description: 'Desinfecta y blanquea. Elimina el 99.9% de bacterias.',
     price: 4.5,
-    icon: 'spray-bottle',
-    tint: '#E3ECF5',
+    image: img['clorox'],
+    imageIsReference: true,
     popularity: 52,
   },
   {
@@ -569,8 +607,8 @@ export const products: Product[] = [
     description: 'Detergente en polvo con poder quitamanchas.',
     price: 8.9,
     regularPrice: 10.5,
-    icon: 'washing-machine',
-    tint: '#DDEBFA',
+    image: img['ariel'],
+    imageIsReference: true,
     promoTags: ['descuentos'],
     popularity: 50,
   },
@@ -585,8 +623,8 @@ export const products: Product[] = [
     subtitle: 'Tubo 75 ml',
     description: 'Protección contra caries, blancura y aliento fresco.',
     price: 5.9,
-    icon: 'toothbrush-paste',
-    tint: '#FFE0E0',
+    image: img['colgate'],
+    imageIsReference: true,
     popularity: 54,
   },
   {
@@ -598,8 +636,8 @@ export const products: Product[] = [
     subtitle: 'Frasco 250 ml',
     description: 'Gel antibacterial con 70% de alcohol.',
     price: 6.5,
-    icon: 'hand-wash-outline',
-    tint: '#E1F3EC',
+    image: img['alcohol-gel'],
+    imageIsReference: true,
     popularity: 48,
   },
   {
@@ -611,8 +649,8 @@ export const products: Product[] = [
     subtitle: 'Sobre 4 tabletas',
     description: 'Alivio de síntomas de gripe y resfriado. Leer las indicaciones antes de usar.',
     price: 3.9,
-    icon: 'pill',
-    tint: '#E7E1F7',
+    image: img['panadol'],
+    imageIsReference: true,
     popularity: 57,
   },
 ];

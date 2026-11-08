@@ -3,6 +3,7 @@ import type { Address, Fulfillment, Order, PickupMethod } from '@/data/types';
 import { deliveryStoreFor } from '@/lib/geo';
 import { pts, ROUTINE_POINTS_MULTIPLIER } from '@/lib/points';
 import { computeTotals } from '@/lib/pricing';
+import { validateSplit } from '@/lib/split';
 import { toCartLines, useCart, type CartItem } from '@/store/cart';
 import { newOrderId, timestamp, useOrders } from '@/store/orders';
 import { useSession } from '@/store/session';
@@ -15,6 +16,7 @@ export type PlaceOrderInput = {
   address?: Address;
   schedule: Order['schedule'];
   payment: Order['payment'];
+  split?: Order['split'];
   couponCode?: string;
   /** "Para llevar": Smart Locker o mostrador. */
   pickupMethod?: PickupMethod;
@@ -48,6 +50,7 @@ export function placeOrder({
   address,
   schedule,
   payment,
+  split,
   couponCode,
   pickupMethod,
   pointsToUse,
@@ -61,6 +64,7 @@ export function placeOrder({
     earnMultiplier: routine ? ROUTINE_POINTS_MULTIPLIER : 1,
   });
   const wallet = useWallet.getState();
+  if (split) validateSplit(split, toCartLines(items), totals.shipping, totals.total, payment.method);
   const balance = balanceOf(wallet.ledger);
   if (totals.pointsToRedeem > balance) throw new InsufficientPointsError(totals.pointsToRedeem - balance);
 
@@ -91,6 +95,7 @@ export function placeOrder({
     pointsEarned: totals.pointsEarned,
     pointsRedeemed: totals.pointsToRedeem || undefined,
     routineId,
+    split,
   };
 
   useOrders.getState().place(order);

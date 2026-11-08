@@ -19,21 +19,22 @@ import { Icon, type IconName } from '@/components/Icon';
 import { EmptyState, FulfillmentBadge, RadioCard, ScreenHeader, TextField } from '@/components/layout';
 import { SmartMap } from '@/components/map/SmartMap';
 import { OtpInput } from '@/components/otp';
+import { PartySplit, recalculateSplit } from '@/components/PartySplit';
 import { POINTS_ICON } from '@/components/points';
 import { AUTOPILOT_BENEFIT, AUTOPILOT_ICON } from '@/components/routines';
 import { Sheet } from '@/components/Sheet';
 import { SummaryRow } from '@/components/summary';
 import { Badge, Button, Card, Chip, Divider, Row, Tap, Txt } from '@/components/ui';
 import { getProduct } from '@/data/products';
-import type { Order, PaymentMethodType, PickupMethod, SavedCard } from '@/data/types';
+import type { Order, OrderSplit, PaymentMethodType, PickupMethod, SavedCard } from '@/data/types';
 import { money, round2 } from '@/lib/format';
 import { haptic } from '@/lib/feedback';
 import { addressCoords, deliveryStoreFor } from '@/lib/geo';
-import { InsufficientPointsError, placeOrder } from '@/lib/placeOrder';
+import { placeOrder } from '@/lib/placeOrder';
 import { formatPoints, pointsForSoles, pointsValue, pts } from '@/lib/points';
 import { checkCoupon } from '@/lib/pricing';
 import { buildSlots, HOLD_MINUTES, slotDisplay, type Slot } from '@/lib/slots';
-import { useCart, useCartTotals } from '@/store/cart';
+import { toCartLines, useCart, useCartTotals } from '@/store/cart';
 import { randomCode, useNow } from '@/store/orders';
 import { useSession } from '@/store/session';
 import { toast, useUi } from '@/store/ui';
@@ -112,6 +113,9 @@ export default function CheckoutScreen() {
   const simTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [placing, setPlacing] = useState(false);
+  const [splitEnabled, setSplitEnabled] = useState(false);
+  const [splitDraft, setSplitDraft] = useState<OrderSplit>();
+  const [splitStamp, setSplitStamp] = useState('');
 
   // Si el bloque elegido ya pasó, `slot` cae solo al siguiente disponible; aquí solo se avisa (una vez).
   const notifiedSlot = useRef<string>(undefined);
@@ -175,6 +179,19 @@ export default function CheckoutScreen() {
         : undefined,
   };
   const hasErrors = Object.values(errors).some(Boolean);
+  const splitEligible = needsPayment && (method === 'yape' || method === 'card');
+  const splitActive = splitEnabled && splitEligible;
+  const splitLines = toCartLines(items);
+  // Un cambio en productos, canjes, cupones, envío o medio de pago invalida las autorizaciones.
+  const splitContext = JSON.stringify([items, totals.total, totals.shipping, appliedPoints, couponCode,
+    point.fulfillment, method, cardId, card, yapePhone, yapeOtp]);
+  // También descarta los pagos si luego se vuelve a la configuración anterior.
+  if (splitStamp && splitStamp !== splitContext) setSplitStamp('');
+  const split = splitActive ? recalculateSplit(splitDraft, splitLines, totals.total, totals.shipping,
+    method === 'card' ? 'card' : 'yape', splitStamp === splitContext) : undefined;
+  const splitPending = !!split && split.participants.some((p) => !p.paid || !p.name.trim());
+  const hostReady = !errors.cardNumber && !errors.cardExpiry && !errors.cardCvv && !errors.cardHolder &&
+    !errors.yapePhone && !errors.yapeOtp;
 
   const simulateYape = () => {
     simTimers.current.forEach(clearTimeout);
@@ -199,7 +216,12 @@ export default function CheckoutScreen() {
     Linking.openURL('yape://').catch(() => toast('Instala Yape para continuar', { tone: 'error' }));
 
   const confirm = async () => {
+    if (placing) return;
     setSubmitted(true);
+    if (splitPending) {
+      toast('Completa los pagos y los nombres de todos los participantes', { tone: 'error' });
+      return;
+    }
     if (hasErrors) {
       haptic.warning();
       toast('Revisa los datos marcados en rojo', { tone: 'error' });
@@ -253,6 +275,7 @@ export default function CheckoutScreen() {
         couponCode,
         pickupMethod,
         pointsToUse: appliedPoints,
+        split,
       });
       if (needsPayment) session.setPreferredPayment(method);
       haptic.success();
@@ -260,7 +283,7 @@ export default function CheckoutScreen() {
     } catch (e) {
       setPlacing(false);
       haptic.warning();
-      toast(e instanceof InsufficientPointsError ? e.message : 'No pudimos registrar tu pedido', {
+      toast(e instanceof Error ? e.message : 'No pudimos registrar tu pedido', {
         tone: 'error',
       });
     }
@@ -290,7 +313,8 @@ export default function CheckoutScreen() {
         }
       />
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled"
+          pointerEvents={placing ? 'none' : 'auto'}>
           {/* Dirección o tienda. La modalidad se decide en "¿Cómo quieres tu pedido?" (un solo lugar). */}
           <Card style={styles.block}>
             <Row style={{ justifyContent: 'space-between' }}>
@@ -445,7 +469,7 @@ export default function CheckoutScreen() {
 
           {/* Horario */}
           <Card style={styles.block}>
-            <BlockTitle icon="clock-outline" title={delivery ? 'Horario de entrega' : 'Horario de recojo'} />
+            <BlockTitle icon="clock-outline" title={delivery ? 'Horario de entrega' : 'Horario de retiro'} />
             <RadioCard
               selected={schedule === 'asap'}
               onPress={() => setSchedule('asap')}
@@ -665,7 +689,7 @@ export default function CheckoutScreen() {
                     <Animated.View entering={ZoomIn.springify().damping(14)} style={styles.yapeOk}>
                       <Icon name="check-decagram" size={20} color={colors.success} />
                       <Txt variant="labelMd" color={colors.success}>
-                        Yape aprobado • {money(totals.total)}
+                        Yape aprobado • {money(split?.participants[0].amount ?? totals.total)}
                       </Txt>
                     </Animated.View>
                   )}
@@ -855,6 +879,28 @@ export default function CheckoutScreen() {
             </RadioCard>
               </>
             )}
+            {splitEligible && (
+              <>
+                <Divider />
+                <Row style={{ alignItems: 'flex-start' }}>
+                  <Txt variant="labelLg" style={{ flex: 1 }}>👥 ¿Compras en mancha? Dividir pago</Txt>
+                  <Switch value={splitEnabled} disabled={placing}
+                    accessibilityLabel="¿Compras en mancha? Dividir pago" accessibilityRole="switch"
+                    accessibilityState={{ checked: splitEnabled, disabled: placing }}
+                    trackColor={{ true: colors.primary, false: colors.surfaceHigh }}
+                    onValueChange={(on) => {
+                      setSplitEnabled(on);
+                      setSplitDraft(undefined);
+                      setSplitStamp('');
+                    }} />
+                </Row>
+                {split && (
+                  <PartySplit key={splitContext} value={split} lines={splitLines} total={totals.total}
+                    shipping={totals.shipping} hostReady={hostReady} disabled={placing}
+                    onChange={(next) => { setSplitDraft(next); setSplitStamp(splitContext); }} />
+                )}
+              </>
+            )}
           </Card>
 
           {/* Resumen */}
@@ -938,6 +984,8 @@ export default function CheckoutScreen() {
           iconRight="arrow-right"
           size="lg"
           loading={placing}
+          disabled={splitPending}
+          accessibilityLabel={`Confirmar pedido por ${money(totals.total)}${splitPending ? '. Hay pagos pendientes en Party Split' : ''}`}
           onPress={confirm}
         />
         <Txt variant="bodySm" align="center" color={colors.textMuted} style={{ marginTop: 6, fontSize: 11 }}>
@@ -949,6 +997,7 @@ export default function CheckoutScreen() {
               : method === 'plin'
                 ? 'Esperando aprobación de Plin…'
                 : 'Procesando tu pedido…'
+            : splitPending ? 'Completa Party Split para confirmar el pedido'
             : 'Al pulsar confirmas los términos y condiciones de entrega Tambo'}
         </Txt>
       </View>
