@@ -1,0 +1,27 @@
+<!doctype html>
+<!-- Manga de cartón del vaso Tambo Café (1024×256), se repite 3 veces alrededor. -->
+<html><head><meta charset="utf-8"><style>html,body{margin:0;width:1024px;height:256px;overflow:hidden}</style></head>
+<body>
+<svg width="1024" height="256" viewBox="0 0 1024 256" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="paper"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="3"/>
+      <feColorMatrix values="0 0 0 0 .35  0 0 0 0 .22  0 0 0 0 .1  0 0 0 .18 0"/></filter>
+    <g id="logo">
+      <circle r="44" fill="#6B1464"/>
+      <path d="M-20 -6 h34 v16 a14 14 0 0 1 -14 14 h-6 a14 14 0 0 1 -14 -14 Z M14 -2 h6 a7 7 0 0 1 0 14 h-6" fill="none" stroke="#FFBE3B" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M-10 -26 q6 8 0 14 M2 -28 q6 8 0 14" stroke="#FFBE3B" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <text x="64" y="-4" font-family="Arial Black, Arial, sans-serif" font-size="44" fill="#4C0047">Tambo Café</text>
+      <text x="66" y="30" font-family="Arial, sans-serif" font-weight="700" font-size="22" fill="#4C0047" letter-spacing="3">GRANOS PERUANOS</text>
+    </g>
+  </defs>
+  <rect width="1024" height="256" fill="#C9A275"/>
+  <rect width="1024" height="256" filter="url(#paper)"/>
+  <rect y="0" width="1024" height="22" fill="#6B1464"/>
+  <rect y="234" width="1024" height="22" fill="#6B1464"/>
+  <g transform="translate(0 128) scale(.62 1)">
+    <use href="#logo" x="90"/>
+    <use href="#logo" x="640"/>
+    <use href="#logo" x="1190"/>
+  </g>
+</svg>
+</body></html>

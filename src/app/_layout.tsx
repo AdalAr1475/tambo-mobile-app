@@ -77,6 +77,14 @@ export default function RootLayout() {
               options={{ animation: 'fade_from_bottom', gestureEnabled: false }}
             />
             <Stack.Screen
+              name="visor/[id]"
+              options={{
+                animation: 'slide_from_bottom',
+                gestureEnabled: false,
+                contentStyle: { backgroundColor: colors.viewerBottom },
+              }}
+            />
+            <Stack.Screen
               name="locker/[id]"
               options={{
                 presentation: 'fullScreenModal',

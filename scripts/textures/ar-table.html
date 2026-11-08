@@ -1,0 +1,37 @@
+<!doctype html>
+<!-- Foto de respaldo para la pestaña AR (720×1280): mesa de madera vista desde arriba en perspectiva.
+     Imagen generada (no es una foto de stock), así que no tiene licencia de terceros. -->
+<html><head><meta charset="utf-8"><style>
+html,body{margin:0;width:720px;height:1280px;overflow:hidden;background:#2b211b}
+.wall{position:absolute;inset:0 0 50% 0;background:
+  radial-gradient(ellipse 60% 70% at 72% 40%, #f3e2c4 0%, #c9ab86 45%, #6e5640 100%);filter:blur(2px)}
+.blob{position:absolute;border-radius:50%;filter:blur(28px)}
+.stage{position:absolute;left:-40%;right:-40%;top:40%;height:140%;perspective:900px;perspective-origin:50% 0%}
+.wood{position:absolute;inset:0;transform:rotateX(64deg);transform-origin:50% 0%;
+  box-shadow:0 -6px 0 #3a2617}
+.vignette{position:absolute;inset:0;background:radial-gradient(ellipse 85% 70% at 50% 62%, transparent 45%, rgba(10,4,2,.55) 100%)}
+.light{position:absolute;inset:0;background:linear-gradient(180deg, rgba(255,236,200,.0) 30%, rgba(255,236,200,.12) 60%, rgba(0,0,0,.25) 100%)}
+</style></head>
+<body>
+<div class="wall"></div>
+<div class="blob" style="left:40px;top:120px;width:180px;height:380px;background:#3f5a2f;opacity:.75"></div>
+<div class="blob" style="left:140px;top:60px;width:120px;height:220px;background:#5f7d40;opacity:.6"></div>
+<div class="blob" style="left:470px;top:160px;width:200px;height:260px;background:#fff6e2;opacity:.8"></div>
+<div class="stage"><svg class="wood" width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 1600 1600" xmlns="http://www.w3.org/2000/svg">
+  <defs><filter id="grain" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.06 0.0025" numOctaves="4" seed="11"/>
+    <feColorMatrix values="0 0 0 0 .55  0 0 0 0 .34  0 0 0 0 .19  0 0 0 0 1"/>
+    <feComponentTransfer><feFuncA type="table" tableValues="1 1"/></feComponentTransfer>
+  </filter>
+  <filter id="lines" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="turbulence" baseFrequency="0.09 0.0015" numOctaves="2" seed="4"/>
+    <feColorMatrix values="0 0 0 0 .18  0 0 0 0 .1  0 0 0 0 .05  0 0 0 -2.2 1.25"/>
+  </filter></defs>
+  <rect width="1600" height="1600" fill="#9b6a43"/>
+  <rect width="1600" height="1600" filter="url(#grain)" opacity=".85"/>
+  <rect width="1600" height="1600" filter="url(#lines)" opacity=".55"/>
+  <g stroke="#4a2e1a" stroke-width="5" opacity=".7"><line x1="400" y1="0" x2="400" y2="1600"/><line x1="800" y1="0" x2="800" y2="1600"/><line x1="1200" y1="0" x2="1200" y2="1600"/></g>
+</svg></div>
+<div class="light"></div>
+<div class="vignette"></div>
+</body></html>

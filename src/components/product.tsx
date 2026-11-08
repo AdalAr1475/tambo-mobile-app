@@ -9,6 +9,7 @@ import { useAddToCart } from '@/lib/useAddToCart';
 import { MAX_QTY, useCart, useCartQty } from '@/store/cart';
 import { colors, radius, space } from '@/theme/tokens';
 import { Icon } from './Icon';
+import { View3DChip } from './spatial/View3DChip';
 import { Badge, type BadgeToneName, Tap, Txt } from './ui';
 
 /* ——— Imagen o placeholder con ícono ——— */
@@ -218,6 +219,7 @@ export function ProductCard({
         {product.redeem && (
           <Badge label="Canjeable" tone="warning" icon="star-circle" style={styles.cardRedeem} />
         )}
+        {product.model3d && <View3DChip productId={product.id} style={styles.card3d} />}
       </View>
       <View style={styles.cardBody}>
         <Txt variant="labelLg" numberOfLines={2} style={{ minHeight: 40 }}>
@@ -264,6 +266,7 @@ const styles = StyleSheet.create({
   },
   cardBadge: { position: 'absolute', top: 8, left: 8, borderRadius: radius.sm },
   cardRedeem: { position: 'absolute', bottom: 8, left: 8 },
+  card3d: { position: 'absolute', top: 8, right: 8 },
   cardBody: { gap: 2 },
   cardFooter: {
     flexDirection: 'row',

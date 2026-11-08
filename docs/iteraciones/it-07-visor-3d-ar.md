@@ -20,6 +20,31 @@
    - ✅ Si funciona → **Nivel A** (3D real).
    - ❌ Si no funciona o rinde a menos de 30 fps → **Nivel B** (2.5D). No se pierde más de 1 sesión.
 
+### Resultado del spike (2026-11-08) → ✅ Nivel A
+
+| Plataforma | GPU / GL | fps | WebGL2 | Textura `fourloko-gold.jpg` |
+| --- | --- | --- | --- | --- |
+| Android (Expo Go, celular real) | Mali-G57 MC2 · OpenGL ES 3.2 | **83** | sí | ok, orientación correcta |
+| Web (Chrome, render por software) | SwiftShader | 60 | sí | ok |
+
+- **`three` fijado en `0.162.0` (y `@types/three` igual). No subir.** Con r187 Expo Go lanzaba `THREE.WebGLRenderer: WebGL 1 is not supported since r163` aunque el celular soporta ES 3.2: el `gl` de expo-gl en Expo Go pasa `instanceof WebGLRenderingContext` y three r163+ lo rechaza. r162 es la última versión sin ese chequeo.
+- Textura en nativo: `Asset` + `texture.image = { data: asset, width, height }` + `isDataTexture = true` (expo-gl acepta `{ localUri }` en `texImage2D`). En web, `TextureLoader` con la URI del asset.
+- `fourloko-gold.jpg` es una foto de latas en un estante: envuelta en el cilindro se ve el estante. Para la lata hace falta una etiqueta propia (dibujada en código o un recorte de la etiqueta).
+- En web el canvas toma su tamaño al crearse: el visor debe llamar `renderer.setSize` en `onLayout`.
+
+### Implementación (2026-11-08) · Nivel A
+
+- **Datos:** `src/data/models3d.ts` (piezas en cm con la base en y = 0, explosión y rótulos por pieza; `getModel3d(spec)` devuelve el modelo y el comparador). `Product.model3d` en `fourloko-gold` (`can473`), los dos packs (`pack2`), `cafe-americano` y `capuccino` (`cup12`) y `pan-chicharron` (`combo`: el producto ya es el combo pan + café).
+- **Texturas:** etiquetas de lata (dorada y sandía), manga del vaso y foto de mesa en `assets/images/3d/` y `assets/images/ar-table.jpg`. Son diseños propios (SVG en `scripts/textures/`) rasterizados con `node scripts/build-textures.mjs` (Chrome headless). La foto de mesa es generada: sin licencia de terceros.
+- **Componentes:** `src/components/spatial/` → `engine.ts` (three: geometrías, materiales Phong/Lambert, texturas, sombra, vapor), `controller.ts` (gestos, render loop, cámara, rótulos proyectados; fuera de React por las reglas del React Compiler), `Viewer3D.tsx`, `ArStage.tsx`, `View3DChip.tsx`.
+- **Ruta:** `src/app/visor/[id].tsx`. Entra desde abajo pero **no** es modal nativo: así el age gate y los toasts (montados en `_layout.tsx`) quedan encima también en iOS.
+- **Vista explosiva / comparador:** 600 ms con *easing* dentro del render loop (no Reanimated: evita leer un shared value desde el hilo JS en cada frame). Al activarlos, el modelo gira al frente y se detiene la autorrotación.
+- **AR:** cámara fija "a 55 cm, 38° de inclinación", así 1 cm se ve igual en todos los productos y el rótulo "Tamaño real ≈ X cm" tiene sentido. Pellizcar cambia la escala (el slider lo sigue). Sin `expo-sensors`.
+- **CTA:** `useAddToCart(product.id)` (age gate en Four Loko). `useAddManyToCart` no hace falta: el combo es un solo producto.
+- **Recursos:** `useFocusEffect` pausa el render loop y desmonta `CameraView` al perder el foco (p. ej. al abrir el carrito); al cerrar el visor se cancela el `requestAnimationFrame` y se liberan geometrías, materiales, texturas y renderer.
+
+Verificado en web (Chrome). En el celular lo prueba el equipo (Expo Go): ver criterios de aceptación abajo.
+
 ## Nivel A · Visor 3D con `three`
 
 **`src/data/models3d.ts`:** descripción procedural por producto (`Product.model3d`).

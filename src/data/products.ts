@@ -32,6 +32,7 @@ export const products: Product[] = [
   // ——— Bebidas ———
   {
     id: 'fourloko-gold-pack',
+    model3d: { kind: 'pack2', flavor: 'gold' },
     name: 'Pack 2 RTD Four Loko Gold 473 ml',
     brand: 'Four Loko',
     categoryId: 'bebidas',
@@ -53,6 +54,7 @@ export const products: Product[] = [
   },
   {
     id: 'fourloko-gold',
+    model3d: { kind: 'can473', flavor: 'gold' },
     name: 'Four Loko Gold 473 ml',
     brand: 'Four Loko',
     categoryId: 'bebidas',
@@ -71,6 +73,7 @@ export const products: Product[] = [
   },
   {
     id: 'fourloko-sandia-pack',
+    model3d: { kind: 'pack2', flavor: 'sandia' },
     redeem: { mixed: { points: 400, cash: 8.9 } },
     name: '2x Four Loko Sandía',
     brand: 'Four Loko',
@@ -368,6 +371,7 @@ export const products: Product[] = [
   },
   {
     id: 'pan-chicharron',
+    model3d: { kind: 'combo' },
     redeem: { points: 1000, mixed: { points: 500, cash: 5.9 } },
     name: 'Combo Sanguchero: Pan con chicharrón + Café',
     brand: 'Combos Tambo',
@@ -413,6 +417,7 @@ export const products: Product[] = [
   // ——— Cafetería ———
   {
     id: 'cafe-americano',
+    model3d: { kind: 'cup12', drink: 'americano' },
     redeem: { points: 350, mixed: { points: 200, cash: 1.5 } },
     name: 'Café Americano 12 oz',
     brand: 'Tambo Café',
@@ -427,6 +432,7 @@ export const products: Product[] = [
   },
   {
     id: 'capuccino',
+    model3d: { kind: 'cup12', drink: 'capuccino' },
     redeem: { points: 590, mixed: { points: 300, cash: 2.9 } },
     name: 'Capuccino 12 oz',
     brand: 'Tambo Café',

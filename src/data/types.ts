@@ -44,7 +44,15 @@ export type Product = {
   popularity: number;
   /** Canje Tambo Lover (estilo CMR): 100% puntos y/o puntos + soles. */
   redeem?: { points?: number; mixed?: { points: number; cash: number } };
+  /** Modelo procedural del visor 3D/AR (`/visor/[id]`). Sin esto no se muestra "Ver en 3D". */
+  model3d?: Model3dSpec;
 };
+
+/** Qué modelo procedural dibuja el visor 3D (ver `src/data/models3d.ts`). */
+export type Model3dSpec =
+  | { kind: 'can473' | 'pack2'; flavor: 'gold' | 'sandia' }
+  | { kind: 'cup12'; drink: 'americano' | 'capuccino' }
+  | { kind: 'sandwich' | 'combo' };
 
 /** Cómo se paga una línea canjeada: solo con puntos o con puntos + soles. */
 export type RedeemMode = 'points' | 'mixed';

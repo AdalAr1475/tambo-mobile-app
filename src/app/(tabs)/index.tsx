@@ -9,6 +9,7 @@ import { useDeliveryPoint, LocationHeader } from '@/components/delivery';
 import { FloatingCartBar, useFloatingCartInset } from '@/components/FloatingCartBar';
 import { Icon } from '@/components/Icon';
 import { SearchBar } from '@/components/layout';
+import { View3DChip } from '@/components/spatial/View3DChip';
 import { ProductCard } from '@/components/product';
 import { Badge, Card, IconButton, Row, SectionHeader, Tap, Txt } from '@/components/ui';
 import { categories } from '@/data/categories';
@@ -216,16 +217,19 @@ function HeroCarousel({ width }: { width: number }) {
                         {b.validity}
                       </Txt>
                     </Row>
-                    <Tap
-                      onPress={() => addToCart(p.id)}
-                      style={styles.heroAdd}
-                      accessibilityLabel={`Agregar ${b.title}`}
-                    >
-                      <Txt variant="labelMd" weight="bold" color={colors.onGold}>
-                        Agregar
-                      </Txt>
-                      <Icon name="plus" size={18} color={colors.onGold} />
-                    </Tap>
+                    <Row style={{ gap: space.sm }}>
+                      {p.model3d && <View3DChip productId={p.id} tone="dark" compact />}
+                      <Tap
+                        onPress={() => addToCart(p.id)}
+                        style={styles.heroAdd}
+                        accessibilityLabel={`Agregar ${b.title}`}
+                      >
+                        <Txt variant="labelMd" weight="bold" color={colors.onGold}>
+                          Agregar
+                        </Txt>
+                        <Icon name="plus" size={18} color={colors.onGold} />
+                      </Tap>
+                    </Row>
                   </Row>
                 </View>
               </LinearGradient>

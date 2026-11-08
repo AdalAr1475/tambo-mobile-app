@@ -125,6 +125,19 @@ export default function ProductScreen() {
               </Txt>
             </Row>
           )}
+          {product.model3d && (
+            <View style={styles.view3d}>
+              <Button
+                label="Ver en 3D y en tu mesa (AR)"
+                icon="rotate-3d-variant"
+                variant="soft"
+                size="sm"
+                full={false}
+                style={{ alignSelf: 'center' }}
+                onPress={() => router.push(`/visor/${product.id}`)}
+              />
+            </View>
+          )}
           {pct > 0 && (
             <Badge
               label={`-${pct}% DSCTO`}
@@ -383,6 +396,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   pager: { justifyContent: 'center', marginVertical: space.md, gap: 6 },
+  view3d: { alignItems: 'center', marginTop: space.md },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.borderStrong },
   dotActive: { width: 24, backgroundColor: colors.primary },
   discount: { position: 'absolute', left: space.lg + space.md, borderRadius: radius.md },

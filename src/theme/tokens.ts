@@ -40,6 +40,14 @@ export const colors = {
   handle: '#D0D5DD',
   scrim: 'rgba(20, 10, 20, 0.55)',
   white: '#FFFFFF',
+  /** Visor 3D/AR (Tambo Spatial): degradado berry oscuro y superficies translúcidas. */
+  viewerTop: '#4A0B45',
+  viewerBottom: '#14040F',
+  onDark: '#FFFFFF',
+  onDarkMuted: 'rgba(255,255,255,0.72)',
+  glass: 'rgba(255,255,255,0.14)',
+  glassBorder: 'rgba(255,255,255,0.22)',
+  glassDark: 'rgba(20,4,18,0.66)',
 } as const;
 
 export const radius = { sm: 4, md: 8, lg: 12, xl: 16, sheet: 20, full: 999 } as const;

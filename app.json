@@ -42,6 +42,15 @@
         {
           "locationWhenInUsePermission": "Tambo+ usa tu ubicación para mostrarte las tiendas cercanas y cómo llegar a recoger tu pedido."
         }
+      ],
+      "expo-asset",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Tambo+ usa la cámara para proyectar productos en 3D sobre tu mesa (AR).",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
       ]
     ],
     "scheme": "tambo",
