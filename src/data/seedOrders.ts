@@ -85,14 +85,14 @@ export const createSeedOrders = (): Order[] => [
     ],
     {
       fulfillment: 'delivery',
-      storeId: 'larco',
+      storeId: 'diagonal-530',
       address: seedAddresses[0],
       payment: { method: 'yape', label: 'Yape' },
     },
   ),
   build('TB-79301', 5, 19, [{ productId: 'incakola-pack', qty: 1 }], {
     fulfillment: 'delivery',
-    storeId: 'larco',
+    storeId: 'diagonal-530',
     address: seedAddresses[0],
     payment: { method: 'card', label: 'Tarjeta Visa •••• 4092' },
   }),
@@ -106,7 +106,7 @@ export const createSeedOrders = (): Order[] => [
     ],
     {
       fulfillment: 'pickup',
-      storeId: 'benavides',
+      storeId: 'uni-puerta-5',
       payment: { method: 'yape', label: 'Yape' },
     },
   ),
@@ -121,7 +121,7 @@ export const createSeedOrders = (): Order[] => [
     ],
     {
       fulfillment: 'delivery',
-      storeId: 'aliaga',
+      storeId: 'navarrete',
       address: seedAddresses[1],
       payment: { method: 'cash', label: 'Efectivo', cashAmount: 50 },
     },

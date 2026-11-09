@@ -1,14 +1,15 @@
-import { useCallback, useState, type ReactNode } from 'react';
+import { Component, useCallback, useState, type ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { colors, radius, space } from '@/theme/tokens';
 import { Icon } from '../Icon';
 import { Row, Txt } from '../ui';
-import { LeafletMap } from './LeafletMap';
+import { PlatformMap } from './Map';
 import type { MapProps } from './types';
 
 /**
- * Mapa real (Leaflet + OpenStreetMap) con respaldo: si no hay conexión, el mapa no carga en
- * unos segundos o es web, muestra `fallback` (p. ej. el mapa SVG) con el aviso "Mapa sin conexión".
+ * Mapa real con respaldo. Nativo: react-native-maps (Google Maps en Android, Apple Maps en iOS).
+ * Web: Leaflet + OpenStreetMap en un iframe; si no carga en unos segundos muestra `fallback`
+ * (p. ej. el mapa SVG) con el aviso "Mapa sin conexión". Si el mapa falla al renderizar, también.
  */
 export function SmartMap({
   fallback,
@@ -31,11 +32,30 @@ export function SmartMap({
           </Row>
         </>
       ) : (
-        <LeafletMap {...props} onFail={onFail} />
+        <MapErrorBoundary onError={onFail}>
+          <PlatformMap {...props} onFail={onFail} />
+        </MapErrorBoundary>
       )}
       {overlay}
     </View>
   );
+}
+
+/** Si el mapa lanza al renderizar (p. ej. módulo nativo ausente), el padre pasa al respaldo. */
+class MapErrorBoundary extends Component<{ onError: () => void; children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  componentDidCatch() {
+    this.props.onError();
+  }
+
+  render() {
+    return this.state.failed ? null : this.props.children;
+  }
 }
 
 const styles = StyleSheet.create({

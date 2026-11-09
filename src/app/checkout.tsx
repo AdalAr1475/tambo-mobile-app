@@ -23,13 +23,15 @@ import { PartySplit, recalculateSplit } from '@/components/PartySplit';
 import { POINTS_ICON } from '@/components/points';
 import { AUTOPILOT_BENEFIT, AUTOPILOT_ICON } from '@/components/routines';
 import { Sheet } from '@/components/Sheet';
+import { StoreMeta } from '@/components/store';
 import { SummaryRow } from '@/components/summary';
 import { Badge, Button, Card, Chip, Divider, Row, Tap, Txt } from '@/components/ui';
 import { getProduct } from '@/data/products';
 import type { Order, OrderSplit, PaymentMethodType, PickupMethod, SavedCard } from '@/data/types';
 import { money, round2 } from '@/lib/format';
 import { haptic } from '@/lib/feedback';
-import { addressCoords, deliveryStoreFor } from '@/lib/geo';
+import { addressCoords, deliveryStoreFor, formatDistance, walkingMinutes, walkingRoute } from '@/lib/geo';
+import { addressKind, usePickupReference } from '@/lib/pickupReference';
 import { placeOrder } from '@/lib/placeOrder';
 import { formatPoints, pointsForSoles, pointsValue, pts } from '@/lib/points';
 import { checkCoupon } from '@/lib/pricing';
@@ -79,6 +81,7 @@ export default function CheckoutScreen() {
   const couponCode = useCart((s) => s.couponCode);
   const setCoupon = useCart((s) => s.setCoupon);
   const point = useDeliveryPoint();
+  const pickupRef = usePickupReference();
   const session = useSession();
 
   // Los bloques se recalculan cada minuto (y al cambiar de modalidad).
@@ -298,6 +301,8 @@ export default function CheckoutScreen() {
   const delivery = point.fulfillment === 'delivery';
   // El delivery lo despacha la tienda más cercana a la dirección (igual que en placeOrder).
   const servingStore = deliveryStoreFor(point.address);
+  // Distancia real (ruta a pie o haversine) desde el punto de "Recoger cerca de…".
+  const pickupWalk = walkingRoute(pickupRef.coords, point.store);
 
   return (
     <View style={{ flex: 1 }}>
@@ -343,7 +348,7 @@ export default function CheckoutScreen() {
                       height={120}
                       interactive={false}
                       markers={[
-                        { id: 'home', kind: 'home', position: addressCoords(point.address) },
+                        { id: 'home', kind: addressKind(point.address), position: addressCoords(point.address) },
                         { id: 'store', kind: 'store', position: servingStore.coords },
                       ]}
                       fit={[addressCoords(point.address), servingStore.coords]}
@@ -413,8 +418,16 @@ export default function CheckoutScreen() {
                       {point.store.name} - {point.store.district}
                     </Txt>
                     <Txt variant="bodySm" color={colors.textMuted}>
-                      {point.store.address} • {point.store.distanceKm} km
+                      {point.store.address}
                     </Txt>
+                    <StoreMeta store={point.store} />
+                    <Row style={{ gap: 3, marginTop: 2 }}>
+                      <Icon name="walk" size={13} color={colors.primary} />
+                      <Txt variant="labelSm" color={colors.primary}>
+                        {formatDistance(pickupWalk.meters)} • {walkingMinutes(pickupWalk.meters)} min a pie de{' '}
+                        {pickupRef.fromText}
+                      </Txt>
+                    </Row>
                     <Badge
                       label={`Listo en ${point.store.eta}`}
                       tone="success"

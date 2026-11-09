@@ -1,10 +1,10 @@
 import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useMemo, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { districtCentroid, getStore, stores } from '@/data/stores';
-import type { Address } from '@/data/types';
+import { DEMO_USER_LABEL, districtCentroid, getStore, isCurrentStore, stores } from '@/data/stores';
+import type { Address, Fulfillment } from '@/data/types';
 import { haptic } from '@/lib/feedback';
 import {
   addressCoords,
@@ -14,17 +14,23 @@ import {
   formatDistance,
   haversine,
   storesByDistance,
+  walkingMinutes,
+  walkingRoute,
 } from '@/lib/geo';
+import { usePickupReference, usePickupReferences, type PickupReference } from '@/lib/pickupReference';
+import { useDoubleTap } from '@/lib/useDoubleTap';
 import { useUserLocation } from '@/lib/useUserLocation';
 import { useCartCount } from '@/store/cart';
 import { useSelectedAddress, useSession } from '@/store/session';
 import { toast } from '@/store/ui';
-import { colors, radius, space } from '@/theme/tokens';
+import { colors, elevation, radius, space } from '@/theme/tokens';
 import { Icon } from './Icon';
 import { fulfillmentMeta, FulfillmentToggle, TextField } from './layout';
+import { addressMarker, storeIdOf, storeMarker, userMarker } from './map/markers';
 import { SmartMap } from './map/SmartMap';
 import { PointsPill } from './points';
 import { Sheet } from './Sheet';
+import { DoubleTapHint, openStoreInMaps, StoreMeta } from './store';
 import { Badge, Button, Chip, IconButton, Row, Tap, Txt } from './ui';
 
 /* ——— Formulario de dirección (sheet y pantalla de direcciones) ——— */
@@ -121,11 +127,31 @@ export function DeliveryPointSheet({ visible, onClose }: { visible: boolean; onC
   const selectStore = useSession((s) => s.selectStore);
   const [adding, setAdding] = useState(false);
   const user = useUserLocation();
-  const nearby = useMemo(() => storesByDistance(user.coords), [user.coords]);
+  const ref = usePickupReference();
+  const refAddress = addresses.find((a) => a.id === ref.id);
+  const nearby = useMemo(
+    () =>
+      storesByDistance(ref.coords).map((n) => ({ ...n, walk: walkingRoute(ref.coords, n.store).meters })),
+    [ref.coords],
+  );
+  const selectedStore = isCurrentStore(storeId) ? getStore(storeId) : undefined;
 
   const close = () => {
     setAdding(false);
     onClose();
+  };
+
+  // Toque: elige la tienda y cierra; doble toque (fila o pin): abre la ficha en Google Maps.
+  const storeTaps = useDoubleTap(close, (id) => openStoreInMaps(getStore(id)));
+  const pickStore = (id: string) => {
+    selectStore(id);
+    haptic.tap();
+    storeTaps.tap(id);
+  };
+
+  const openFullMap = (mode: Fulfillment) => {
+    close();
+    router.push({ pathname: '/mapa', params: { mode } });
   };
 
   return (
@@ -179,34 +205,58 @@ export function DeliveryPointSheet({ visible, onClose }: { visible: boolean; onC
                 variant="outline"
                 onPress={() => setAdding(true)}
               />
+              <Button
+                label="Ver direcciones y cobertura en el mapa"
+                icon="map-search-outline"
+                variant="ghost"
+                onPress={() => openFullMap('delivery')}
+              />
             </>
           ) : (
             <>
               <Txt variant="labelSm" color={colors.textMuted} style={styles.kicker}>
-                Tiendas cercanas
+                Recoger cerca de
               </Txt>
-              {/* Mapa de cobertura: tu ubicación, radio de 1.5 km y tiendas con casilleros libres. */}
+              <ReferenceChips />
+              {selectedStore && (
+                <View style={styles.selectedCard}>
+                  <Row style={{ gap: space.sm, alignItems: 'flex-start' }}>
+                    <Icon name="check-circle" size={20} color={colors.primary} />
+                    <View style={{ flex: 1 }}>
+                      <Txt variant="labelLg" weight="bold" numberOfLines={1}>
+                        {selectedStore.name}
+                      </Txt>
+                      <StoreMeta store={selectedStore} />
+                    </View>
+                  </Row>
+                  <Button
+                    label="Ver en Google Maps"
+                    icon="google-maps"
+                    variant="outline"
+                    size="sm"
+                    onPress={() => openStoreInMaps(selectedStore)}
+                  />
+                </View>
+              )}
+              {/* Mapa de cobertura: punto de referencia, radio de 1.5 km y tiendas con casilleros libres. */}
               <View style={styles.mapBox}>
                 <SmartMap
                   height={200}
                   interactive={false}
                   markers={[
-                    { id: 'user', kind: 'user', position: user.coords },
-                    ...stores.map((s) => ({
-                      id: `store:${s.id}`,
-                      kind: 'store' as const,
-                      position: s.coords,
-                      selected: s.id === storeId,
-                      badge: s.lockers ? `🔒${s.lockers.free}` : undefined,
-                    })),
+                    userMarker(user.coords),
+                    ...(refAddress ? [addressMarker(refAddress)] : []),
+                    ...stores.map((s) => storeMarker(s, s.id === storeId)),
                   ]}
-                  circles={[{ id: 'coverage', center: user.coords, radius: COVERAGE_METERS }]}
-                  fit={[user.coords, ...nearby.slice(0, 3).map((n) => n.store.coords)]}
+                  circles={[{ id: 'coverage', center: ref.coords, radius: COVERAGE_METERS, tone: 'user' }]}
+                  fit={[ref.coords, ...nearby.slice(0, 3).map((n) => n.store.coords)]}
                   onMarkerPress={(id) => {
-                    if (!id.startsWith('store:')) return;
-                    selectStore(id.slice(6));
-                    haptic.tap();
-                    close();
+                    const sid = storeIdOf(id);
+                    if (sid) pickStore(sid);
+                  }}
+                  onMarkerDoublePress={(id) => {
+                    const sid = storeIdOf(id);
+                    if (sid) storeTaps.double(sid);
                   }}
                   fallback={
                     <View style={styles.mapFallback}>
@@ -216,42 +266,65 @@ export function DeliveryPointSheet({ visible, onClose }: { visible: boolean; onC
                       </Txt>
                     </View>
                   }
+                  overlay={
+                    <Tap
+                      onPress={() => openFullMap('pickup')}
+                      style={styles.expand}
+                      accessibilityLabel="Ampliar mapa de tiendas"
+                    >
+                      <Icon name="arrow-expand" size={16} color={colors.primary} />
+                      <Txt variant="labelMd" weight="bold" color={colors.primary}>
+                        Ampliar mapa
+                      </Txt>
+                    </Tap>
+                  }
                 />
               </View>
               <Row style={{ gap: 4 }}>
-                <Icon name="crosshairs-gps" size={14} color={colors.textMuted} />
+                <Icon name={ref.id === 'me' ? 'crosshairs-gps' : 'map-marker-radius-outline'} size={14}
+                  color={colors.textMuted} />
                 <Txt variant="bodySm" color={colors.textMuted} style={{ flex: 1 }}>
-                  {user.source === 'gps'
-                    ? 'Según tu ubicación actual'
-                    : user.source === 'approx'
-                      ? 'Ubicación aproximada (no pudimos usar tu GPS)'
-                      : 'Ubicación de demo: Parque Kennedy, Miraflores'}{' '}
+                  {ref.id !== 'me'
+                    ? `Tiendas cerca de ${ref.label}`
+                    : user.source === 'gps'
+                      ? 'Según tu ubicación actual'
+                      : user.source === 'approx'
+                        ? 'Ubicación aproximada (no pudimos usar tu GPS)'
+                        : `Ubicación de demo: ${DEMO_USER_LABEL}`}{' '}
                   • cobertura inmediata de {formatDistance(COVERAGE_METERS)}
                 </Txt>
               </Row>
-              {nearby.map(({ store: s, meters }) => (
+              <DoubleTapHint />
+              {nearby.map(({ store: s, meters, walk }) => (
                 <PointRow
                   key={s.id}
                   icon="storefront-outline"
                   title={`${s.name} - ${s.district}`}
-                  subtitle={`${s.address} • a ${formatDistance(meters)} • Listo en ${s.eta}`}
+                  subtitle={`${s.address} • Listo en ${s.eta}`}
                   extra={
-                    <Row style={{ gap: 6, marginTop: 4, flexWrap: 'wrap' }}>
-                      {s.lockers && (
-                        <Badge
-                          label={s.lockers.free ? `Smart Locker: ${s.lockers.free} libres` : 'Sin casilleros libres'}
-                          tone={s.lockers.free ? 'success' : 'neutral'}
-                          icon="locker-multiple"
-                        />
-                      )}
-                      {meters > COVERAGE_METERS && <Badge label="Más lejos" tone="neutral" />}
-                    </Row>
+                    <>
+                      <StoreMeta store={s} />
+                      <Row style={{ gap: 3, marginTop: 2 }}>
+                        <Icon name="walk" size={13} color={colors.primary} />
+                        <Txt variant="labelSm" color={colors.primary} numberOfLines={1} style={{ flexShrink: 1 }}>
+                          {formatDistance(walk)} • {walkingMinutes(walk)} min a pie de {ref.fromText}
+                        </Txt>
+                      </Row>
+                      <Row style={{ gap: 6, marginTop: 4, flexWrap: 'wrap' }}>
+                        {s.lockers && (
+                          <Badge
+                            label={s.lockers.free ? `Smart Locker: ${s.lockers.free} libres` : 'Sin casilleros libres'}
+                            tone={s.lockers.free ? 'success' : 'neutral'}
+                            icon="locker-multiple"
+                          />
+                        )}
+                        {meters > COVERAGE_METERS && <Badge label="Más lejos" tone="neutral" />}
+                      </Row>
+                    </>
                   }
                   selected={s.id === storeId}
-                  onPress={() => {
-                    selectStore(s.id);
-                    close();
-                  }}
+                  accessibilityHint="Toca para elegir; doble toque para ver en Google Maps"
+                  onPress={() => pickStore(s.id)}
                 />
               ))}
             </>
@@ -259,6 +332,29 @@ export function DeliveryPointSheet({ visible, onClose }: { visible: boolean; onC
         </View>
       )}
     </Sheet>
+  );
+}
+
+/** Chips de "Recoger cerca de…": tu ubicación (FIIS-UNI en la demo) y tus direcciones guardadas. */
+export function ReferenceChips({ onChange }: { onChange?: (ref: PickupReference) => void }) {
+  const refs = usePickupReferences();
+  const current = usePickupReference();
+  const setPickupRef = useSession((s) => s.setPickupRef);
+  return (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
+      {refs.map((r) => (
+        <Chip
+          key={r.id}
+          label={r.label}
+          active={r.id === current.id}
+          onPress={() => {
+            setPickupRef(r.id);
+            haptic.tap();
+            onChange?.(r);
+          }}
+        />
+      ))}
+    </ScrollView>
   );
 }
 
@@ -288,6 +384,7 @@ function PointRow({
   extra,
   selected,
   onPress,
+  accessibilityHint,
 }: {
   icon: React.ComponentProps<typeof Icon>['name'];
   title: string;
@@ -295,6 +392,7 @@ function PointRow({
   extra?: React.ReactNode;
   selected: boolean;
   onPress: () => void;
+  accessibilityHint?: string;
 }) {
   return (
     <Tap
@@ -302,6 +400,7 @@ function PointRow({
       accessibilityRole="radio"
       accessibilityState={{ checked: selected }}
       accessibilityLabel={title}
+      accessibilityHint={accessibilityHint}
       style={[styles.point, selected && styles.pointActive]}
     >
       <View style={[styles.pointIcon, selected && { backgroundColor: colors.primary }]}>
@@ -419,6 +518,27 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   pointActive: { borderColor: colors.primary, backgroundColor: colors.primaryTint },
+  selectedCard: {
+    gap: space.sm,
+    padding: space.md,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    backgroundColor: colors.primaryTint,
+  },
+  expand: {
+    position: 'absolute',
+    top: space.sm,
+    right: space.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: space.md,
+    paddingVertical: 6,
+    borderRadius: radius.full,
+    backgroundColor: colors.white,
+    ...elevation.float,
+  },
   pointIcon: {
     width: 40,
     height: 40,

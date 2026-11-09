@@ -143,14 +143,28 @@ export function LockerPanel({ order, store }: { order: Order; store: Store }) {
         </Txt>
       </Row>
       <Divider />
+      <Row style={styles.howTo}>
+        <Icon name="cellphone-screenshot" size={22} color={colors.primary} />
+        <Txt variant="bodySm" style={{ flex: 1 }}>
+          En el casillero toca <Txt variant="labelMd">&quot;Recoger pedido&quot;</Txt> y escanea el código que
+          aparece en la pantalla.
+        </Txt>
+      </Row>
+      <Button
+        label="Escanear QR del casillero"
+        icon="qrcode-scan"
+        size="lg"
+        onPress={() => router.push(`/escanear/${order.id}`)}
+      />
+      <Divider />
       <Txt variant="labelLg" align="center">
-        Escanea este QR en el tótem del casillero
+        ¿Casillero con lector? Muestra tu QR en el tótem
       </Txt>
       <DynamicQr order={order} />
       <Button
-        label="Abrir casillero"
+        label="Abrir casillero con el tótem"
         icon="lock-open-variant-outline"
-        size="lg"
+        variant="outline"
         onPress={() => router.push(`/locker/${order.id}`)}
       />
     </Card>
@@ -253,6 +267,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.md,
     borderRadius: radius.md,
     backgroundColor: colors.primaryDark,
+  },
+  howTo: {
+    gap: space.sm,
+    padding: space.sm,
+    borderRadius: radius.md,
+    backgroundColor: colors.primaryTint,
   },
   hold: {
     gap: 6,

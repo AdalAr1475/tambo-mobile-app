@@ -1,6 +1,9 @@
 import routesJson from '@/data/routes.json';
-import { DEMO_USER_LOCATION, districtCentroid, getStore, stores } from '@/data/stores';
+import { DEMO_USER_LOCATION, districtCentroid, getStore, seedAddresses, stores } from '@/data/stores';
 import type { Address, LatLng, Order, Store } from '@/data/types';
+import { haversine } from './haversine';
+
+export { haversine };
 
 /**
  * Utilidades geográficas (sin red). Las rutas reales se precalculan con
@@ -14,15 +17,7 @@ export const DELIVERY_RANGE_METERS = 4000;
 /** Velocidad a pie (metros por minuto). */
 const WALK_M_PER_MIN = 75;
 
-const R = 6_371_000;
 const rad = (d: number) => (d * Math.PI) / 180;
-
-export function haversine(a: LatLng, b: LatLng) {
-  const dLat = rad(b.lat - a.lat);
-  const dLng = rad(b.lng - a.lng);
-  const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(h));
-}
 
 export function polylineLength(points: LatLng[]) {
   let total = 0;
@@ -111,10 +106,18 @@ export function deliveryRoute(order: Order): GeoRoute {
   return approx(store.coords, to);
 }
 
-/** Ruta a pie del usuario a la tienda (precalculada solo desde la ubicación de demo). */
+/** Orígenes con rutas a pie precalculadas: ubicación de demo (FIIS-UNI), casa y oficina semilla. */
+const FOOT_ORIGINS: { key: string; coords: LatLng }[] = [
+  { key: 'demo', coords: DEMO_USER_LOCATION },
+  ...seedAddresses.map((a) => ({ key: a.id, coords: addressCoords(a) })),
+];
+
+/** Ruta a pie a la tienda desde `from` (real si `from` está a menos de 30 m de un origen precalculado). */
 export function walkingRoute(from: LatLng, store: Store): GeoRoute {
-  const data = ROUTES[`foot:demo:${store.id}`];
-  if (data && near(from, DEMO_USER_LOCATION)) return toRoute(data);
+  for (const origin of FOOT_ORIGINS) {
+    const data = ROUTES[`foot:${origin.key}:${store.id}`];
+    if (data && near(from, origin.coords)) return toRoute(data);
+  }
   return approx(from, store.coords);
 }
 
@@ -131,3 +134,7 @@ export function cardinal(a: LatLng, b: LatLng) {
 export const googleMapsUrl = (to: LatLng, mode: 'walking' | 'driving' = 'walking') =>
   `https://www.google.com/maps/dir/?api=1&destination=${to.lat},${to.lng}&travelmode=${mode}`;
 export const wazeUrl = (to: LatLng) => `https://waze.com/ul?ll=${to.lat},${to.lng}&navigate=yes`;
+
+/** Horario corto para listas: "Abierto 24 h" o el texto de Google ("Cierra a las 11 p. m."). */
+export const hoursLabel = (hours?: string) =>
+  !hours ? undefined : /24 horas|24 h/i.test(hours) ? 'Abierto 24 h' : hours;

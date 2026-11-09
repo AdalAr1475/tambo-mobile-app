@@ -47,7 +47,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Tambo+ usa la cámara para proyectar productos en 3D sobre tu mesa (AR).",
+          "cameraPermission": "Tambo+ usa la cámara para escanear el QR del Smart Locker al recoger tu pedido y para proyectar productos en 3D sobre tu mesa (AR).",
           "microphonePermission": false,
           "recordAudioAndroid": false
         }

@@ -12,7 +12,6 @@
     "casa": { "lat": -12.121448, "lng": -77.032535, "osm": "Calle Berlín, Miraflores" },
     "oficina": { "lat": -12.093379, "lng": -77.026431, "osm": "641, Avenida Ricardo Rivera Navarrete, San Isidro" }
   },
-  "demoUser": { "lat": -12.121781, "lng": -77.030422, "osm": "Parque John F. Kennedy, Miraflores" },
   "districts": {
     "Miraflores": { "lat": -12.121498, "lng": -77.025906 },
     "San Isidro": { "lat": -12.097902, "lng": -77.035367 },

@@ -85,7 +85,23 @@ export default function RootLayout() {
               }}
             />
             <Stack.Screen
+              name="mapa"
+              options={{
+                presentation: 'fullScreenModal',
+                animation: 'slide_from_bottom',
+                contentStyle: { backgroundColor: colors.surfaceMid },
+              }}
+            />
+            <Stack.Screen
               name="locker/[id]"
+              options={{
+                presentation: 'fullScreenModal',
+                animation: 'slide_from_bottom',
+                contentStyle: { backgroundColor: colors.primaryDark },
+              }}
+            />
+            <Stack.Screen
+              name="escanear/[id]"
               options={{
                 presentation: 'fullScreenModal',
                 animation: 'slide_from_bottom',

@@ -109,8 +109,8 @@ export default function DemoScreen() {
             <View style={{ flex: 1 }}>
               <Txt variant="labelLg">Usar mi GPS real</Txt>
               <Txt variant="bodySm" color={colors.textMuted}>
-                Apagado: ubicación de demo fija (Parque Kennedy, Miraflores), con rutas a pie reales. Encendido:
-                pide permiso; si estás lejos de las tiendas, vuelve a la de demo.
+                Apagado: ubicación de demo fija (FIIS - UNI, Rímac), sin permisos y con rutas a pie
+                reales. Encendido: pide permiso; si estás lejos de las tiendas, vuelve a la de demo.
               </Txt>
             </View>
             <Switch

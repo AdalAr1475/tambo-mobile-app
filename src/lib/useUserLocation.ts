@@ -5,7 +5,10 @@ import type { LatLng } from '@/data/types';
 import { useDemo } from '@/store/demo';
 import { storesByDistance } from './geo';
 
-/** Si el GPS real está a más de esto de toda tienda, se usa la ubicación de demo. */
+/**
+ * Si el GPS real está a más de esto de toda tienda, se usa la ubicación de demo. Las tiendas
+ * reales cubren de la UNI (Rímac) a Miraflores, así que 15 km abarca casi toda Lima Metropolitana.
+ */
 const MAX_DISTANCE_TO_STORE = 15_000;
 
 export type UserLocation = {
@@ -17,8 +20,9 @@ export type UserLocation = {
 const DEMO: UserLocation = { coords: DEMO_USER_LOCATION, source: 'demo' };
 
 /**
- * Ubicación del usuario. Por defecto la de demo (Parque Kennedy) para que la presentación sea
- * estable; con "Usar mi GPS real" (Modo Presentador) pide permiso con expo-location.
+ * Ubicación del usuario. Por defecto la de demo (FIIS - UNI), sin pedir permisos ni llamar APIs,
+ * para que la presentación sea estable; con "Usar mi GPS real" (Modo Presentador) pide permiso
+ * con expo-location.
  */
 export function useUserLocation(): UserLocation {
   const realLocation = useDemo((s) => s.realLocation);

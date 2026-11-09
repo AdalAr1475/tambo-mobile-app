@@ -111,7 +111,7 @@ export function getOrderStatus(order: Order, now: number): OrderStatus {
         ? 'Acércate a caja con tu código para retirarlo'
         : ready
           ? locker
-            ? 'Escanea tu QR en el tótem para abrir la puerta'
+            ? 'Escanea con la app el QR que muestra el casillero'
             : 'Acércate a caja y muestra tu código'
           : 'Te avisaremos cuando esté listo para recoger',
       shortLabel: ready ? (locker ? 'En tu Smart Locker' : 'Listo para recoger') : 'Preparando',

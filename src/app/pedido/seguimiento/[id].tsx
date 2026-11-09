@@ -477,9 +477,9 @@ export default function TrackingScreen() {
                 )
               ) : lockerPickup && pickupReady ? (
                 <Button
-                  label="Abrir casillero"
-                  icon="lock-open-variant-outline"
-                  onPress={() => router.push(`/locker/${order.id}`)}
+                  label="Escanear QR del casillero"
+                  icon="qrcode-scan"
+                  onPress={() => router.push(`/escanear/${order.id}`)}
                 />
               ) : (
                 <Button

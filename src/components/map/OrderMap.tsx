@@ -15,13 +15,17 @@ import {
   type GeoRoute,
 } from '@/lib/geo';
 import type { OrderStatus } from '@/lib/orderProgress';
+import { addressKind, usePickupReference } from '@/lib/pickupReference';
 import { useUserLocation } from '@/lib/useUserLocation';
+import { useSession } from '@/store/session';
 import { toast } from '@/store/ui';
 import { colors, elevation, radius, space } from '@/theme/tokens';
 import { Icon } from '../Icon';
 import { Sheet } from '../Sheet';
+import { openStoreInMaps, StoreMeta } from '../store';
 import { TrackingMap } from '../tracking';
 import { Button, Row, Tap, Txt } from '../ui';
+import { addressMarker, storeMarker, userMarker } from './markers';
 import { SmartMap } from './SmartMap';
 import type { MapLine, MapMarker } from './types';
 
@@ -47,8 +51,11 @@ export function OrderMap({
 }) {
   const store = getStore(order.storeId);
   const user = useUserLocation();
+  // Para llevar: se camina desde el punto de "Recoger cerca de…" (tu ubicación, casa u oficina).
+  const ref = usePickupReference();
+  const addresses = useSession((s) => s.addresses);
   const telemetry = useDeliveryTelemetry(order, live);
-  const walk = useMemo(() => walkingRoute(user.coords, store), [user.coords, store]);
+  const walk = useMemo(() => walkingRoute(ref.coords, store), [ref.coords, store]);
   const delivery = order.fulfillment === 'delivery';
   const enRoute = delivery && live.phase === 'active' && live.step >= 2;
   const firstName = rider.name.split(' ')[0];
@@ -60,8 +67,13 @@ export function OrderMap({
   if (delivery) {
     const home = addressCoords(order.address);
     markers = [
-      { id: 'store', kind: 'store', position: store.coords, label: store.name },
-      { id: 'home', kind: 'home', position: home, label: order.address?.label ?? 'Tu dirección' },
+      storeMarker(store, true),
+      {
+        id: 'home',
+        kind: addressKind(order.address),
+        position: home,
+        label: order.address?.label ?? 'Tu dirección',
+      },
       ...(enRoute ? [{ id: 'rider', kind: 'rider' as const, position: telemetry.point }] : []),
     ];
     lines = enRoute
@@ -74,19 +86,15 @@ export function OrderMap({
     if (live.arrived) pill = `${firstName} llegó a tu puerta`;
     else if (enRoute) pill = `${firstName} • a ${formatDistance(telemetry.remainingMeters)} • ${live.etaMin} min`;
   } else {
+    const refAddress = addresses.find((a) => a.id === ref.id);
     markers = [
-      {
-        id: 'store',
-        kind: 'store',
-        position: store.coords,
-        label: store.name,
-        badge: store.lockers ? `🔒${store.lockers.free}` : undefined,
-      },
-      { id: 'user', kind: 'user', position: user.coords },
+      storeMarker(store, true),
+      userMarker(user.coords),
+      ...(refAddress ? [addressMarker(refAddress)] : []),
     ];
     lines = [{ id: 'walk', points: walk.points, style: 'walk' }];
-    fit = [user.coords, store.coords];
-    pill = `A ${formatDistance(walk.meters)} de ti • ${walkingMinutes(walk.meters)} min caminando`;
+    fit = [ref.coords, store.coords];
+    pill = `A ${formatDistance(walk.meters)} de ${ref.fromText} • ${walkingMinutes(walk.meters)} min caminando`;
   }
 
   return (
@@ -141,13 +149,13 @@ export function DirectionsSheet({
   storeId: string;
 }) {
   const store = getStore(storeId);
-  const user = useUserLocation();
-  const route: GeoRoute = useMemo(() => walkingRoute(user.coords, store), [user.coords, store]);
+  const ref = usePickupReference();
+  const route: GeoRoute = useMemo(() => walkingRoute(ref.coords, store), [ref.coords, store]);
   const steps =
     route.steps && route.steps.length > 0
       ? route.steps
       : [
-          { text: `Camina hacia ${cardinal(user.coords, store.coords)}`, meters: route.meters },
+          { text: `Camina hacia ${cardinal(ref.coords, store.coords)}`, meters: route.meters },
           { text: 'Llegas a la tienda', meters: 0 },
         ];
   const open = (url: string) => Linking.openURL(url).catch(() => toast('No pudimos abrir el mapa', { tone: 'error' }));
@@ -157,9 +165,10 @@ export function DirectionsSheet({
       visible={visible}
       onClose={onClose}
       title="Cómo llegar"
-      subtitle={`${store.name} • ${formatDistance(route.meters)} • ${walkingMinutes(route.meters)} min a pie`}
+      subtitle={`${store.name} • ${formatDistance(route.meters)} • ${walkingMinutes(route.meters)} min a pie desde ${ref.label}`}
     >
       <View style={{ gap: space.md }}>
+        <StoreMeta store={store} />
         {steps.map((s, i) => (
           <Row key={i} style={{ gap: space.md, alignItems: 'flex-start' }}>
             <View style={styles.stepDot}>
@@ -184,6 +193,12 @@ export function DirectionsSheet({
         )}
         <Button label="Abrir en Google Maps" icon="google-maps" onPress={() => open(googleMapsUrl(store.coords))} />
         <Button label="Abrir en Waze" icon="waze" variant="outline" onPress={() => open(wazeUrl(store.coords))} />
+        <Button
+          label="Ver la tienda en Google Maps"
+          icon="storefront-outline"
+          variant="ghost"
+          onPress={() => openStoreInMaps(store)}
+        />
       </View>
     </Sheet>
   );

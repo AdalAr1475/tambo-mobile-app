@@ -67,11 +67,17 @@ export type Store = {
   district: string;
   address: string;
   eta: string;
-  /** Distancia de referencia (la real se calcula con `haversine` desde la ubicación del usuario). */
-  distanceKm: number;
   coords: LatLng;
   /** Tambo Smart Lockers de la tienda (casilleros inteligentes para retiro autónomo). */
   lockers?: { total: number; free: number };
+  /** Estrellas de Google Maps (capturadas una vez); sin valor = sin reseñas. */
+  rating?: number;
+  /** Número de reseñas en Google Maps. */
+  reviews?: number;
+  /** Horario tal como lo muestra Google Maps (ej. "Cierra a las 11 p. m."). */
+  hours?: string;
+  /** Ficha de la tienda en Google Maps (se abre con Linking; la app no llama a la API de Google). */
+  mapsUrl: string;
 };
 
 /** Cómo se retira un pedido "Para llevar". */

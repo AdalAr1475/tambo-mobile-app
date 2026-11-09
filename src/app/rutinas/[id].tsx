@@ -10,9 +10,11 @@ import { Sheet } from '@/components/Sheet';
 import { SummaryRow } from '@/components/summary';
 import { Badge, Button, Card, Chip, Divider, IconButton, Row, Tap, Txt } from '@/components/ui';
 import { getProduct, searchProducts } from '@/data/products';
-import { stores } from '@/data/stores';
+import { getStore } from '@/data/stores';
 import { haptic } from '@/lib/feedback';
 import { money } from '@/lib/format';
+import { storesByDistance } from '@/lib/geo';
+import { usePickupReference } from '@/lib/pickupReference';
 import { pts } from '@/lib/points';
 import {
   DAY_PRESETS,
@@ -71,6 +73,14 @@ export default function RoutineEditorScreen() {
     if (desde === 'carrito') return { ...base, name: 'Mi pedido de siempre', items: fromCart(useCart.getState().items) };
     return base;
   });
+  // 25 tiendas reales: se ofrecen las 6 más cercanas al punto de "Recoger cerca de…" (y la elegida).
+  const pickupRef = usePickupReference();
+  const routineStores = useMemo(() => {
+    const near = storesByDistance(pickupRef.coords)
+      .slice(0, 6)
+      .map((n) => n.store);
+    return near.some((s) => s.id === draft.storeId) ? near : [getStore(draft.storeId), ...near];
+  }, [pickupRef.coords, draft.storeId]);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -278,7 +288,7 @@ export default function RoutineEditorScreen() {
           {draft.fulfillment === 'pickup' && (
             <View style={{ gap: space.sm }}>
               <Row style={{ flexWrap: 'wrap' }}>
-                {stores.map((s) => (
+                {routineStores.map((s) => (
                   <Chip key={s.id} label={s.name} active={draft.storeId === s.id} onPress={() => set('storeId', s.id)} />
                 ))}
               </Row>

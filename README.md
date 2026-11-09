@@ -12,7 +12,7 @@ npx expo start          # Expo Go en Android/iOS: plataforma principal de la dem
 npx expo start --web    # respaldo web, centrado a 480 px
 ```
 
-No necesita backend, API keys ni development build. El texto libre de Tambo IA (It9) es opcional: copia `.env.example` como `.env` y pon tu `EXPO_PUBLIC_GEMINI_API_KEY` (modo de desarrollo: la key queda dentro del bundle). Para presentar sin exponer la key, despliega el proxy de [`proxy/`](proxy/README.md) y usa `EXPO_PUBLIC_AI_PROXY_URL`. Sin variables se usa el formulario. Carrito, sesión, pedidos, puntos y rutinas persisten en AsyncStorage. Los pagos, sensores IoT, repartidor y verificación del QR se simulan; no se realiza ningún cobro. Los mapas nativos descargan tiles de CARTO/OSM; en web o sin conexión usan un mapa SVG de respaldo.
+No necesita backend, API keys ni development build. El texto libre de Tambo IA (It9) es opcional: copia `.env.example` como `.env` y pon tu `EXPO_PUBLIC_GEMINI_API_KEY` (modo de desarrollo: la key queda dentro del bundle). Para presentar sin exponer la key, despliega el proxy de [`proxy/`](proxy/README.md) y usa `EXPO_PUBLIC_AI_PROXY_URL`. Sin variables se usa el formulario. Carrito, sesión, pedidos, puntos y rutinas persisten en AsyncStorage. Los pagos, sensores IoT, repartidor y verificación del QR se simulan; no se realiza ningún cobro. El mapa nativo usa `react-native-maps` (Google Maps en Android, Apple Maps en iOS) y funciona en Expo Go sin API key; un build de tienda necesitaría una key de Google Maps vía config plugin. En web el mapa es Leaflet con tiles de OpenStreetMap y, sin conexión, usa un respaldo sin tiles. (Los tiles de CARTO se retiraron porque ahora exigen API key.)
 
 ## Flujos implementados
 
@@ -42,8 +42,12 @@ Mantén presionada **2 segundos la foto de Perfil** para abrir `/demo`. Activa l
 - **Party Split:** elige Yape o tarjeta, activa “¿Compras en mancha?”, selecciona 2–5 personas, completa tu medio de pago y pulsa **Autorizar mi parte**. “⚡ Simular pagos Yape de amigos” paga una cuota cada 800 ms. Compartir una solicitud no marca el pago. La boleta conserva el reparto al reiniciar la app.
 - **Ejemplos de split (Para llevar, sin puntos ni cupón):** 3 packs Four Loko Gold = S/ 44.70, entre 3 = S/ 14.90 cada uno; croissant + lejía = S/ 10.00, entre 3 = S/ 3.34 / S/ 3.33 / S/ 3.33. El residuo queda en el anfitrión. Al cambiar el total, los productos, el reparto o el medio de pago se requieren nuevas autorizaciones. En modo por producto el envío se divide por igual y los descuentos de cupón/puntos se prorratean sobre los soles de las líneas.
 - **Seguimiento a ×1:** preparación 15 s, salida 25 s, llegada 75 s; Para llevar listo a los 30 s. Se puede cancelar antes de los 15 s. Los pedidos nuevos esperan verificación QR/PIN para completar la entrega o el retiro.
+- **QR del Smart Locker:** imprime o abre en otra pantalla `docs/qr/casillero-demo.png` (sirve para cualquier Tambo) o `docs/qr/casillero-uni-puerta-5.png` (solo Tambo UNI puerta 5); los `.svg` del mismo nombre son la tarjeta con leyenda. Haz un pedido Para llevar con Smart Locker, espera a que esté listo (30 s o “Adelantar”) y en el seguimiento toca **Escanear QR del casillero**: al leer el código la app muestra “¡Recojo validado!”. Con Presentador, “Simular escaneo del casillero” hace lo mismo sin cámara (útil en web). Regenerar: `node scripts/build-locker-qr.mjs`.
 - **Auto-Pilot:** prueba “Desayuno oficina” o crea una rutina desde el carrito. Solo se ejecuta con la app abierta, dentro de los 10 minutos posteriores a la hora; puedes dispararla desde el control de demo.
 - **3D/AR:** prueba Four Loko Gold, Sandía, café, capuccino y pan con chicharrón. Cámara, permisos GPS y hoja de compartir se deben comprobar en Expo Go.
+- **Ubicación y tiendas:** por defecto estás en la **FIIS - UNI** (sin pedir permisos). Las 25 tiendas son Tambos reales (nombre, dirección, coordenadas, estrellas, reseñas y horario capturados una vez de Google Maps el 2026-11-08; la app no llama a ninguna API). Casilleros y "Listo en" son de demo; Tambo UNI puerta 5 es la tienda por defecto.
+- **Recoger cerca de…:** en "¿Cómo quieres tu pedido?" → Para llevar, elige *Mi ubicación (FIIS-UNI)*, *Casa* u *Oficina* para reordenar las tiendas y ver metros/minutos a pie desde ahí (checkout y "Cómo llegar" usan el mismo punto). **Ampliar mapa** abre el mapa a pantalla completa con carrusel; en Delivery muestra tus direcciones, la tienda que atiende cada una y su cobertura.
+- **Doble toque:** sobre una tienda de la lista, una tarjeta o su pin abre su ficha en Google Maps (también con el botón "Ver en Google Maps").
 - **Alcohol:** confirmar +18 al agregar productos, combos o favoritos, crear rutinas y confirmar checkout. “Volver a pedir” vuelve a validar en checkout.
 
 ### Fotos del catálogo
@@ -74,7 +78,7 @@ src/theme/        colores, tipografía, espaciados y MAX_APP_WIDTH
 
 `useUi` no persiste. `placeOrder()` centraliza totales, validación del split, guardado, puntos, cupón y vaciado del carrito; Auto-Pilot usa `clearCart: false`. `cancelOrder()` revierte puntos y libera el cupón. Los pedidos antiguos se conservan sin `split`.
 
-Las iteraciones anteriores incorporaron `expo-crypto` y `qrcode-generator` (QR), `react-native-webview` y `expo-location` (mapas/GPS), `three` **0.162.0**, `@types/three`, `expo-gl`, `expo-asset` y `expo-camera` (3D/AR). Mantén three fijado: versiones posteriores requieren WebGL 2, incompatible con este visor en Expo Go.
+Las iteraciones anteriores incorporaron `expo-crypto` y `qrcode-generator` (QR), `react-native-maps` y `expo-location` (mapas/GPS; `react-native-webview` queda instalado sin uso), `three` **0.162.0**, `@types/three`, `expo-gl`, `expo-asset` y `expo-camera` (3D/AR). Mantén three fijado: versiones posteriores requieren WebGL 2, incompatible con este visor en Expo Go.
 
 ## Calidad
 

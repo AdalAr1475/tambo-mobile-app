@@ -1,6 +1,14 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { districtCentroid, LEGACY_SEED_LINES, seedAddresses, seedCards, user } from '@/data/stores';
+import {
+  DEFAULT_STORE_ID,
+  districtCentroid,
+  isCurrentStore,
+  LEGACY_SEED_LINES,
+  seedAddresses,
+  seedCards,
+  user,
+} from '@/data/stores';
 import type { Address, Fulfillment, PaymentMethodType, SavedCard } from '@/data/types';
 import { persistStorage } from './storage';
 
@@ -20,6 +28,8 @@ type SessionState = {
   fulfillment: Fulfillment;
   addressId: string;
   storeId: string;
+  /** Punto de referencia de "Recoger cerca de…": 'me' (tu ubicación) o el id de una dirección. */
+  pickupRef?: string;
   addresses: Address[];
   cards: SavedCard[];
   preferredPayment: PaymentMethodType;
@@ -35,6 +45,7 @@ type SessionState = {
   setFulfillment: (f: Fulfillment) => void;
   selectAddress: (id: string) => void;
   selectStore: (id: string) => void;
+  setPickupRef: (ref: string) => void;
   saveAddress: (a: Address) => void;
   deleteAddress: (id: string) => void;
   addCard: (c: SavedCard) => void;
@@ -57,7 +68,8 @@ export const useSession = create<SessionState>()(
       ageVerified: false,
       fulfillment: 'delivery',
       addressId: seedAddresses[0].id,
-      storeId: 'aliaga',
+      storeId: DEFAULT_STORE_ID,
+      pickupRef: 'me',
       addresses: seedAddresses,
       cards: seedCards,
       preferredPayment: 'yape',
@@ -73,6 +85,7 @@ export const useSession = create<SessionState>()(
       setFulfillment: (fulfillment) => set({ fulfillment }),
       selectAddress: (addressId) => set({ addressId }),
       selectStore: (storeId) => set({ storeId }),
+      setPickupRef: (pickupRef) => set({ pickupRef }),
       saveAddress: (a) =>
         set((s) => ({
           addresses: s.addresses.some((x) => x.id === a.id)
@@ -121,7 +134,8 @@ export const useSession = create<SessionState>()(
       storage: persistStorage,
       // v2 (It. 2): los puntos pasan a useWallet; se descarta el campo `points` antiguo.
       // v3 (It. 6): direcciones con coordenadas; las semilla antiguas (en la puerta de una tienda) se reemplazan.
-      version: 3,
+      // v4: tiendas reales (Google Maps); un storeId antiguo pasa a la tienda por defecto (UNI puerta 5).
+      version: 4,
       migrate: (persisted, version) => {
         const state = { ...(persisted as SessionState & { points?: number }) };
         if (version < 2) delete state.points;
@@ -132,6 +146,7 @@ export const useSession = create<SessionState>()(
             return a.coords ? a : { ...a, coords: districtCentroid(a.district) };
           });
         }
+        if (version < 4 && !isCurrentStore(state.storeId)) state.storeId = DEFAULT_STORE_ID;
         return state as SessionState;
       },
     },

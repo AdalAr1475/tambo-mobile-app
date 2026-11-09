@@ -1,75 +1,88 @@
+import { haversine } from '@/lib/haversine';
 import places from './places.json';
 import { normalize } from './products';
+import realStores from './realStores.json';
 import type { Address, Coupon, LatLng, SavedCard, Store } from './types';
 
-/** Coordenadas de OSM (ver places.json) sin campos extra. */
+/** Coordenadas (places.json / realStores.json) sin campos extra. */
 const ll = (p: { lat: number; lng: number }): LatLng => ({ lat: p.lat, lng: p.lng });
 
-export const stores: Store[] = [
-  {
-    id: 'aliaga',
-    coords: ll(places.stores.aliaga),
-    name: 'Tambo Juan de Aliaga',
-    district: 'Magdalena del Mar',
-    address: 'Av. Juan de Aliaga 400, Magdalena del Mar',
-    eta: '15-25 min',
-    distanceKm: 0.6,
-    lockers: { total: 36, free: 4 },
-  },
-  {
-    id: 'larco',
-    coords: ll(places.stores.larco),
-    name: 'Tambo Larco 400',
-    district: 'Miraflores',
-    address: 'Av. José Larco 400, Miraflores',
-    eta: '20-30 min',
-    distanceKm: 1.2,
-    lockers: { total: 36, free: 7 },
-  },
-  {
-    id: 'benavides',
-    coords: ll(places.stores.benavides),
-    name: 'Tambo Benavides',
-    district: 'Miraflores',
-    address: 'Av. Alfredo Benavides 1180, Miraflores',
-    eta: '25-35 min',
-    distanceKm: 2.4,
-    lockers: { total: 24, free: 2 },
-  },
-  {
-    id: 'sanisidro',
-    coords: ll(places.stores.sanisidro),
-    name: 'Tambo Camino Real',
-    district: 'San Isidro',
-    address: 'Av. Camino Real 390, San Isidro',
-    eta: '25-35 min',
-    distanceKm: 3.1,
-    lockers: { total: 36, free: 11 },
-  },
-  // Sedes demo (direcciones reales de OSM; no corresponden necesariamente a una tienda Tambo).
-  {
-    id: 'losolivos',
-    name: 'Tambo Antúnez de Mayolo',
-    district: 'Los Olivos',
-    address: 'Av. Antúnez de Mayolo 800, Los Olivos',
-    eta: '20-30 min',
-    distanceKm: 14.2,
-    coords: ll(places.stores.losolivos),
-    lockers: { total: 24, free: 6 },
-  },
-  {
-    id: 'surco',
-    name: 'Tambo Primavera',
-    district: 'Santiago de Surco',
-    address: 'Av. Primavera 1200, Santiago de Surco',
-    eta: '20-30 min',
-    distanceKm: 7.4,
-    coords: ll(places.stores.surco),
-    lockers: { total: 36, free: 9 },
-  },
-];
+/** Ubicación de demo del usuario (FIIS - UNI). No pide permisos ni llama APIs. */
+export const DEMO_USER_LOCATION: LatLng = ll(realStores.demoUser);
+export const DEMO_USER_LABEL = realStores.demoUser.name;
 
-export const getStore = (id: string) => stores.find((s) => s.id === id) ?? stores[0];
+/** Ficha de Google Maps a partir del `cid` capturado (se abre con Linking, sin API). */
+const mapsUrlForCid = (cid: string) => `https://www.google.com/maps?cid=${cid}`;
+const mapsSearchUrl = (p: LatLng) => `https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}`;
+
+/** Casilleros de demo (las tiendas reales no publican este dato): algunas con 0 para ver el retiro en caja. */
+const DEMO_LOCKERS_FREE = [5, 8, 3, 6, 2, 0, 9, 4, 7];
+
+/** Tiempo "Listo en" de demo: preparación + un margen según qué tan lejos está del punto de su zona. */
+function demoEta(meters: number) {
+  const from = meters < 500 ? 10 : meters < 1500 ? 15 : 20;
+  return `${from}-${from + 10} min`;
+}
+
+type RealStore = (typeof realStores.stores)[number];
+
+const areaAnchor = (area: RealStore['area']): LatLng =>
+  area === 'casa' ? ll(places.addresses.casa) : area === 'oficina' ? ll(places.addresses.oficina) : DEMO_USER_LOCATION;
+
+/**
+ * Catálogo de tiendas: 25 Tambos reales capturados una vez de Google Maps (ver realStores.json).
+ * El primero (Tambo UNI puerta 5) es el más cercano a la FIIS y la tienda por defecto.
+ */
+export const stores: Store[] = realStores.stores.map((s, i) => {
+  const coords = ll(s);
+  return {
+    id: s.id,
+    name: s.name,
+    district: s.district,
+    address: `${s.address}, ${s.district}`,
+    coords,
+    eta: demoEta(haversine(coords, areaAnchor(s.area))),
+    lockers: { total: i % 2 ? 24 : 36, free: DEMO_LOCKERS_FREE[i % DEMO_LOCKERS_FREE.length] },
+    rating: s.rating ?? undefined,
+    reviews: s.reviews ?? undefined,
+    hours: s.hours,
+    mapsUrl: mapsUrlForCid(s.cid),
+  };
+});
+
+export const DEFAULT_STORE_ID = stores[0].id;
+
+/**
+ * Tiendas de las iteraciones 1–9 (antes de las reales). Solo se resuelven para pedidos o rutinas
+ * ya guardados en el teléfono; no aparecen en listas ni mapas.
+ */
+const LEGACY: [keyof typeof places.stores, string, string, string, number][] = [
+  ['aliaga', 'Tambo Juan de Aliaga', 'Magdalena del Mar', 'Av. Juan de Aliaga 400, Magdalena del Mar', 4],
+  ['larco', 'Tambo Larco 400', 'Miraflores', 'Av. José Larco 400, Miraflores', 7],
+  ['benavides', 'Tambo Benavides', 'Miraflores', 'Av. Alfredo Benavides 1180, Miraflores', 2],
+  ['sanisidro', 'Tambo Camino Real', 'San Isidro', 'Av. Camino Real 390, San Isidro', 11],
+  ['losolivos', 'Tambo Antúnez de Mayolo', 'Los Olivos', 'Av. Antúnez de Mayolo 800, Los Olivos', 6],
+  ['surco', 'Tambo Primavera', 'Santiago de Surco', 'Av. Primavera 1200, Santiago de Surco', 9],
+];
+const legacyStores: Store[] = LEGACY.map(([id, name, district, address, free]) => {
+  const coords = ll(places.stores[id]);
+  return {
+    id,
+    name,
+    district,
+    address,
+    coords,
+    eta: '20-30 min',
+    lockers: { total: 36, free },
+    mapsUrl: mapsSearchUrl(coords),
+  };
+});
+
+export const isCurrentStore = (id: string) => stores.some((s) => s.id === id);
+
+/** Tienda por id (incluye las antiguas para pedidos guardados); si no existe, la tienda por defecto. */
+export const getStore = (id: string) =>
+  stores.find((s) => s.id === id) ?? legacyStores.find((s) => s.id === id) ?? stores[0];
 
 export const seedAddresses: Address[] = [
   {
@@ -95,8 +108,8 @@ export const LEGACY_SEED_LINES: Record<string, string> = {
   oficina: 'Av. Juan de Aliaga 400, Dpto 502',
 };
 
-/** Ubicación de demo del usuario (Parque Kennedy, Miraflores). */
-export const DEMO_USER_LOCATION: LatLng = ll(places.demoUser);
+/** Id de la dirección que se crea al elegir "Entregar aquí" sobre tu ubicación (FIIS-UNI en la demo). */
+export const MY_LOCATION_ADDRESS_ID = 'mi-ubicacion';
 
 /** Centroide aproximado del distrito, para direcciones creadas a mano (sin geocodificar). */
 export function districtCentroid(district: string): LatLng | undefined {
