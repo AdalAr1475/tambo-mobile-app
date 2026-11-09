@@ -4,11 +4,14 @@
 **Objetivo:** que el usuario pida en **lenguaje natural**, por ejemplo *"somos 4, vamos a ver el partido, tenemos 50 soles y uno no toma alcohol"*, y un LLM interprete la intención. El **motor local de It4** sigue eligiendo los productos y los precios.
 **Cuándo hacerla:** solo si sobra tiempo después de It8, **y** hay internet confiable en el aula.
 **Esfuerzo:** S-M.
+**Estado:** implementada con **Gemini** (`gemini-3.5-flash-lite`), elegido por su nivel gratuito. Dos modos en `.env`:
+- **Directo (desarrollo, por defecto):** `EXPO_PUBLIC_GEMINI_API_KEY`, la app llama a Gemini sin proxy. Es lo más simple, pero **no cumple el tercer criterio de aceptación**: la key queda dentro del bundle. Usar una key de un proyecto sin facturación.
+- **Proxy (presentación):** Cloudflare Worker en [`proxy/`](../../proxy/README.md) con `EXPO_PUBLIC_AI_PROXY_URL`. La key queda como secreto del Worker y se cumplen los tres criterios.
 
 ## Arquitectura: el LLM interpreta, el motor decide
 
 ```
-Usuario (texto) ──► Proxy HTTPS (serverless) ──► Claude API
+Usuario (texto) ──► Proxy HTTPS (Cloudflare Worker) ──► Gemini API
                           │  devuelve JSON validado: { budget, people, vibe, constraints[] }
                           ▼
                     buildPlan() de It4 (local, precios con computeTotals)
@@ -22,7 +25,7 @@ Usuario (texto) ──► Proxy HTTPS (serverless) ──► Claude API
   - un límite de tasa;
   - un *allowlist* del esquema de salida.
 - La app llama al proxy con `fetch` y un *timeout* de 6 s. Si falla, no hay red o tarda → **cae al formulario de It4** (slider, personas, vibe) con un toast "Usamos el modo sin conexión".
-- **Modelo:** el más reciente y capaz disponible de la familia Claude. Antes de implementar, confirmar los IDs, los precios y los parámetros vigentes en la documentación oficial de la API de Anthropic. Usar salida estructurada (*tool use* o *JSON schema*) para garantizar el formato.
+- **Modelo:** `gemini-3.5-flash-lite` (estable, el más rápido y económico, con nivel gratuito), con `responseMimeType: application/json` + `responseJsonSchema` y `thinkingLevel: MINIMAL`. IDs y campos confirmados en la documentación de Gemini el 2026-11-08; se cambian en `proxy/wrangler.toml` sin tocar la app.
 
 ## Restricciones que el LLM debe extraer
 

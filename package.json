@@ -51,7 +51,8 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "test:split": "node --test scripts/split.test.cjs",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "test:plan": "node --test scripts/plan.test.cjs"
   },
   "private": true
 }

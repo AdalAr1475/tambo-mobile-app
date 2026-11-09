@@ -284,6 +284,8 @@ type Slot = {
   /** Porciones necesarias para el grupo. */
   need: (people: number) => number;
   options: string[];
+  /** Para cuántas personas es este espacio, si no es para todo el grupo (texto de la línea). */
+  forPeople?: number;
 };
 
 /** Porciones por unidad (un six-pack rinde 6; un combo de ron, ~10). */
@@ -361,6 +363,84 @@ export const VIBES: Record<Vibe, { label: string; icon: IconName; slots: Slot[] 
   },
 };
 
+/**
+ * Restricciones opcionales de "Arma tu plan". Llegan del formulario o del texto libre que
+ * interpreta Tambo IA (It9); en ambos casos este motor local elige productos y precios.
+ */
+export type PlanConstraints = {
+  /** Cuántas personas no toman alcohol; un valor `>= people` significa que nadie toma. */
+  noAlcoholFor?: number;
+  vegetarian?: boolean;
+  sweet?: boolean;
+  hotDrinks?: boolean;
+  /** Máximo de productos distintos en el plan. */
+  maxItems?: number;
+};
+
+export type PlanParams = { budget: number; people: number; vibe: Vibe; constraints?: PlanConstraints };
+
+const SODAS = ['incakola-zero', 'cocacola-zero'];
+const SWEETS = ['sublime', 'morochas', 'donofrio-sinparar'];
+const HOT_DRINKS = ['cafe-americano', 'capuccino'];
+
+const isAlcoholic = (id: string) => !!getProduct(id)?.alcoholic;
+/** "Vegetariano" retira la categoría Comida del plan (empanadas y sándwiches con carne). */
+const isVegetarian = (id: string) => getProduct(id)?.categoryId !== 'comida';
+/** El vibe incluye alcohol por defecto (solo entonces tiene sentido "Sin alcohol"). */
+export const vibeHasAlcohol = (vibe: Vibe) => VIBES[vibe].slots.some((s) => s.options.some(isAlcoholic));
+/** Una gaseosa de 1.5 L alcanza para dos personas. */
+const sodasFor = (n: number) => Math.ceil(n / 2);
+
+/** Espacios del plan para un vibe, ya ajustados a las restricciones. */
+export function planSlots(vibe: Vibe, people: number, c: PlanConstraints = {}): Slot[] {
+  let slots = VIBES[vibe].slots.map((s) => ({ ...s }));
+
+  const sober = Math.min(people, Math.max(0, Math.floor(c.noAlcoholFor ?? 0)));
+  if (sober > 0 && slots.some((s) => s.options.some(isAlcoholic))) {
+    const drinkers = people - sober;
+    const sodaSlot = slots.find((s) => s.options.every((id) => SODAS.includes(id)));
+    slots = slots.flatMap((s): Slot[] => {
+      if (!s.options.some(isAlcoholic)) return s === sodaSlot && drinkers === 0 ? [] : [s];
+      if (drinkers > 0) return [{ ...s, need: () => s.need(drinkers), forPeople: drinkers }];
+      // Nadie toma: el espacio de alcohol pasa a gaseosas para todo el grupo.
+      const options = s.options.filter((id) => !isAlcoholic(id));
+      return [{ ...s, label: 'Bebida sin alcohol', options: options.length ? options : SODAS, need: sodasFor }];
+    });
+    if (drinkers > 0) {
+      const soberSlot: Slot = {
+        key: sodaSlot?.key ?? 'soda',
+        label: 'Sin alcohol',
+        required: true,
+        need: () => sodasFor(sober),
+        options: SODAS,
+        forPeople: sober,
+      };
+      slots = sodaSlot ? slots.map((s) => (s === sodaSlot ? soberSlot : s)) : [...slots, soberSlot];
+    }
+  }
+
+  if (c.vegetarian) {
+    slots = slots
+      .map((s) => ({ ...s, options: s.options.filter(isVegetarian) }))
+      .filter((s) => s.options.length > 0);
+  }
+
+  if (c.sweet && !slots.some((s) => s.options.some((id) => SWEETS.includes(id)))) {
+    slots.push({ key: 'sweet', label: 'Algo dulce', required: true, need: sodasFor, options: ['sublime', 'morochas'] });
+  }
+
+  if (c.hotDrinks) {
+    const hot = slots.find((s) => s.options.some((id) => HOT_DRINKS.includes(id)));
+    if (hot) {
+      slots = slots.map((s) => (s === hot ? { ...s, options: s.options.filter((id) => HOT_DRINKS.includes(id)) } : s));
+    } else {
+      slots.push({ key: 'hot', label: 'Bebida caliente', required: true, need: (n) => n, options: HOT_DRINKS });
+    }
+  }
+
+  return slots;
+}
+
 export type PlanItem = ItemQty & {
   slotKey: string;
   slotLabel: string;
@@ -396,14 +476,17 @@ const optionsOf = (slot: Slot) => slot.options.map(getProduct).filter((p): p is 
  * Mochila voraz: 1) llena los espacios obligatorios con la opción de mejor valor
  * (popularidad / costo); 2) agrega opcionales si alcanza; 3) mejora a opciones más populares
  * mientras no se pase del presupuesto. `overrides` fija un producto por espacio ("Cambiar").
+ * `constraints` ajusta los espacios (ver `planSlots`) y limita la cantidad de productos.
  */
 export function buildPlan(
-  { budget, people, vibe }: { budget: number; people: number; vibe: Vibe },
+  { budget, people, vibe, constraints = {} }: PlanParams,
   overrides: Record<string, string> = {},
 ): Plan {
-  const slots = VIBES[vibe].slots;
+  const slots = planSlots(vibe, people, constraints);
+  const maxItems = constraints.maxItems && constraints.maxItems > 0 ? Math.floor(constraints.maxItems) : Infinity;
   const best = (slot: Slot) => {
-    const forced = overrides[slot.key] && getProduct(overrides[slot.key]);
+    const forcedId = overrides[slot.key];
+    const forced = forcedId && slot.options.includes(forcedId) && getProduct(forcedId);
     if (forced) return choose(slot, forced, people);
     return optionsOf(slot)
       .map((p) => choose(slot, p, people))
@@ -414,7 +497,7 @@ export function buildPlan(
       .map((p) => choose(slot, p, people))
       .sort((a, b) => a.cost - b.cost)[0];
 
-  const required = slots.filter((s) => s.required);
+  const required = slots.filter((s) => s.required).slice(0, maxItems);
   let picks = required.map(best);
   let spent = picks.reduce((s, c) => s + c.cost, 0);
   if (spent > budget) {
@@ -424,6 +507,7 @@ export function buildPlan(
   }
 
   for (const slot of slots.filter((s) => !s.required)) {
+    if (picks.length >= maxItems) break;
     const c = best(slot);
     if (c && spent + c.cost <= budget) {
       picks.push(c);
@@ -451,7 +535,7 @@ export function buildPlan(
     slotLabel: c.slot.label,
     cost: c.cost,
     canSwap: c.slot.options.length > 1,
-    note: `${c.qty} x ${c.product.name} para ${people === 1 ? '1 persona' : `${people} personas`}`,
+    note: `${c.qty} x ${c.product.name} para ${personas(c.slot.forPeople ?? people)}`,
   }));
   const { total, regular } = priceOf(items);
   return {
@@ -461,15 +545,14 @@ export function buildPlan(
     regular,
     budget,
     remaining: round2(budget - total),
-    coverage: picks.length / slots.length,
+    coverage: picks.length / Math.max(1, Math.min(slots.length, maxItems)),
     hasAlcohol: picks.some((c) => !!c.product.alcoholic),
   };
 }
 
-/** Siguiente opción del espacio que entra en el presupuesto (botón "Cambiar"). */
-export function nextOption(vibe: Vibe, slotKey: string, currentId: string) {
-  const slot = VIBES[vibe].slots.find((s) => s.key === slotKey);
-  if (!slot) return undefined;
-  const i = slot.options.indexOf(currentId);
-  return slot.options[(i + 1) % slot.options.length];
+const personas = (n: number) => (n === 1 ? '1 persona' : `${n} personas`);
+
+/** Opciones de un espacio del plan con las restricciones aplicadas (botón "Cambiar"). */
+export function slotOptions({ vibe, people, constraints }: PlanParams, slotKey: string) {
+  return planSlots(vibe, people, constraints).find((s) => s.key === slotKey)?.options ?? [];
 }

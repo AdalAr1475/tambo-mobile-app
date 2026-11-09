@@ -12,7 +12,7 @@ npx expo start          # Expo Go en Android/iOS: plataforma principal de la dem
 npx expo start --web    # respaldo web, centrado a 480 px
 ```
 
-No necesita backend, API keys ni development build. Carrito, sesión, pedidos, puntos y rutinas persisten en AsyncStorage. Los pagos, sensores IoT, repartidor y verificación del QR se simulan; no se realiza ningún cobro. Los mapas nativos descargan tiles de CARTO/OSM; en web o sin conexión usan un mapa SVG de respaldo.
+No necesita backend, API keys ni development build. El texto libre de Tambo IA (It9) es opcional: copia `.env.example` como `.env` y pon tu `EXPO_PUBLIC_GEMINI_API_KEY` (modo de desarrollo: la key queda dentro del bundle). Para presentar sin exponer la key, despliega el proxy de [`proxy/`](proxy/README.md) y usa `EXPO_PUBLIC_AI_PROXY_URL`. Sin variables se usa el formulario. Carrito, sesión, pedidos, puntos y rutinas persisten en AsyncStorage. Los pagos, sensores IoT, repartidor y verificación del QR se simulan; no se realiza ningún cobro. Los mapas nativos descargan tiles de CARTO/OSM; en web o sin conexión usan un mapa SVG de respaldo.
 
 ## Flujos implementados
 
@@ -22,7 +22,7 @@ No necesita backend, API keys ni development build. Carrito, sesión, pedidos, p
 | Checkout | Delivery / Para llevar, dirección, referencia, horarios reales, Yape con código de 6 dígitos, Plin, tarjetas y efectivo con vuelto; validación de mayoría de edad |
 | Tambo Lover Puntos | Saldo, movimientos, niveles, canje 100% puntos, puntos + soles y descuento libre sobre productos |
 | Smart Lockers | Retiro en casillero o mostrador, QR dinámico cada 30 s, PIN, reserva y telemetría demostrativa; el retiro termina con la verificación |
-| Tambo IA | Recomendaciones locales explicables, complementos y plan por presupuesto, sin LLM ni red |
+| Tambo IA | Recomendaciones locales explicables, complementos y plan por presupuesto. Opcional (It9): pedir el plan en lenguaje natural; Gemini (directo con key en `.env` o vía un proxy propio) interpreta el texto y el motor local elige productos y precios |
 | Auto-Pilot | Rutinas editables, pausa, saltar una fecha, próxima entrega y estimación mensual; 10% en productos, envío gratis y puntos dobles |
 | Geo y SafeDrop | Tienda cercana, distancias, cobertura, GPS opcional, ruta real precalculada y entrega mediante QR/PIN |
 | Tambo Spatial | Visor 3D procedural y AR sobre cámara en celular; escala real y foto de mesa como respaldo web |
@@ -82,6 +82,7 @@ Las iteraciones anteriores incorporaron `expo-crypto` y `qrcode-generator` (QR),
 npm run typecheck
 npm run lint
 npm run test:split    # cálculo exacto, canjes y validación de placeOrder; sin dependencias adicionales
+npm run test:plan     # Arma tu plan con restricciones y cliente de Tambo IA (fallbacks, timeout, allowlist)
 npx expo export --platform web
 npx expo-doctor
 ```

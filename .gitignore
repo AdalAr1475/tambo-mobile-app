@@ -55,7 +55,8 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
+# local env files (la key de Gemini va en .env: nunca se versiona; la plantilla es .env.example)
+.env
 .env*.local
 
 # typescript
@@ -67,3 +68,7 @@ yarn-error.*
 
 # Claude Code (local)
 .claude/settings.local.json
+
+# Proxy de Tambo IA (Cloudflare Worker): secretos locales y caché de wrangler
+.dev.vars*
+.wrangler/
